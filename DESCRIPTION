@@ -1,12 +1,23 @@
 Package: DiSCo
-Title: What the Package Does (One Line, Title Case)
+Title: Distributional Synthetic Controls Estimation
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    c(person("David", "Van Dijcke", , "dvdijcke@umich.edu", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-5825-3447")),
+person("Florian", "Gunsilius", , "ffg@umich.edu", role = c("aut"),
+           comment = c(ORCID = "0000-0002-1698-6324")),
+person("Siyun", "He", , "siyunhe@umich.edu", role = c("aut"),
+           comment = c(ORCID = "0000-0001-5825-3447"))
+)
+Description: The method of synthetic controls is a widely-adopted tool for evaluating causal effects of policy changes in settings with observational data. In many settings where it is applicable, researchers want to identify causal effects of policy changes on a treated unit at an aggregate level while having access to data at a finer granularity. We develop a simple extension of the synthetic controls estimator that takes advantage of this additional structure and provides nonparametric estimates of the heterogeneity within the aggregate unit. The idea is to replicate the quantile function associated with the treated unit by a weighted average of quantile functions of the control units. This estimator has desirable properties and relies on the same mathematical theory as the changes-in-changes estimator. It operates in both repeated cross-sections and panel data with as little as a single pre-treatment period and provides a unique counterfactual quantile function for continuous, discrete or mixed distributions.
+License: MIT license
+BugReports: https://github.com/
+URL: https://github.com/
+LazyData: TRUE
+Imports: data.table, CVXR, pracma, quadprog, Rdpack
+RdMacros: Rdpack
+Suggests: 
+    haven, utils, latex2exp
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.2

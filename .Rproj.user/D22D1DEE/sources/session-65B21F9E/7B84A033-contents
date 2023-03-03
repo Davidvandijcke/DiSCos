@@ -15,7 +15,7 @@
 #####
 # Load required packages
 packages_load <- c("haven", "base", "data.table", "latex2exp", "CVXR",  # used to compute the weights using the alternative using mixtures of CDF
-                   "here", "dplyr", "pracma", "quadprog", "utils")
+                   "here", "dplyr", "pracma", "quadprog", "R.utils")
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(char = packages_load, character.only = TRUE)
 
@@ -276,7 +276,7 @@ controls.per <- list()
 target.per <- list()
 for (ii in 1:length(results.over.years)){
   controls.per[[ii]] <- results.over.years[[ii]][[4]][[1]]
-  target.per[[ii]] <- results.over.years[[yy]][[3]][[4]]
+  target.per[[ii]] <- results.over.years[[yy]][[3]][[4]] # DVD: I think this might be wrong
 }
 
 
