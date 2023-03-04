@@ -15,10 +15,11 @@
 #' @param graph Boolean indicating whether to plot graphs
 #' @param y_name Y axis label of the graph
 #' @param x_name X axis label of the graph
+#' @param num_cores Integer, number of cores to use for parallel computation. Set to 1 by default (sequential computation), this can be very slow!
 #' @return List of matrices containing synthetic time path of the outcome variable
 #' for the target unit together with the time paths of the control units
 DSC_per <- function(c_df, t_df, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, length.out=101),
-                 graph=TRUE, y_name='y', x_name='x'){
+                 graph=TRUE, y_name='y', x_name='x', num_cores = 1){
 
   #Creating a function for the empirical quantile function
   myquant <- function(X,q){
@@ -37,15 +38,16 @@ DSC_per <- function(c_df, t_df, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, len
   #calculate lambda_t for t<=T0
   lambda_t=list()
 
-  for (t in 1:T0){
-    lambda_t[[t]] <- DSC_weights_reg(c_df[[t]],as.vector(t_df[[t]]), 1000)
-  }
+
+  lambda_t <- parallel::mclapply(seq_len(T0), function(t) {
+    DSC_weights_reg(c_df[[t]], as.vector(t_df[[t]]), 1000)
+  }, mc.cores = num_cores)
 
   #calculate the average optimal lambda
   if (length(ww)==1){
     w_t=rep(1/T0, T0)
     lambda.opt=matrix(unlist(lambda_t),ncol=T0)%*%w_t
-  }else{
+  } else{
     lambda.opt=matrix(unlist(lambda_t),ncol=T0)%*%ww
   }
 
@@ -53,9 +55,10 @@ DSC_per <- function(c_df, t_df, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, len
   #calculate the barycenters for each period
   bc_t=list()
 
-  for (t in 1:length(c_df)){
-    bc_t[[t]] <- DSC_bc(c_df[[t]],lambda.opt,evgrid)
-  }
+
+  bc_t <- parallel::mclapply(c_df, function(x) {
+    DSC_bc(x, lambda.opt, evgrid)
+  }, mc.cores = num_cores)
 
   #computing the target quantile function
   target_q=list()
@@ -79,8 +82,6 @@ DSC_per <- function(c_df, t_df, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, len
 
   #initiate progress bar
   cat('Permutation starts')
-  pb <- txtProgressBar(min=0, max=100, style=3) #initiate progress bar
-
 
   #default permute all controls
   if (length(peridx)==1){
@@ -89,8 +90,16 @@ DSC_per <- function(c_df, t_df, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, len
     }
   }
 
+  #pb <- txtProgressBar(min = 1, max = length(peridx), style = 3)
 
-  for (idx in 1:length(peridx)){
+
+  # register clusters
+  cl <- parallel::makeCluster(num_cores)
+  doSNOW::registerDoSNOW(cl)
+
+
+  # START for loop
+  distp <- foreach(idx = 1:length(peridx), .combine = c, .export=c("DSC_weights_reg", "DSC_bc", "myquant")) %dopar% {
 
     #create new control and target
     pert=list()
@@ -154,14 +163,21 @@ DSC_per <- function(c_df, t_df, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, len
     for (t in 1:length(perc)){
       dist[t]=mean((bc_t[[t]][[2]]-target_q[[t]])**2)
     }
+    #setTxtProgressBar(pb, i)
 
-    distp[[idx]]=dist
+    return(dist)
 
-
-    Sys.sleep(0.025)
-    setTxtProgressBar(pb, round(idx / length(peridx) * 100)) # progress bar
-    cat(if (idx == length(peridx)) '\n')
   }
+  # END for loop
+
+  # stop cluster
+  snow::stopCluster(cl)
+
+  # Convert the list to a nested list (the parallelization messes up the output of foreach when choosing .combine = list)
+  distp <- matrix(unlist(distp), ncol = length(c_df), byrow = TRUE)
+  distp <- split(distp, seq_len(nrow(distp)))
+
+
 
 
   #default plot all squared Wasserstein distances

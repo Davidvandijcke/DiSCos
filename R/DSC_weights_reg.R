@@ -13,7 +13,7 @@
 #'
 #' @param controls List with matrices of control distributions
 #' @param target Matrix containing the target distribution
-#' @param M Matrix containing the target distribution
+#' @param M Optional integer, number of draws from the uniform distribution for approximating the integral. See section 3.1 in the paper.
 #'
 #' @return
 DSC_weights_reg <- function(controls,target, M = 500){
@@ -63,7 +63,7 @@ DSC_weights_reg <- function(controls,target, M = 500){
     # norm of the matrix
     sc <- norm(controls.s,"2")
 
-  weights.opt <- lsqlincon(controls.s/sc,target.s/sc, A=NULL,b=NULL,Aeq = Aequ, beq = 1, 0, 1)
+  weights.opt <- pracma::lsqlincon(controls.s/sc,target.s/sc, A=NULL,b=NULL,Aeq = Aequ, beq = 1, 0, 1)
 
 
   return(weights.opt)
