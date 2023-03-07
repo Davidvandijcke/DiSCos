@@ -133,7 +133,7 @@ for(yy in 1:7){
                    rep(FALSE,ceiling(0.5*length(target[[3]])))))
   set.seed(1860)
   ind <- sample(v)
-  target[[1]] <- target[[3]][ind]
+  target[[1]] <- target[[3]][ind] # this apepars to be legacy code, not called anywhere
   target[[2]] <- target[[3]][!ind]
 
 
@@ -151,7 +151,7 @@ for(yy in 1:7){
                      rep(FALSE,ceiling(0.5*length(controls[[ii]][[3]])))))
     set.seed(1860)
     ind <- sample(v)
-    controls[[ii]][[1]] <- controls[[ii]][[3]][ind]
+    controls[[ii]][[1]] <- controls[[ii]][[3]][ind] # same here
     controls[[ii]][[2]] <- controls[[ii]][[3]][!ind]
   }
 

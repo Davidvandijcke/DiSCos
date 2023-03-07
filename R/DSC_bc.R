@@ -11,7 +11,7 @@
 #'
 #' @param controls List with matrices of control distributions.
 #' @param weights Vector of optimal synthetic control weights, computed using the DSC_weights_reg function.
-#' @param evgrid Optional vector containing an evenly spaced grid on [0,1] on which the quantile function for the control units will be evaulated.
+#' @param evgrid Optional vector containing an evenly spaced grid on [0,1] on which the quantile function for the control units will be evaluated
 #' By default, a grid of 100 points is used.
 #' @return  1. the quantile function of the barycenter associated with the "weights" evaluated at the vector "evgrid"
 #' 2. the quantile functions of the control groups evaluated at the vector "evgrid".
