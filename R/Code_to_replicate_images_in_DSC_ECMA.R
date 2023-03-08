@@ -123,6 +123,7 @@ results.over.years <- list()
 # Solving for the optimal weights in the DSC method and the alternative method using mixtures of
 # distributions by year
 
+
 # looping over the years from 1998 - 2014
 for(yy in 1:7){
   # obtaining the target state
@@ -133,10 +134,8 @@ for(yy in 1:7){
                    rep(FALSE,ceiling(0.5*length(target[[3]])))))
   set.seed(1860)
   ind <- sample(v)
-  target[[1]] <- target[[3]][ind] # this apepars to be legacy code, not called anywhere
+  target[[1]] <- target[[3]][ind]
   target[[2]] <- target[[3]][!ind]
-
-
 
   # obtaining all control states
   controlstates <- df[state_fips%in%control.states & year==(1997+yy)]

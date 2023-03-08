@@ -80,7 +80,6 @@ DSC_per <- function(c_df, t_df, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, len
   #list for squared Wasserstein distance
   distp=list()
 
-  #initiate progress bar
   cat('Permutation starts')
 
   #default permute all controls
@@ -90,16 +89,75 @@ DSC_per <- function(c_df, t_df, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, len
     }
   }
 
-  #pb <- txtProgressBar(min = 1, max = length(peridx), style = 3)
 
 
-  # register clusters
-  cl <- parallel::makeCluster(num_cores)
-  doSNOW::registerDoSNOW(cl)
+  if (num.cores == 1) { # sequential computation
+
+    distp <- list()
+    
+    pb <- txtProgressBar(min = 1, max = length(peridx), style = 3, title = "Permutation progress:")
+
+    # START for loop
+    for (idx in 1:length(peridx)){
+      # one iterations of the permutation test
+      distp[[idx]] <- DSC_per_iter(c_df=c_df, t_df=t_df, T0=T0, ww=ww, peridx=peridx, evgrid=evgrid, idx=idx) # the arguments are the same as the function arguments
+      
+      # update progress bar
+      setTxtProgressBar(pb, idx)
+    }
+    # END for loop
+
+    # close progress bar
+    close(pb)
+
+  } else if (num.cores > 1) { # parallel computation: no progress bar since dysfunctional in parallelization
+
+    # register clusters
+    cl <- parallel::makeCluster(num_cores)
+    doSNOW::registerDoSNOW(cl) # compatible with both windows and Unix platforms
+
+    # START for loop
+    distp <- foreach(idx = 1:length(peridx), .combine = c, .export=c("DSC_weights_reg", "DSC_bc", "myquant")) %dopar% {
+
+      # one iterations of the permutation test
+      return(DSC_per_iter(c_df=c_df, t_df=t_df, T0=T0, ww=ww, peridx=peridx, evgrid=evgrid, idx=idx)) # the arguments are the same as the function arguments
+
+    }
+    # END for loop
+
+    # stop cluster
+    snow::stopCluster(cl)
+  }
+  cat('Permutation finished!')
+
+   
+  # Convert the list to a nested list (the parallelization messes up the output of foreach when choosing .combine = list)
+  distp <- matrix(unlist(distp), ncol = length(c_df), byrow = TRUE)
+  distp <- split(distp, seq_len(nrow(distp)))
 
 
-  # START for loop
-  distp <- foreach(idx = 1:length(peridx), .combine = c, .export=c("DSC_weights_reg", "DSC_bc", "myquant")) %dopar% {
+  #default plot all squared Wasserstein distances
+  if (graph==TRUE){
+    plot(distt, xlab='',ylab='', type='l', lwd=2)
+    for (i in 1:length(distp)){
+      lines(1:length(c_df), distp[[i]], col='grey', lwd=1)
+    }
+    legend("topleft",legend = c("Target", "Control"),
+           col=c("black", "grey"),
+           lty= c(1,1), lwd = c(2,2), cex = 1.5)
+    title(ylab=y_name, line=2, cex.lab=1.5)
+    title(xlab=x_name, line=2, cex.lab=1.5)
+  }
+
+
+  return(list(target.dist=distt, control.dist=distp))
+
+}
+
+
+
+DSC_per_iter <- function(c_df, t_df, T0, ww, peridx, evgrid, idx){
+    # One iteration of the permutation test
 
     #create new control and target
     pert=list()
@@ -166,34 +224,4 @@ DSC_per <- function(c_df, t_df, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, len
     #setTxtProgressBar(pb, i)
 
     return(dist)
-
-  }
-  # END for loop
-
-  # stop cluster
-  snow::stopCluster(cl)
-
-  # Convert the list to a nested list (the parallelization messes up the output of foreach when choosing .combine = list)
-  distp <- matrix(unlist(distp), ncol = length(c_df), byrow = TRUE)
-  distp <- split(distp, seq_len(nrow(distp)))
-
-
-
-
-  #default plot all squared Wasserstein distances
-  if (graph==TRUE){
-    plot(distt, xlab='',ylab='', type='l', lwd=2)
-    for (i in 1:length(distp)){
-      lines(1:length(c_df), distp[[i]], col='grey', lwd=1)
-    }
-    legend("topleft",legend = c("Target", "Control"),
-           col=c("black", "grey"),
-           lty= c(1,1), lwd = c(2,2), cex = 1.5)
-    title(ylab=y_name, line=2, cex.lab=1.5)
-    title(xlab=x_name, line=2, cex.lab=1.5)
-  }
-
-
-  return(list(target.dist=distt, control.dist=distp))
-
 }

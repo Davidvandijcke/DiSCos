@@ -9,8 +9,6 @@ df$y_col = df$adj0contpov
 
 
 
-
-
 getMixture <- function(controls1, target, grid.min, grid.max, grid.rand) {
 
   ###### The mixture of distributions approach
@@ -80,7 +78,7 @@ getGrid <- function(target, controls1) {
   return(list(grid.min, grid.max, grid.rand, grid.ord))
 }
 
-DiSCo_time <- function(yy, ...) {
+DiSCo_iter <- function(yy, ...) {
 
     # obtaining the target state
 
@@ -110,8 +108,6 @@ DiSCo_time <- function(yy, ...) {
     DSC_res2.cdfF <- ecdf(DSC_res2[[2]])
     DSC_res2.cdf <- DSC_res2.cdfF(grid$grid.ord)
 
-    # assign DSC results to named list
-    #DSC_res[(c)
     
  
     # obtaining the optimal weights for the mixture of distributions method
@@ -139,6 +135,7 @@ DiSCo <- function() {
   results.by.year <- list()
 
   # looping over the years from 1998 - 2014
+
 
 
 
