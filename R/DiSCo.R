@@ -58,6 +58,9 @@ getMixture <- function(controls1, target, grid.min, grid.max, grid.rand) {
   target.order <- CDF.matrix[order(grid.rand, decreasing=FALSE),1]
 
 
+  return(list("weights.opt" = theweights.opt, "distance.opt" = thedistance.opt, 
+              "mean" = themean.order, "target.order" = target.order, "cdf" = CDF.matrix))
+
 }
 
 getGrid <- function(target, controls1) {
@@ -77,16 +80,8 @@ getGrid <- function(target, controls1) {
   return(list(grid.min, grid.max, grid.rand, grid.ord))
 }
 
-DiSCo <- function() {
+DiSCo_time <- function(yy, ...) {
 
-
-
-  #####
-  # Solving for the optimal weights in the DSC method and the alternative method using mixtures of
-  # distributions by year
-
-  # looping over the years from 1998 - 2014
-  for(yy in 1:7){
     # obtaining the target state
 
     # target outcome
@@ -96,7 +91,8 @@ DiSCo <- function() {
     # generate list where each element contains a list of all micro-level outcomes for a control unit
     controls <- list()
     j <- 1
-    for (id in unique(df[id_col != target_id, id_col])) {
+    controls.id <- unique(df[id_col != target_id, id_col])
+    for (id in controls.id) {
       controls[j] <- list(df[id_col == id & t_col == yy, y_col])
       j <- j + 1
     }
@@ -112,18 +108,38 @@ DiSCo <- function() {
 
     # getting the CDF from the quantile function
     DSC_res2.cdfF <- ecdf(DSC_res2[[2]])
-    DSC_res2.cdf <- DSC_res2.cdfF(grid.ord)
+    DSC_res2.cdf <- DSC_res2.cdfF(grid$grid.ord)
 
-
+    # assign DSC results to named list
+    #DSC_res[(c)
+    
+ 
     # obtaining the optimal weights for the mixture of distributions method
-    getMixture(controls, target, grid.ord)
+    mixture <- getMixture(controls, target, grid$grid.min, grid$grid.max, grid$grid.rand)
 
-    results.over.years[[yy]] <- list()
-    results.over.years[[yy]][[1]] <- list(DSC_res_weights, DSC_res2, DSC_res2.cdf) # DSC estimator
-    results.over.years[[yy]][[2]] <- list(theweights.opt, themean, themean.order) # the mixture
-    results.over.years[[yy]][[3]] <- list(target.s, target.order, grid.ord, as.vector(target[[3]]))
-    results.over.years[[yy]][[4]] <- list(controls1, CDF.matrix)
-  }
+    y_char <- as.character(yy)
+    results <- list()
+    results[["DSC"]] <- 
+      list("weights" = DSC_res_weights, "quantile" = DSC_res2, "cdf" =  DSC_res2.cdf) # DSC estimator
+    results[["mixture"]] <- list("weights" = mixture$weights.opt, "distance" = mixture$distance.opt, "mean" = mixture$mean) # mixture of distributions estimator
+    results[["target"]] <- list("quantile" = target.s, "cdf" = mixture$target.order, "grid" =  grid.ord, "data" = as.vector(target))
+    results[["controls"]] <- list("data" = controls, "cdf" = mixture$CDF.matrix, "id" = controls.id)
+
+}
+
+DiSCo <- function() {
+
+
+
+  #####
+  # Solving for the optimal weights in the DSC method and the alternative method using mixtures of
+  # distributions by year
+
+  # create named list for storing results, one element for each year
+  results.by.year <- list()
+
+  # looping over the years from 1998 - 2014
+
 
 
 }

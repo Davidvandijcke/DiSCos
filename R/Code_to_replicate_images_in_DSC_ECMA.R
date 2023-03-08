@@ -266,7 +266,7 @@ plot(results.over.years[[year.to.plot]][[3]][[3]], results.over.years[[year.to.p
      type='l', lwd=4,col='#0066FF', xlab='x',ylab='F(x)',cex.lab=1.4, cex.axis=1.4, ylim = c(0,1))
 lines(results.over.years[[year.to.plot]][[3]][[3]],DSC_res2.cdf,lwd=4, col='#FF0066', lty=2)
 lines(results.over.years[[year.to.plot]][[3]][[3]],results.over.years[[year.to.plot]][[3]][[2]],
-      lwd=3, lty=3)
+      lwd=3, lty=3) # this is the target cdf
 dev.off()
 
 #####

@@ -51,5 +51,5 @@ DSC_bc <- function(controls,weights,evgrid = seq(from=0, to=1, length.out=101)){
   thebc <- controls.q%*%weights
 
   # returning the quantile functions and the barycenter
-  return(list(controls.q,thebc))
+  return(list("controls" = controls.q, "barycenter" = thebc))
 }
