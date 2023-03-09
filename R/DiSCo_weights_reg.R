@@ -1,4 +1,4 @@
-#' Function for obtaining the weights in the DSC method at every time period
+#' Function for obtaining the weights in the DiSCo method at every time period
 
 #' Estimate the optimal weights for the distributional synthetic controls method by
 #' solving the convex minimization problem in Eq. (2) in \insertref{gunsilius2020distributional}{DiSCo}
@@ -16,7 +16,7 @@
 #' @param M Optional integer, number of draws from the uniform distribution for approximating the integral. See section 3.1 in the paper.
 #'
 #' @return
-DSC_weights_reg <- function(controls,target, M = 500){
+DiSCo_weights_reg <- function(controls,target, M = 500){
 
   if (!is.vector(target)){
     stop("Target needs to be given as a vector.")

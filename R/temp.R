@@ -19,11 +19,11 @@ fips.target <- 2 # target state is AK
 #####
 # Required functions
 # loading the function for computing the optimal weights
-source('R/DSC_weights_reg.R')
+source('R/DiSCo_weights_reg.R')
 # loading the function for computing the barycenter and the donor distributions
-source('R/DSC_bc.R')
+source('R/DiSCo_bc.R')
 # loading the function for performing the permutation test
-source('R/DSC_per.R')
+source('R/DiSCo_per.R')
 ## function to compute quantile function
 myquant <- function(X,q){
   # sort if unsorted
@@ -105,4 +105,19 @@ df[,.(age=mean(age),
 results.over.years <- list()
 
 df = df[state_fips %in% c(fips.target, control.states)]
-df[, id_col := state_fips == fips.target]
+df[, id_col := state_fips]
+
+# create t_col starting at 1 and increasing by 1 for each year
+df[, t_col := year - min(year) + 1]
+df[, y_col := adj0contpov]
+
+dt = copy(df)
+
+# other required arguments
+id_col.target = fips.target
+T0 = 5
+M = 1000
+G = 1000
+num.cores = parallel::detectCores() - 1
+permutation = FALSE
+

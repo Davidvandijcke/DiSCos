@@ -8,14 +8,14 @@
 # We converted the .dta file to compressed csv to reduce the filesize
 
 # This code comes with no guarantees. The compressed package also contains an unused function
-# DSC_CI, which is not used in this replication, but can be used to compute the confidence
+# DiSCo_CI, which is not used in this replication, but can be used to compute the confidence
 # intervals of the corresponding quantile functions.
 
 
 #####
 # Load required packages
 packages_load <- c("haven", "base", "data.table", "latex2exp", "CVXR",  # used to compute the weights using the alternative using mixtures of CDF
-                   "here", "dplyr", "pracma", "quadprog", "R.utils", "foreach")
+                   "here", "dplyr", "pracma", "quadprog", "R.utils", "foreach", "maps")
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(char = packages_load, character.only = TRUE)
 
@@ -34,11 +34,11 @@ fips.target <- 2 # target state is AK
 #####
 # Required functions
 # loading the function for computing the optimal weights
-source('R/DSC_weights_reg.R')
+source('R/DiSCo_weights_reg.R')
 # loading the function for computing the barycenter and the donor distributions
-source('R/DSC_bc.R')
+source('R/DiSCo_bc.R')
 # loading the function for performing the permutation test
-source('R/DSC_per.R')
+source('R/DiSCo_per.R')
 ## function to compute quantile function
 myquant <- function(X,q){
   # sort if unsorted
@@ -120,11 +120,12 @@ df[,.(age=mean(age),
 results.over.years <- list()
 
 #####
-# Solving for the optimal weights in the DSC method and the alternative method using mixtures of
+# Solving for the optimal weights in the DiSCo method and the alternative method using mixtures of
 # distributions by year
 
 
-# looping over the years from 1998 - 2014
+start_time <- Sys.time()
+# looping over the years from 1998 - 2004
 for(yy in 1:7){
   # obtaining the target state
   target <- list(3)
@@ -165,10 +166,10 @@ for(yy in 1:7){
   }
 
 
-  # obtaining the optimal weights for the DSC method
-  DSC_res_weights <- DSC_weights_reg(controls1,as.vector(target[[3]]), 1000)
+  # obtaining the optimal weights for the DiSCo method
+  DiSCo_res_weights <- DiSCo_weights_reg(controls1,as.vector(target[[3]]), 1000)
 
-  DSC_res2 <- DSC_bc(controls1,DSC_res_weights,seq(from=0,to=1,length.out=1001))
+  DiSCo_res2 <- DiSCo_bc(controls1,DiSCo_res_weights,seq(from=0,to=1,length.out=1001))
 
 
 
@@ -196,8 +197,8 @@ for(yy in 1:7){
   grid.ord <- grid.rand[order(grid.rand)]
 
   # getting the CDF from the quantile function
-  DSC_res2.cdfF <- ecdf(DSC_res2[[2]])
-  DSC_res2.cdf <- DSC_res2.cdfF(grid.ord)
+  DiSCo_res2.cdfF <- ecdf(DiSCo_res2[[2]])
+  DiSCo_res2.cdf <- DiSCo_res2.cdfF(grid.ord)
 
   # Evaluating the CDF on the random grid
   CDF.matrix <- matrix(0,nrow=length(grid.rand), ncol = (length(controls1)+1))
@@ -232,41 +233,53 @@ for(yy in 1:7){
   target.order <- CDF.matrix[order(grid.rand, decreasing=FALSE),1]
 
   results.over.years[[yy]] <- list()
-  results.over.years[[yy]][[1]] <- list(DSC_res_weights, DSC_res2, DSC_res2.cdf) # DSC estimator
+  results.over.years[[yy]][[1]] <- list(DiSCo_res_weights, DiSCo_res2, DiSCo_res2.cdf) # DiSCo estimator
   results.over.years[[yy]][[2]] <- list(theweights.opt, themean, themean.order) # the mixture
   results.over.years[[yy]][[3]] <- list(target.s, target.order, grid.ord, as.vector(target[[3]]))
   results.over.years[[yy]][[4]] <- list(controls1, CDF.matrix)
 }
 
+end <- Sys.time()
+print(end - start_time)
+
 #####
 #obtaining the weights as a uniform mean over all time periods
-Weights_DSC_avg <- results.over.years[[1]][[1]][[1]]
+Weights_DiSCo_avg <- results.over.years[[1]][[1]][[1]]
 Weights_mixture_avg <- results.over.years[[1]][[2]][[1]]
-for (yy in 2:7){
-  Weights_DSC_avg <- Weights_DSC_avg + results.over.years[[yy]][[1]][[1]]
+for (yy in 2:5){
+  Weights_DiSCo_avg <- Weights_DiSCo_avg + results.over.years[[yy]][[1]][[1]]
   Weights_mixture_avg <- Weights_mixture_avg + results.over.years[[yy]][[2]][[1]]
 }
-Weights_DSC_avg <- (1/length(1:7)) * Weights_DSC_avg
-Weights_mixture_avg <- (1/length(1:7)) * Weights_mixture_avg
+Weights_DiSCo_avg <- (1/5) * Weights_DiSCo_avg
+Weights_mixture_avg <- (1/5) * Weights_mixture_avg
 
-year.to.plot <- 6
+year.to.plot <- 2
 # generating the counterfactuals
-DSC_res2 <- DSC_bc(results.over.years[[year.to.plot]][[4]][[1]],
-                   Weights_DSC_avg,seq(from=0,to=1,length.out=1001))
+DiSCo_res2 <- DiSCo_bc(results.over.years[[year.to.plot]][[4]][[1]],
+                   Weights_DiSCo_avg,seq(from=0,to=1,length.out=1001))
 
 # getting the CDF from the quantile function
-DSC_res2.cdfF <- ecdf(DSC_res2[[2]])
-DSC_res2.cdf <- DSC_res2.cdfF(results.over.years[[year.to.plot]][[3]][[3]])
+DiSCo_res2.cdfF <- ecdf(DiSCo_res2[[2]])
+DiSCo_res2.cdf <- DiSCo_res2.cdfF(results.over.years[[year.to.plot]][[3]][[3]])
 
 #####
 # Plotting the results
-pdf("Univ_emp_avg_new_appl.pdf")
+pdf("Univ_emp_avg_new_appl_1999.pdf")
 plot(results.over.years[[year.to.plot]][[3]][[3]], results.over.years[[year.to.plot]][[2]][[3]],
      type='l', lwd=4,col='#0066FF', xlab='x',ylab='F(x)',cex.lab=1.4, cex.axis=1.4, ylim = c(0,1))
-lines(results.over.years[[year.to.plot]][[3]][[3]],DSC_res2.cdf,lwd=4, col='#FF0066', lty=2)
+lines(results.over.years[[year.to.plot]][[3]][[3]],DiSCo_res2.cdf,lwd=4, col='#FF0066', lty=2)
 lines(results.over.years[[year.to.plot]][[3]][[3]],results.over.years[[year.to.plot]][[3]][[2]],
       lwd=3, lty=3) # this is the target cdf
 dev.off()
+
+# list the largest weights
+weights_df <- data.frame(weights = Weights_DiSCo_avg, fips = helpcont)
+
+# merge with built-in state fips codes
+weights_df <- merge(weights_df, maps::state.fips, by = "fips")
+
+setorder(weights_df, -weights)
+
 
 #####
 # implementing the permutation test
@@ -279,7 +292,7 @@ for (ii in 1:length(results.over.years)){
 }
 
 
-permutation.test.results <- DSC_per(controls.per, target.per, 5, num_cores = parallel::detectCores() - 1,
+permutation.test.results <- DiSCo_per(controls.per, target.per, 5, num_cores = parallel::detectCores() - 1,
                                     evgrid=seq(from=0, to=1, length.out=1001), graph=TRUE, y_name='y', x_name='x')
 
 #recording the plot
