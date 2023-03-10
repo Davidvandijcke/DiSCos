@@ -60,7 +60,4 @@ DiSCo <- function(df, id_col.target, T0, M = 1000, G = 1000, num.cores = 1, perm
   Weights_mixture_avg <- (1/length(periods)) * Weights_mixture_avg
 
 
-
-
-
 }
