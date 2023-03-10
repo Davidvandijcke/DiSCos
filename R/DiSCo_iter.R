@@ -50,13 +50,10 @@
 #' \item{id}{A vector containing the IDs of the control units, in the same ordering as the weights returned in the DiSCo and mixture of distributions lists}
 #' }
 #' }
-DiSCo_iter <- function(yy, df, id_col.target, M, G, T0, ...) {
+DiSCo_iter <- function(yy, evgrid, id_col.target, M, G, T0, ...) {
 
-    # obtaining the target state
-
-    # target outcome
+    # target
     target <- df[id_col == id_col.target, y_col]
-
 
     # generate list where each element contains a list of all micro-level outcomes for a control unit
     controls <- list()
@@ -68,31 +65,39 @@ DiSCo_iter <- function(yy, df, id_col.target, M, G, T0, ...) {
       j <- j + 1
     }
 
+    # check whether problem undetermined
+    if (length(controls[1]) < length(controls)) {
+      stop("Problem undetermined: number of data points is smaller than number of weights")
+    }
+
     # evaluating the quantile functions on the grid "evgrid":
     controls.q <- matrix(0,nrow = length(evgrid), ncol=length(controls))
     for (jj in 1:length(controls)){
       controls.q[,jj] <- mapply(myquant, evgrid, MoreArgs = list(X=controls[[jj]]))
     }
 
-    if (yy <= T0) {
-      # obtaining the optimal weights for the DiSCo method
-      DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M)
-
-      DiSCo_res2 <- DiSCo_bc(controls, controls.q, DiSCo_res_weights,seq(from=0,to=1,length.out=M+1))
-    }
 
     # sample grid
     grid <- list(grid.min = NA, grid.max = NA, grid.rand = NA, grid.ord = NA)
     grid[c("grid.min", "grid.max", "grid.rand", "grid.ord")] <- getGrid(target, controls, G)
 
+    if (yy <= T0) { # only get weights for pre-treatment periods
+      # obtaining the optimal weights for the DiSCo method      
+      DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M)
+
+      DiSCo_res2 <- DiSCo_bc(controls, controls.q, DiSCo_res_weights, evgrid)
+
+      # obtaining the optimal weights for the mixture of distributions method
+      mixture <- DiSCo_mixture(controls, target, grid$grid.min, grid$grid.max, grid$grid.rand)
+    } else {
+      DiSCo_res_weights <- NA
+      DiSCo_res2 <- list(barycenter = NA)
+      mixture <- list(weights.opt = NA, distance.opt = NA, mean = NA)
+    }
+
     # getting the CDF from the quantile function
     DiSCo_res2.cdfF <- ecdf(controls.q)
     DiSCo_res2.cdf <- DiSCo_res2.cdfF(grid$grid.ord)
-
-
-
-    # obtaining the optimal weights for the mixture of distributions method
-    mixture <- getMixture(controls, target, grid$grid.min, grid$grid.max, grid$grid.rand)
 
     y_char <- as.character(yy)
     results <- list()
@@ -100,6 +105,6 @@ DiSCo_iter <- function(yy, df, id_col.target, M, G, T0, ...) {
       list("weights" = DiSCo_res_weights, "quantile.barycenter" = DiSCo_res2$barycenter, "cdf" = DiSCo_res2.cdf) # DiSCo estimator
     results[["mixture"]] <- list("weights" = mixture$weights.opt, "distance" = mixture$distance.opt, "mean" = mixture$mean) # mixture of distributions estimator
     results[["target"]] <- list("quantile" = target.s, "cdf" = mixture$target.order, "grid" =  grid.ord, "data" = as.vector(target))
-    results[["controls"]] <- list("data" = controls, "cdf" = mixture$CDF.matrix, "id" = controls.id)
-
+    results[["controls"]] <- list("quantile" = controls.q, "cdf" = mixture$CDF.matrix, "data" = controls, "id" = controls.id)
+    return(results)
 }

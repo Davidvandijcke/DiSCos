@@ -15,6 +15,7 @@
 #' By default, a grid of 100 points is used.
 #' @return The quantile function of the barycenter associated with the "weights" evaluated at the vector "evgrid"
 DiSCo_bc <- function(controls, controls.q, weights, evgrid = seq(from=0, to=1, length.out=101)){
+  
   if (!is.list(controls) && !is.matrix(controls)){
     stop ("Controls need to be given in either list-form or matrix form.")
   }

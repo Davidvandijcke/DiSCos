@@ -4,11 +4,11 @@ Version: 0.0.0.9000
 Authors@R: 
     c(person("David", "Van Dijcke", , "dvdijcke@umich.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-5825-3447")),
-person("Florian", "Gunsilius", , "ffg@umich.edu", role = c("aut"),
+    person("Florian", "Gunsilius", , "ffg@umich.edu", role = c("aut"),
            comment = c(ORCID = "0000-0002-1698-6324")),
-person("Siyun", "He", , "siyunhe@umich.edu", role = c("aut"),
+    person("Siyun", "He", , "siyunhe@umich.edu", role = c("aut"),
            comment = c(ORCID = "0000-0001-5825-3447"))
-)
+    )
 Description: The method of synthetic controls is a widely-adopted tool for evaluating causal effects of policy changes in settings with observational data. In many settings where it is applicable, researchers want to identify causal effects of policy changes on a treated unit at an aggregate level while having access to data at a finer granularity. We develop a simple extension of the synthetic controls estimator that takes advantage of this additional structure and provides nonparametric estimates of the heterogeneity within the aggregate unit. The idea is to replicate the quantile function associated with the treated unit by a weighted average of quantile functions of the control units. This estimator has desirable properties and relies on the same mathematical theory as the changes-in-changes estimator. It operates in both repeated cross-sections and panel data with as little as a single pre-treatment period and provides a unique counterfactual quantile function for continuous, discrete or mixed distributions.
 License: MIT license
 BugReports: https://github.com/

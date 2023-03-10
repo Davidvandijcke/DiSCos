@@ -62,8 +62,13 @@ DiSCo_weights_reg <- function(controls,target, M = 500){
     # overflow errors. For this reason we scale both the vector and the matrix by the Frobenius
     # norm of the matrix
     sc <- norm(controls.s,"2")
+  
 
-  weights.opt <- pracma::lsqlincon(controls.s/sc,target.s/sc, A=NULL,b=NULL,Aeq = Aequ, beq = 1, 0, 1)
+  # solve with the pracma package, which runs FORTRAN under the hood so it is fast
+  weights.opt <- pracma::lsqlincon(controls.s/sc,target.s/sc, A=NULL,b=NULL,
+                  Aeq = Aequ, # LHS of equality constraint: matrix of 1s, need coefficients to lie in unit simplex
+                  beq = 1, 0, 1 # RHS of equality constraint, unit simplex
+                  ) 
 
 
   return(weights.opt)

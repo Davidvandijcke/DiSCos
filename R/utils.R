@@ -1,7 +1,25 @@
 
-getGrid <- function(target, controls1, G) {
-  grid.min <- min(c(min(target),unlist(lapply(controls1,min))))
-  grid.max <- max(c(max(target),unlist(lapply(controls1,max))))
+#' Set up a grid for the estimation of the quantile functions and CDFs
+#' 
+#' @inheritParams DiSco_iter
+#' @return A list containing the following elements:
+#' \itemize{
+#' \item{grid.min}{The minimum value of the grid}
+#' \item{grid.max}{The maximum value of the grid}
+#' \item{grid.rand}{A vector containing the grid points}
+#' \item{grid.ord}{A vector containing the grid points, ordered}
+#' }
+#' @export
+#' @examples
+#' set.seed(123)
+#' target <- rnorm(100)
+#' controls <- list(rnorm(100),rnorm(100),rnorm(100))
+#' grid <- list(grid.min = NA, grid.max = NA, grid.rand = NA, grid.ord = NA)
+#' grid[c("grid.min", "grid.max", "grid.rand", "grid.ord")] <- getGrid(target, controls, G)
+#' plot(grid$grid.ord, type="l")
+getGrid <- function(target, controls, G) {
+  grid.min <- min(c(min(target),unlist(lapply(controls,min))))
+  grid.max <- max(c(max(target),unlist(lapply(controls,max))))
 
   # if grid.max-grid.min<=1 we round to the next 0.1.
   grid.min <- floor(grid.min*10)/10
@@ -16,6 +34,21 @@ getGrid <- function(target, controls1, G) {
   return(list(grid.min, grid.max, grid.rand, grid.ord))
 }
 
+#' Carry out checks on the inputs
+#'
+#' @inheritParams DiSCo
+#' @param permutation logical, whether to use permutation or not
+#' @return NULL
+#' @export
+#' @examples
+#' df <- data.frame(id_col = c(1,1,1,2,2,2,3,3,3), t_col = c(1,2,3,1,2,3,1,2,3), y_col = c(1,1,0,1,1,0,1,1,0))
+#' id_col.target <- 1
+#' T0 <- 1  
+#' M <- 1000  
+#' G <- 1000
+#' num.cores <- 1
+#' permutation <- FALSE
+#' checks(df, id_col.target, T0, M, G, num.cores, permutation)
 checks <- function(df, id_col.target, T0, M, G, num.cores, permutation) {
       # checks on the input data
   if (!id_col.target %in% df$id_col) {
@@ -36,7 +69,7 @@ checks <- function(df, id_col.target, T0, M, G, num.cores, permutation) {
     stop("id_col must be numeric")
   }
   if (!is.integer(df$t_col)) {
-    stop("year_col must be integer")
+    stop("t_col must be integer")
   }
   if (!is.numeric(df$y_col)) {
     stop("y_col must be numeric")
@@ -82,7 +115,11 @@ checks <- function(df, id_col.target, T0, M, G, num.cores, permutation) {
 
 
 
-
+#' Check if a vector is integer
+#' 
+#' @param x a vector
+#' @return TRUE if x is integer, FALSE otherwise
+#' @export
 is.integer <- function(x) {
   is.numeric(x) && all(x == as.integer(x))
 }
