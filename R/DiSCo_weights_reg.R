@@ -34,16 +34,6 @@ DiSCo_weights_reg <- function(controls,target, M = 500){
   }
   # M is the number of draws from the uniform distribution for approximating the integral
 
-  ## Creating a function for the empirical quantile function
-  myquant <- function(X,q){
-    # sort if unsorted
-    if (is.unsorted(X)) X <- sort(X)
-    # compute empirical CDF
-    X.cdf <- 1:length(X) / length(X)
-    # obtain the corresponding empirical quantile
-    return(X[which(X.cdf >= q)[1]])
-  }
-
   ## Sampling from this quantile function M times
   Mvec <- runif(M, min = 0, max = 1)
   controls.s <- matrix(0,nrow = M, ncol = length(controls))

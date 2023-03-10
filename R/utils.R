@@ -1,3 +1,23 @@
+#' Compute the empirical quantile function
+#' 
+#' @param X A vector containing the data
+#' @param q A vector containing the quantiles
+#' @return A vector containing the empirical quantile function
+#' @export
+#' @examples
+#' set.seed(123)
+#' X <- rnorm(100)
+#' q <- 0.1
+#' myquant(X,q)
+myquant <- function(X,q){
+  # sort if unsorted
+  if (is.unsorted(X)) X <- sort(X)
+  # compute empirical CDF
+  X.cdf <- 1:length(X) / length(X)
+  # obtain the corresponding empirical quantile
+  return(X[which(X.cdf >= q)[1]])
+}
+
 
 #' Set up a grid for the estimation of the quantile functions and CDFs
 #' 

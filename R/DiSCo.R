@@ -40,12 +40,12 @@ DiSCo <- function(df, id_col.target, T0, M = 1000, G = 1000, num.cores = 1, perm
   # run the main function in parallel for each period (mclapply doesn't require a cluster so we will run this in parallel if num.cores > 1, but it won't work on windows)
   start_time <- Sys.time()
   periods <- sort(unique(df$t_col)) # we call the iter function on all periods, but won't calculate weights for the post-treatment periods
-  results.periods <- parallel::mclapply(periods, DiSCo_iter, evgrid, id_col.target = id_col.target, M = M, G = G, T0 = T0, mc.cores = num.cores)
+  results.periods <- parallel::mclapply(periods, DiSCo_iter, df, evgrid, id_col.target = id_col.target, M = M, G = G, T0 = T0, mc.cores = num.cores)
   end <- Sys.time()
   print(end - start_time)
 
   # turn results.years into a named list where the name is the year
-  names(results.periods) <- sort(unique(as.character(df$t_col)))
+  names(results.periods) <- as.character(periods)
 
 
   #####
@@ -58,11 +58,6 @@ DiSCo <- function(df, id_col.target, T0, M = 1000, G = 1000, num.cores = 1, perm
   }
   Weights_DiSCo_avg <- (1/length(periods)) * Weights_DiSCo_avg
   Weights_mixture_avg <- (1/length(periods)) * Weights_mixture_avg
-
-  year.to.plot <- 6
-  # generating the counterfactuals
-  DiSCo_res2 <- DiSCo_bc(results.over.years[[year.to.plot]][[4]][[1]],
-                    Weights_DiSCo_avg,seq(from=0,to=1,length.out=1001))
 
 
 

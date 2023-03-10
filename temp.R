@@ -71,7 +71,7 @@ if (reread_dta) {
   # download the replication data
   url <- "https://www.dropbox.com/s/hrmz2fu0lxet97c/Minimum%20Wage%20Poverty%20Replication.zip?dl=1"
   fn <- file.path("data", "march_regready_1996.zip")
-  download.file(url)
+  download.file(url, fn)
   unzip(fn, file.path("Minimum Wage Poverty Replication", "Data", "march_regready_1996.dta"), exdir = "data", junkpaths = TRUE)
   file.remove(fn)
 
@@ -87,7 +87,7 @@ if (reread_dta) {
   file.remove(fn) # remove file to avoid github issues
 
 } else{
-  df <- readRDS(file.path("data", "march_regready_1996.rds"))
+  df <- readRDS(file.path("data", "march_regready_1996.rds")) %>% setDT()
 
 }
 
@@ -96,7 +96,7 @@ if (reread_dta) {
 
 results.over.years <- list()
 
-df = df[state_fips %in% c(fips.target, control.states)]
+df <- df[state_fips %in% c(fips.target, control.states)]
 df[, id_col := state_fips]
 
 # create t_col starting at 1 and increasing by 1 for each year

@@ -15,6 +15,7 @@ BugReports: https://github.com/
 URL: https://github.com/
 LazyData: TRUE
 Imports: data.table, CVXR, pracma, quadprog, Rdpack
+Depends: data.table
 RdMacros: Rdpack
 Suggests: 
     haven, utils, latex2exp

@@ -30,17 +30,6 @@ DiSCo_bc <- function(controls, controls.q, weights, evgrid = seq(from=0, to=1, l
   }
 
 
-  ## Creating a function for the empirical quantile function
-  myquant <- function(X,q){
-    # sort if unsorted
-    if (is.unsorted(X)) X <- sort(X)
-    # compute empirical CDF
-    X.cdf <- 1:length(X) / length(X)
-    # obtain the corresponding empirical quantile
-    return(X[which(X.cdf >= q)[1]])
-  }
-
-
   # Obtaining the Wasserstein barycenter as the average of the quantile functions
   # weighted by "weights" and evaluate it on the grid "evgrid"
   thebc <- controls.q%*%weights

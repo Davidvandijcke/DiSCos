@@ -50,23 +50,23 @@
 #' \item{id}{A vector containing the IDs of the control units, in the same ordering as the weights returned in the DiSCo and mixture of distributions lists}
 #' }
 #' }
-DiSCo_iter <- function(yy, evgrid, id_col.target, M, G, T0, ...) {
-
+DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, ...) {
+    
     # target
-    target <- df[id_col == id_col.target, y_col]
-
+    target <- df[id_col == id_col.target]$y_col
+    
     # generate list where each element contains a list of all micro-level outcomes for a control unit
     controls <- list()
     j <- 1
 
-    controls.id <- unique(df[id_col != id_col.target, id_col])
+    controls.id <- unique(df[id_col != id_col.target]$id_col)
     for (id in controls.id) {
-      controls[j] <- list(df[id_col == id & t_col == yy, y_col])
+      controls[j] <- list(df[id_col == id & t_col == yy]$y_col)
       j <- j + 1
     }
 
     # check whether problem undetermined
-    if (length(controls[1]) < length(controls)) {
+    if (length(controls[1][[1]]) < length(controls)) {
       stop("Problem undetermined: number of data points is smaller than number of weights")
     }
 
@@ -104,7 +104,7 @@ DiSCo_iter <- function(yy, evgrid, id_col.target, M, G, T0, ...) {
     results[["DiSCo"]] <-
       list("weights" = DiSCo_res_weights, "quantile.barycenter" = DiSCo_res2$barycenter, "cdf" = DiSCo_res2.cdf) # DiSCo estimator
     results[["mixture"]] <- list("weights" = mixture$weights.opt, "distance" = mixture$distance.opt, "mean" = mixture$mean) # mixture of distributions estimator
-    results[["target"]] <- list("quantile" = target.s, "cdf" = mixture$target.order, "grid" =  grid.ord, "data" = as.vector(target))
-    results[["controls"]] <- list("quantile" = controls.q, "cdf" = mixture$CDF.matrix, "data" = controls, "id" = controls.id)
+    results[["target"]] <- list("cdf" = mixture$target.order, "grid" = grid$grid.ord, "data" = as.vector(target))
+    results[["controls"]] <- list("cdf" = mixture$CDF.matrix, "data" = controls, "id" = controls.id)
     return(results)
 }
