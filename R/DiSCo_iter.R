@@ -85,13 +85,10 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, ...) {
       # obtaining the optimal weights for the DiSCo method      
       DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M)
 
-      DiSCo_res2 <- DiSCo_bc(controls, controls.q, DiSCo_res_weights, evgrid)
-
       # obtaining the optimal weights for the mixture of distributions method
       mixture <- DiSCo_mixture(controls, target, grid$grid.min, grid$grid.max, grid$grid.rand)
     } else {
       DiSCo_res_weights <- NA
-      DiSCo_res2 <- list(barycenter = NA)
       mixture <- list(weights.opt = NA, distance.opt = NA, mean = NA)
     }
 
@@ -101,8 +98,8 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, ...) {
 
     y_char <- as.character(yy)
     results <- list()
-    results[["DiSCo"]] <-
-      list("weights" = DiSCo_res_weights, "quantile.barycenter" = DiSCo_res2$barycenter, "cdf" = DiSCo_res2.cdf) # DiSCo estimator
+    results[["DiSCo_weights"]] <-
+       DiSCo_res_weights # DiSCo estimator
     results[["mixture"]] <- list("weights" = mixture$weights.opt, "distance" = mixture$distance.opt, "mean" = mixture$mean) # mixture of distributions estimator
     results[["target"]] <- list("cdf" = mixture$target.order, "grid" = grid$grid.ord, "data" = as.vector(target))
     results[["controls"]] <- list("cdf" = mixture$CDF.matrix, "data" = controls, "id" = controls.id)
