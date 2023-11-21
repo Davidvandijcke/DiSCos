@@ -49,6 +49,7 @@
 #' \item{cdf}{A vector containing the empirical CDFs of the controls}
 #' \item{id}{A vector containing the IDs of the control units, in the same ordering as the weights returned in the DiSCo and mixture of distributions lists}
 #' }
+#' \item{controls.q}{A list containing the quantiles for the control units, evaluated on the grid of size G.}
 #' }
 DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, ...) {
 

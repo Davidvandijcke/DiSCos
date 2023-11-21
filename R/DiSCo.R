@@ -12,24 +12,31 @@
 #' \itemize{
 #' \item{y_col}{A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)}
 #' \item{id_col}{A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals}
-#' \item{t_col}{A vector containing the time period of the observation for each unit. This should be an increasing integer, and the first period should be equal to 1.}
+#' \item{time_col}{A vector containing the time period of the observation for each unit. This should be an increasing integer, and the first period should be equal to 1.}
 #' }
 #' @param id_col.target Variable indicating the name of the target unit, as specified in the id_col column of the data table.
 #' This variable can be any type, as long as it is the same type as the id_col column of the data table.
-#' @param T0 Integer indicating last period before treatment as counted from 1 (e.g, if treatment year 2003 was the 6th year in the sample, this parameter should be 5).
+#' @param t0 Integer indicating period of treatment.
 #' @param M Integer indicating the number of control units to use in the DiSCo method. Default is 1000.
 #' @param G Integer indicating the number of grid points for the grid on which the estimated functions are evaluated. Default is 1000.
 #' @param num.cores Integer, number of cores to use for parallel computation. Default is 1 (sequential computation). If the `permutation` argument is set to TRUE, this can be very slow!
 #' @param permutation Logical, indicating whether to use the permutation method for computing the optimal weights. Default is FALSE.
 #'
 #'
-DiSCo <- function(df, id_col.target, T0, M = 1000, G = 1000, num.cores = 1, permutation = FALSE) {
+DiSCo <- function(df, id_col.target, T0, M = 1000, G = 1000, num.cores = 1, CI=FALSE, boots=500, cl=0.95, permutation = FALSE) {
 
   # make sure we have a data table
   df <- as.data.table(df)
 
   # check the inputs
   checks(df, id_col.target, T0, M, G, num.cores, permutation)
+
+  # create a column for the normallized time period
+  t_min <-min(df$time_col)
+  df[, t_col := time_col - t_min + 1]
+  T0 <- unique(df[time_col == t0]$t_col) - 1
+  T_max <- max(df$t_col)
+
 
   # create a list to store the results for each period
   results.periods <- list()
@@ -61,7 +68,19 @@ DiSCo <- function(df, id_col.target, T0, M = 1000, G = 1000, num.cores = 1, perm
   Weights_DiSCo_avg <- (1/T0) * Weights_DiSCo_avg
   Weights_mixture_avg <- (1/T0) * Weights_mixture_avg
 
-  DiSCo_res <- DiSco_bc(results.periods, Weights_DiSCo_avg, )
+  # calculating the counterfactual target distribution
+  bc <- lapply(seq(1:T_max), function(x) DiSCo_bc(results.periods[[x]]$controls$data, results.periods[[x]]$controls.q, Weights_DiSCo_avg, evgrid))
+  names(bc) <- t_min  + seq(1:T_max) - 1
 
+  controls <- results.periods[[x]]$controls$data
+  bc <- bc[[x]]
+
+
+
+  if (CI) {
+    CI <- DiSCo_CI(controls=controls, bc=bc, weights=Weights_DiSCo_avg, mc.cores=num.cores, cl=cl, num.redraws=boots, evgrid = evgrid)
+  } else {
+    CI <- NULL
+  }
 
 }

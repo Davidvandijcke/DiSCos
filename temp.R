@@ -100,7 +100,7 @@ df <- df[state_fips %in% c(fips.target, control.states)]
 df[, id_col := state_fips]
 
 # create t_col starting at 1 and increasing by 1 for each year
-df[, t_col := year - min(year) + 1]
+df[, time_col := year]
 df[, y_col := adj0contpov]
 
 dt = copy(df)
@@ -113,3 +113,12 @@ G = 1000
 num.cores = parallel::detectCores() - 1
 permutation = FALSE
 
+
+
+pdf("Univ_emp_avg_new_appl.pdf")
+plot(evgrid, ,
+     type='l', lwd=4,col='#0066FF', xlab='x',ylab='F(x)',cex.lab=1.4, cex.axis=1.4, ylim = c(0,1))
+lines(results.over.years[[year.to.plot]][[3]][[3]],DiSCo_res2.cdf,lwd=4, col='#FF0066', lty=2)
+lines(results.over.years[[year.to.plot]][[3]][[3]],results.over.years[[year.to.plot]][[3]][[2]],
+      lwd=3, lty=3)
+dev.off()
