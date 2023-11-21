@@ -26,7 +26,7 @@
 DiSCo <- function(df, id_col.target, T0, M = 1000, G = 1000, num.cores = 1, permutation = FALSE) {
 
   # make sure we have a data table
-  df <- as.data.table(dt)
+  df <- as.data.table(df)
 
   # check the inputs
   checks(df, id_col.target, T0, M, G, num.cores, permutation)
@@ -36,11 +36,13 @@ DiSCo <- function(df, id_col.target, T0, M = 1000, G = 1000, num.cores = 1, perm
 
 
   evgrid = seq(from=0,to=1,length.out=M+1)
-  
-  # run the main function in parallel for each period (mclapply doesn't require a cluster so we will run this in parallel if num.cores > 1, but it won't work on windows)
+
+  # run the main function in parallel for each period
   start_time <- Sys.time()
   periods <- sort(unique(df$t_col)) # we call the iter function on all periods, but won't calculate weights for the post-treatment periods
-  results.periods <- parallel::mclapply(periods, DiSCo_iter, df, evgrid, id_col.target = id_col.target, M = M, G = G, T0 = T0, mc.cores = num.cores)
+
+  results.periods <- mclapply.hack(periods, DiSCo_iter, df, evgrid, id_col.target = id_col.target, M = M, G = G, T0 = T0, mc.cores = num.cores)
+
   end <- Sys.time()
   print(end - start_time)
 
@@ -50,14 +52,16 @@ DiSCo <- function(df, id_col.target, T0, M = 1000, G = 1000, num.cores = 1, perm
 
   #####
   #obtaining the weights as a uniform mean over all time periods
-  Weights_DiSCo_avg <- results.periods$`1`$DiSCo$weights
+  Weights_DiSCo_avg <- results.periods$`1`$DiSCo_weights
   Weights_mixture_avg <- results.periods$`1`$mixture$weights
-  for (yy in 2:7){
-    Weights_DiSCo_avg <- Weights_DiSCo_avg + results.periods$`yy`$DiSCo$weights
-    Weights_mixture_avg <- Weights_mixture_avg + results.periods$`yy`$mixture$weights
+  for (yy in 2:T0){
+    Weights_DiSCo_avg <- Weights_DiSCo_avg + results.periods[[yy]]$DiSCo_weights
+    Weights_mixture_avg <- Weights_mixture_avg + results.periods[[yy]]$mixture$weights
   }
-  Weights_DiSCo_avg <- (1/length(periods)) * Weights_DiSCo_avg
-  Weights_mixture_avg <- (1/length(periods)) * Weights_mixture_avg
+  Weights_DiSCo_avg <- (1/T0) * Weights_DiSCo_avg
+  Weights_mixture_avg <- (1/T0) * Weights_mixture_avg
+
+  DiSCo_res <- DiSco_bc(results.periods, Weights_DiSCo_avg, )
 
 
 }

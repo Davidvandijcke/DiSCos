@@ -51,10 +51,10 @@
 #' }
 #' }
 DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, ...) {
-    
+
     # target
     target <- df[id_col == id_col.target]$y_col
-    
+
     # generate list where each element contains a list of all micro-level outcomes for a control unit
     controls <- list()
     j <- 1
@@ -82,10 +82,10 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, ...) {
     grid[c("grid.min", "grid.max", "grid.rand", "grid.ord")] <- getGrid(target, controls, G)
 
     if (yy <= T0) { # only get weights for pre-treatment periods
-      # obtaining the optimal weights for the DiSCo method      
+      # obtaining the optimal weights for the DiSCo method
       DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M)
 
-      # obtaining the optimal weights for the mixture of distributions method
+    # obtaining the optimal weights for the mixture of distributions method
       mixture <- DiSCo_mixture(controls, target, grid$grid.min, grid$grid.max, grid$grid.rand)
     } else {
       DiSCo_res_weights <- NA
@@ -103,5 +103,8 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, ...) {
     results[["mixture"]] <- list("weights" = mixture$weights.opt, "distance" = mixture$distance.opt, "mean" = mixture$mean) # mixture of distributions estimator
     results[["target"]] <- list("cdf" = mixture$target.order, "grid" = grid$grid.ord, "data" = as.vector(target))
     results[["controls"]] <- list("cdf" = mixture$CDF.matrix, "data" = controls, "id" = controls.id)
+    results[['controls.q']] <- controls.q
     return(results)
 }
+
+
