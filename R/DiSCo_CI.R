@@ -55,7 +55,7 @@ DiSCo_CI <- function(controls, bc, weights, mc.cores=1, cl=0.95, num.redraws=500
   DSC_res2.CI <- mclapply.hack(1:num.redraws, DiSCo_CI_iter, controls=controls, bc=bc,
                                weights=weights, cl=cl, evgrid=evgrid, mc.cores=mc.cores)
 
-  DSC_res2.CI <- sapply(DSC_res2.CI, function(x) x$barycenter)
+  DSC_res2.CI <- sapply(DSC_res2.CI, function(x) x)
 
   # DiSCo_CI_iter(1, controls=controls, bc=bc, weights=weights, cl=cl, evgrid = evgrid)
   # obtain the cl% confidence interval
@@ -65,6 +65,6 @@ DiSCo_CI <- function(controls, bc, weights, mc.cores=1, cl=0.95, num.redraws=500
   se <- apply(DSC_res2.CI,1,sd)
 
 
-  return(list(upper=CI.u, lower=CI.l))
+  return(list(upper=CI.u, lower=CI.l, se=se))
 
 }

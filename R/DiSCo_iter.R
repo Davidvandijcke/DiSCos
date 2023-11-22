@@ -3,53 +3,43 @@
 #'
 #' @description This function implements the DiSCo method for a single time period, as well as the mixture of distributions approach.
 #'
-#' @details This function is called for every time period in the DiSCo function. It implements the DiSCo method for a single time period, as well as the mixture of distributions approach.
-#' The corresponding results for each year can be accessed in the `years` list of the output of the DiSCo function. The DiSCo function returns the average weight for each unit across all years,
-#' calculated as a uniform mean, as well as the counterfactual target distribution produced as the weighted average of the control distributions for each year, using these averaged weights.
+#' @details This function is part of the DiSCo method, called for each time period. It calculates the optimal weights for the DiSCo method and the mixture of distributions approach for a single time period. The function processes data for both the target and control units, computes the quantile functions, and evaluates these on a specified grid. The function is designed to be used within the broader context of the DiSCo function, which aggregates results across multiple time periods.
 #'
-#' @param c_df List with matrices of control distributions
-#' @param t_df Matrix containing the target distribution
-#' @param T0 Integer indicating first year of treatment as counted from 1 (e.g, if treatment year 2002 was the 5th year in the sample, this parameter should be 5).
-#' @param ww Optional vector of weights indicating the relative importance of each time period. If not specified, each time period is weighted equally.
-#' @param peridx Optional integer indicating number of permutations. If not specified, by default equal to the number of units in the sample.
-#' @param evgrid Optional vector containing an evenly spaced grid on [0,1] on which the quantile function for the control units will be evaulated.
-#' By default, a grid of 100 points is used.
-#' @param graph Boolean indicating whether to plot graphs
-#' @param y_name Y axis label of the graph
-#' @param x_name X axis label of the graph
-#' @param num_cores Integer, number of cores to use for parallel computation. Set to 1 by default (sequential computation), this can be very slow!
-#' @return A nested list with the following elements:
+#' @param yy Integer indicating the current year being processed.
+#' @param df Data frame containing the data for both target and control units.
+#' @param evgrid Vector containing an evenly spaced grid on [0,1] for evaluating quantile functions.
+#' @param id_col.target String specifying the column name for the target unit's identifier.
+#' @param M Integer specifying the number of iterations for optimization.
+#' @param G Integer indicating the grid size for evaluation.
+#' @param T0 Integer indicating the first year of treatment as counted from 1.
+#' @param ... Additional arguments passed to the function.
+#'
+#' @return A list with the following elements:
 #' \itemize{
-#' \item{DiSCo}{A list containing the results of the main (DiSCo) method, with the following elements:
-#' \itemize{
-#' \item{weights}{The optimal weights for the DiSCo method}
-#' \item{quantile}{A list containing the quantile functions of the controls and the corresponding barycenter, with the following elements:}
-#' \itemize{
-#' \item{controls}{A vector containing the quantile functions of the controls}
-#' \item{barycenter}{A vector containing the quantile function of the barycenter}
-#' }
-#' \item{cdf}{The empirical CDFs of the barycenters}
-#' }
-#' \item{mixture}{A list containing the results of the mixture of distributions approach, with the following elements:
-#' \itemize{
-#' \item{weights}{The optimal weights for the mixture of distributions approach}
-#' \item{distance}{The value of the objective function for the mixture of distributions approach}
-#' \item{mean}{The weighted mixture of the controls' CDFs, i.e. the "mixture CDF"}
-#' }
-#' \item{target}{A list containing the data for the target unit, with the following elements:}
-#' \itemize{
-#' \item{quantile}{A vector containing the quantile functions of the target}
-#' \item{cdf}{A vector containing the empirical CDFs of the target}
-#' \item{grid}{A vector containing the grid on which the quantile and CDF functions were evaluated}
-#' \item{data}{A vector containing the supplied data for the target unit}
-#' }
-#' \item{controls}{A list containing the data for the control units, with the following elements:}
-#' \itemize{
-#' \item{data}{A vector containing the supplied data for the control units}
-#' \item{cdf}{A vector containing the empirical CDFs of the controls}
-#' \item{id}{A vector containing the IDs of the control units, in the same ordering as the weights returned in the DiSCo and mixture of distributions lists}
-#' }
-#' \item{controls.q}{A list containing the quantiles for the control units, evaluated on the grid of size G.}
+#'   \item{DiSCo_weights}{Weights calculated using the DiSCo method.}
+#'   \item{mixture}{
+#'     \itemize{
+#'       \item{weights}{Optimal weights for the mixture approach.}
+#'       \item{distance}{Value of the objective function for the mixture approach.}
+#'       \item{mean}{Weighted mixture of the controls' CDFs.}
+#'     }
+#'   }
+#'   \item{target}{
+#'     \itemize{
+#'       \item{cdf}{Empirical CDF of the target.}
+#'       \item{quantile}{Quantile function of the target.}
+#'       \item{grid}{Grid on which the quantile and CDF functions were evaluated.}
+#'       \item{data}{Original data for the target unit.}
+#'     }
+#'   }
+#'   \item{controls}{
+#'     \itemize{
+#'       \item{data}{Original data for the control units.}
+#'       \item{cdf}{Empirical CDFs of the control units.}
+#'       \item{id}{IDs of the control units.}
+#'     }
+#'   }
+#'   \item{controls.q}{Quantiles for the control units, evaluated on the specified grid.}
 #' }
 DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, ...) {
 
@@ -76,12 +66,10 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, ...) {
       controls.q[,jj] <- mapply(myquant, evgrid, MoreArgs = list(X=controls[[jj]]))
     }
 
-
     # sample grid
     grid <- list(grid.min = NA, grid.max = NA, grid.rand = NA, grid.ord = NA)
     grid[c("grid.min", "grid.max", "grid.rand", "grid.ord")] <- getGrid(target, controls, G)
 
-    set.seed(1860)
     if (yy <= T0) { # only get weights for pre-treatment periods
       # obtaining the optimal weights for the DiSCo method
       DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M)

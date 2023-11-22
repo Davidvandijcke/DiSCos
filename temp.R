@@ -113,12 +113,9 @@ G = 1000
 num.cores = parallel::detectCores() - 1
 permutation = FALSE
 
+results <- DiSCo(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 5, permutation = TRUE,
+                 CI = TRUE, boots = 20, cl = 0.95, CI_periods = NULL, graph = FALSE)
 
 
-pdf("Univ_emp_avg_new_appl.pdf")
-plot(evgrid, ,
-     type='l', lwd=4,col='#0066FF', xlab='x',ylab='F(x)',cex.lab=1.4, cex.axis=1.4, ylim = c(0,1))
-lines(results.over.years[[year.to.plot]][[3]][[3]],DiSCo_res2.cdf,lwd=4, col='#FF0066', lty=2)
-lines(results.over.years[[year.to.plot]][[3]][[3]],results.over.years[[year.to.plot]][[3]][[2]],
-      lwd=3, lty=3)
-dev.off()
+
+

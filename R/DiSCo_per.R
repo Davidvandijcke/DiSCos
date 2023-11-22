@@ -120,14 +120,14 @@ DiSCo_per <- function(c_df, t_df, controls.q, T0, ww=0, peridx=0, evgrid=seq(fro
 
 
 
-DiSCo_per_rank <- function(distt, distp) {
-  #' @param distt List of squared Wasserstein distances between the target unit and the control units
-  #' @param distp List of squared Wasserstein distances between the control units
-  #' @return List of p-values for each time period
-  #' @export
+#' @param distt List of squared Wasserstein distances between the target unit and the control units
+#' @param distp List of squared Wasserstein distances between the control units
+#' @return List of p-values for each time period
+#' @export
 
-  ## rank the squared Wasserstein distances and get the rank of the target unit
-  # combine distt and distp
+## rank the squared Wasserstein distances and get the rank of the target unit
+# combine distt and distp
+DiSCo_per_rank <- function(distt, distp) {
   distall <- distp
   distall$target <- distt
   distall <- matrix(unlist(distall), nrow=length(distall), ncol=length(distall[[1]]), byrow = TRUE)
@@ -145,4 +145,61 @@ DiSCo_per_rank <- function(distt, distp) {
   return(list(p_t = p_values, ranks=rnks))
 }
 
+
+#' @ title permut
+#' @ description Object to hold results of permutation test
+#'
+#' @param distp List of squared Wasserstein distances between the control units
+#' @param distt List of squared Wasserstein distances between the target unit and the control units
+#' @param rank Rank of the target unit
+#' @param p_values List of p-values for each time period
+#' @param p_overall Overall p-value
+#' @param J_1 Number of control units
+#' @return A list of class permut, with the following elements
+#' \item{distp}{List of squared Wasserstein distances between the control units}
+#' \item{distt}{List of squared Wasserstein distances between the target unit and the control units}
+#' \item{rank}{Rank of the target unit}
+#' \item{p_values}{List of p-values for each time period}
+#' \item{p_overall}{Overall p-value for post-treatment periods}
+#' \item{J_1}{Number of control units}
+#'
+#' @export
+#' @examples
+#' permut(distp, distt, rank, p_values, p_overall, J_1)
+#' @export
+permut <- function(distp, distt, rank, p_values, p_overall, J_1) {
+  out <- list(distp=distp, distt=distt, rank=rank, p_values=p_values, p_overall=p_overall, J_1=J_1)
+  class(out) <- "permut"
+  return(out)
+}
+
+
+#' @ title print.permut
+#'
+#' @description Print permutation test results
+#'
+#' @param x Object of class permut
+#' @param digits Number of digits to print
+#' @return Prints permutation test results
+#' @export
+#' @examples
+#' print(x, digits=3)
+#' @export
+print.permut <- function(x, digits = 3) {
+  cat("Permutation test results:\n")
+  cat("Overall post-treatment p-value: ", format(x$p_overall, digits=digits), "\n")
+  cat("Number of control units: ", x$J_1, "\n")
+}
+
+#' @ title summary.permut
+#' @description Summarize permutation test results
+#' @param object Object of class permut
+#' @param digits Number of digits to print
+#' @return Prints permutation test results
+#' @export
+#' @examples
+#' summary(x, digits=3)
+summary.permut <- function(x, digits = 3) {
+  print.permut(x, digits=digits)
+}
 
