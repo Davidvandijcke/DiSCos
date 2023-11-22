@@ -1,10 +1,3 @@
-controls=controls
-bc=bc
-weights=Weights_DiSCo_avg
-mc.cores=num.cores
-cl=cl
-num.redraws=boots
-evgrid = evgrid
 
 
 DiSCo_CI_iter <- function(redraw, controls, bc, weights, cl=0.95, evgrid = seq(from=0, to=1, length.out=1001)){

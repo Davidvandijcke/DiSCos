@@ -19,46 +19,48 @@
 #' @param num_cores Integer, number of cores to use for parallel computation. Set to 1 by default (sequential computation), this can be very slow!
 #' @return List of matrices containing synthetic time path of the outcome variable
 #' for the target unit together with the time paths of the control units
-DiSCo_per <- function(c_df, t_df, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, length.out=101),
-                 graph=TRUE, y_name='y', x_name='x', num_cores = 1){
-
-  #Creating a function for the empirical quantile function
-  myquant <- function(X,q){
-    # sort if unsorted
-    if (is.unsorted(X)) X <- sort(X)
-    # compute empirical CDF
-    X.cdf <- 1:length(X) / length(X)
-    # obtain the corresponding empirical quantile
-    return(X[which(X.cdf >= q)[1]])
-  }
+DiSCo_per <- function(c_df, t_df, controls.q, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, length.out=101),
+                 graph=TRUE, num_cores = 1, redo_weights=FALSE, weights=NULL){
 
   #----------------------------------------#
   # target
   #----------------------------------------#
 
-  #calculate lambda_t for t<=T0
-  lambda_t=list()
+  c_df=controls_per
+  t_df=target_per
+  controls.q=controls.q
+  T0=T0
+  weights=Weights_DiSCo_avg
+  num_cores=num.cores
+
+  if (redo_weights) {
+    #calculate lambda_t for t<=T0
+    lambda_t=list()
 
 
-  lambda_t <- parallel::mclapply(seq_len(T0), function(t) {
-    DiSCo_weights_reg(c_df[[t]], as.vector(t_df[[t]]), 1000)
-  }, mc.cores = num_cores)
+    lambda_t <- parallel::mclapply.hack(seq_len(T0), function(t) {
+      DiSCo_weights_reg(c_df[[t]], as.vector(t_df[[t]]), 1000)
+    }, mc.cores = num_cores)
 
-  #calculate the average optimal lambda
-  if (length(ww)==1){
-    w_t=rep(1/T0, T0)
-    lambda.opt=matrix(unlist(lambda_t),ncol=T0)%*%w_t
-  } else{
-    lambda.opt=matrix(unlist(lambda_t),ncol=T0)%*%ww
+    #calculate the average optimal lambda
+    if (length(ww)==1){
+      w_t=rep(1/T0, T0)
+      lambda.opt=matrix(unlist(lambda_t),ncol=T0)%*%w_t
+    } else{
+      lambda.opt=matrix(unlist(lambda_t),ncol=T0)%*%ww
+    }
+  } else if (is.null(weights)){
+    stop("Please provide either weights or set redo_weights to TRUE")
+  } else {
+    lambda.opt=weights
   }
-
 
   #calculate the barycenters for each period
   bc_t=list()
 
 
-  bc_t <- parallel::mclapply(c_df, function(x) {
-    DiSCo_bc(x, lambda.opt, evgrid)
+  bc_t <- mclapply.hack(1:length(c_df), function(x) {
+    DiSCo_bc(c_df[[x]], controls.q[[x]], lambda.opt, evgrid)
   }, mc.cores = num_cores)
 
   #computing the target quantile function
@@ -71,64 +73,24 @@ DiSCo_per <- function(c_df, t_df, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, l
   #squared Wasserstein distance between the target and the corresponding barycenter
   distt=c()
   for (t in 1:length(c_df)){
-    distt[t]=mean((bc_t[[t]][[2]]-target_q[[t]])**2)
+    distt[t]=mean((bc_t[[t]]-target_q[[t]])**2)
   }
 
   #----------------------------------------#
   # permutation
   #----------------------------------------#
 
-  #list for squared Wasserstein distance
-  distp=list()
-
-  cat('Permutation starts')
 
   #default permute all controls
-  if (length(peridx)==1){
-    if (peridx==0){
+  if (peridx==0){
       peridx=1:length(c_df[[1]])
-    }
   }
 
 
-
-  if (num_cores == 1) { # sequential computation
-
-    distp <- list()
-
-    pb <- txtProgressBar(min = 1, max = length(peridx), style = 3, title = "Permutation progress:")
-
-    # START for loop
-    for (idx in 1:length(peridx)){
-      # one iterations of the permutation test
-      distp[[idx]] <- DiSCo_per_iter(c_df=c_df, t_df=t_df, T0=T0, ww=ww, peridx=peridx, evgrid=evgrid, idx=idx) # the arguments are the same as the function arguments
-
-      # update progress bar
-      setTxtProgressBar(pb, idx)
-    }
-    # END for loop
-
-    # close progress bar
-    close(pb)
-
-  } else if (num_cores > 1) { # parallel computation: no progress bar since dysfunctional in parallelization
-
-    # register clusters
-    cl <- parallel::makeCluster(num_cores)
-    doSNOW::registerDoSNOW(cl) # compatible with both windows and Unix platforms
-
-    # START for loop
-    distp <- foreach(idx = 1:length(peridx), .combine = c, .export=c("DiSCo_weights_reg", "DiSCo_bc", "DiSCo_per_iter", "myquant")) %dopar% {
-
-      # one iterations of the permutation test
-      return(DiSCo_per_iter(c_df=c_df, t_df=t_df, T0=T0, ww=ww, peridx=peridx, evgrid=evgrid, idx=idx)) # the arguments are the same as the function arguments
-
-    }
-    # END for loop
-
-    # stop cluster
-    snow::stopCluster(cl)
-  }
+  cat("Starting permutation test...")
+  distp <- mclapply.hack(seq_len(length(peridx)), function(idx) {
+    DiSCo_per_iter(c_df=c_df, c_df.q=controls.q, t_df=t_df, T0=T0, ww=ww, peridx=peridx, evgrid=evgrid, idx=idx)
+  }, mc.cores = num_cores)
   cat('Permutation finished!')
 
 
@@ -143,16 +105,44 @@ DiSCo_per <- function(c_df, t_df, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, l
     for (i in 1:length(distp)){
       lines(1:length(c_df), distp[[i]], col='grey', lwd=1)
     }
+    abline(v=T0, lty = 2)
     legend("topleft",legend = c("Target", "Control"),
            col=c("black", "grey"),
            lty= c(1,1), lwd = c(2,2), cex = 1.5)
-    title(ylab=y_name, line=2, cex.lab=1.5)
-    title(xlab=x_name, line=2, cex.lab=1.5)
+    title(ylab="Squared Wasserstein distance", line=2.5, cex.lab=1.5)
+    title(xlab="Time periods", line=3, cex.lab=1.5)
   }
 
 
   return(list(target.dist=distt, control.dist=distp))
 
+}
+
+
+
+DiSCo_per_rank <- function(distt, distp) {
+  #' @param distt List of squared Wasserstein distances between the target unit and the control units
+  #' @param distp List of squared Wasserstein distances between the control units
+  #' @return List of p-values for each time period
+  #' @export
+
+  ## rank the squared Wasserstein distances and get the rank of the target unit
+  # combine distt and distp
+  distall <- distp
+  distall$target <- distt
+  distall <- matrix(unlist(distall), nrow=length(distall), ncol=length(distall[[1]]), byrow = TRUE)
+  J_1 <- nrow(distall)
+  rnks <- list()
+  p_values <- list()
+  for (t in 1:ncol(distall)){
+    # record rank of target unit
+    rnk <- rank(-distall[,t])[J_1]
+    p_values[[t]] <- rnk / J_1
+    rnks[[t]] <- rnk
+  }
+  p_values <- unlist(p_values)
+
+  return(list(p_t = p_values, ranks=rnks))
 }
 
 

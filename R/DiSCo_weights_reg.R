@@ -38,27 +38,27 @@ DiSCo_weights_reg <- function(controls,target, M = 500){
   Mvec <- runif(M, min = 0, max = 1)
   controls.s <- matrix(0,nrow = M, ncol = length(controls))
   for (jj in 1:length(controls)){
-    controls.s[,jj] <- mapply(myquant, Mvec, MoreArgs = list(X=controls[[jj]]))
+    controls.s[,jj] <- mapply(myquant, Mvec, MoreArgs=list(X=controls[[jj]]))
   }
 
   target.s <- matrix(0, nrow = M, ncol=1)
-  target.s[,1] <- mapply(myquant, Mvec, MoreArgs = list(X=target))
+  target.s[,1] <- mapply(myquant, Mvec, MoreArgs=list(X=target))
 
   ## Solving the optimization using constrained linear regression
 
     # the equality constraints
-    Aequ <- matrix(rep(1,length(controls)),nrow = 1, ncol = length(controls))
+    Aequ <- matrix(rep(1,length(controls)),nrow=1, ncol=length(controls))
     # if the values in controls.s and target.s are too large it can happen that we run into
     # overflow errors. For this reason we scale both the vector and the matrix by the Frobenius
     # norm of the matrix
     sc <- norm(controls.s,"2")
-  
+
 
   # solve with the pracma package, which runs FORTRAN under the hood so it is fast
   weights.opt <- pracma::lsqlincon(controls.s/sc,target.s/sc, A=NULL,b=NULL,
                   Aeq = Aequ, # LHS of equality constraint: matrix of 1s, need coefficients to lie in unit simplex
                   beq = 1, 0, 1 # RHS of equality constraint, unit simplex
-                  ) 
+                  )
 
 
   return(weights.opt)

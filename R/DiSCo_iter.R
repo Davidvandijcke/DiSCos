@@ -54,12 +54,11 @@
 DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, ...) {
 
     # target
-    target <- df[id_col == id_col.target]$y_col
+    target <- df[id_col == id_col.target & t_col == yy]$y_col
 
     # generate list where each element contains a list of all micro-level outcomes for a control unit
     controls <- list()
     j <- 1
-
     controls.id <- unique(df[id_col != id_col.target]$id_col)
     for (id in controls.id) {
       controls[j] <- list(df[id_col == id & t_col == yy]$y_col)
@@ -82,6 +81,7 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, ...) {
     grid <- list(grid.min = NA, grid.max = NA, grid.rand = NA, grid.ord = NA)
     grid[c("grid.min", "grid.max", "grid.rand", "grid.ord")] <- getGrid(target, controls, G)
 
+    set.seed(1860)
     if (yy <= T0) { # only get weights for pre-treatment periods
       # obtaining the optimal weights for the DiSCo method
       DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M)

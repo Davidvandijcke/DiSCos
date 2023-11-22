@@ -74,8 +74,8 @@ checks <- function(df, id_col.target, T0, M, G, num.cores, permutation) {
   if (!id_col.target %in% df$id_col) {
     stop("There is no row in the column `id_col` with the name specified in id_col.target!")
   }
-  if (!"t_col" %in% names(df)) {
-    stop("t_col is not a column in the data table")
+  if (!"time_col" %in% names(df)) {
+    stop("time_col is not a column in the data table")
   }
   if (!"y_col" %in% names(df)) {
     stop("y_col is not a column in the data table")
@@ -88,7 +88,7 @@ checks <- function(df, id_col.target, T0, M, G, num.cores, permutation) {
   if (!is.numeric(df$id_col)) {
     stop("id_col must be numeric")
   }
-  if (!is.integer(df$t_col)) {
+  if (!is.integer(df$time_col)) {
     stop("t_col must be integer")
   }
   if (!is.numeric(df$y_col)) {
@@ -111,7 +111,7 @@ checks <- function(df, id_col.target, T0, M, G, num.cores, permutation) {
   }
 
   # checks on the input data values
-  if (T0 < 1 | T0 > max(df$t_col)) {
+  if ((T0 < min(df$time_col)) | (T0 > max(df$time_col))) {
     stop("T0 must be between 1 and the maximum value of year_col")
   }
   if (M < 1) {
@@ -126,10 +126,6 @@ checks <- function(df, id_col.target, T0, M, G, num.cores, permutation) {
     stop("num.cores cannot be greater than the number of available cores")
   }
 
-  # check that the year_col is a sequence of integers starting at 1
-  if (!all(sort(unique(df$t_col)) == 1:max(df$t_col))) {
-    stop("t_col must be a sequence of integers starting at 1")
-  }
 
 }
 
@@ -237,6 +233,6 @@ mclapply.hack <- function(..., verbose=FALSE, mc.cores=NULL) {
     }
   } else{
     ## If not on Windows, just call mclapply()
-    mclapply(..., mc.cores=mc.cores)
+    parallel::mclapply(..., mc.cores=mc.cores)
   }
 }

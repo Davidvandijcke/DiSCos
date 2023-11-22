@@ -29,7 +29,6 @@ DiSCo_bc <- function(controls, controls.q, weights, evgrid = seq(from=0, to=1, l
     controls <- controls.h
   }
 
-
   # Obtaining the Wasserstein barycenter as the average of the quantile functions
   # weighted by "weights" and evaluate it on the grid "evgrid"
   thebc <- controls.q%*%weights

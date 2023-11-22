@@ -77,11 +77,15 @@ if (reread_dta) {
 
   # load the data from the stata file
   fn <- file.path("data", "march_regready_1996.dta")
-  df <- read_dta(fn) %>% setDT()
+  df <- read_dta(fn)  %>% setDT()
   # only considering individuals under the age of 65
   df <- df[demgroup1 == 1]
-  df <- df[, c("adj0contpov", "state_fips", "year")]
   df <- df[year %between% c(1998, 2004)]
+
+  # collapsing the data
+  df[,.(adj0contpov=mean(adj0contpov)),
+     by=c('state_fips', 'year', 'hhseq')]
+  df <- df[, c("adj0contpov", "state_fips", "year")]
   saveRDS(df, file.path("data", "march_regready_1996.rds"), compress = TRUE)
 
   file.remove(fn) # remove file to avoid github issues
@@ -90,8 +94,6 @@ if (reread_dta) {
   df <- readRDS(file.path("data", "march_regready_1996.rds")) %>% setDT()
 
 }
-
-
 
 
 results.over.years <- list()
@@ -103,11 +105,9 @@ df[, id_col := state_fips]
 df[, time_col := year]
 df[, y_col := adj0contpov]
 
-dt = copy(df)
-
 # other required arguments
 id_col.target = fips.target
-T0 = 5
+t0 = 2003
 M = 1000
 G = 1000
 num.cores = parallel::detectCores() - 1

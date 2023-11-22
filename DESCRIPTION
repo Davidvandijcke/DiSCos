@@ -14,7 +14,7 @@ License: MIT license
 BugReports: https://github.com/
 URL: https://github.com/
 LazyData: TRUE
-Imports: data.table, CVXR, pracma, quadprog, Rdpack
+Imports: data.table, CVXR, pracma, quadprog, Rdpack, parallel
 Depends: data.table
 RdMacros: Rdpack
 Suggests: 
