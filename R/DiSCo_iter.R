@@ -27,9 +27,9 @@
 #'   \item{target}{
 #'     \itemize{
 #'       \item{cdf}{Empirical CDF of the target.}
-#'       \item{quantile}{Quantile function of the target.}
 #'       \item{grid}{Grid on which the quantile and CDF functions were evaluated.}
 #'       \item{data}{Original data for the target unit.}
+#'       \item{quantiles}{Quantiles for the target unit, evaluated on the specified grid.}
 #'     }
 #'   }
 #'   \item{controls}{
@@ -37,6 +37,7 @@
 #'       \item{data}{Original data for the control units.}
 #'       \item{cdf}{Empirical CDFs of the control units.}
 #'       \item{id}{IDs of the control units.}
+#'       \item{quantiles}{Quantiles for the control units, evaluated on the specified grid.}
 #'     }
 #'   }
 #'   \item{controls.q}{Quantiles for the control units, evaluated on the specified grid.}
@@ -44,19 +45,19 @@
 DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, ...) {
 
     # target
-    target <- df[id_col == id_col.target & t_col == yy]$y_col
+    target <- df[(id_col == id_col.target) & (t_col == yy)]$y_col
 
     # generate list where each element contains a list of all micro-level outcomes for a control unit
     controls <- list()
     j <- 1
     controls.id <- unique(df[id_col != id_col.target]$id_col)
     for (id in controls.id) {
-      controls[j] <- list(df[id_col == id & t_col == yy]$y_col)
+      controls[[j]] <- df[(id_col == id) & (t_col == yy)]$y_col
       j <- j + 1
     }
 
     # check whether problem undetermined
-    if (length(controls[1][[1]]) < length(controls)) {
+    if (length(controls[[1]]) < length(controls)) {
       stop("Problem undetermined: number of data points is smaller than number of weights")
     }
 
@@ -68,7 +69,7 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, ...) {
 
     # sample grid
     grid <- list(grid.min = NA, grid.max = NA, grid.rand = NA, grid.ord = NA)
-    grid[c("grid.min", "grid.max", "grid.rand", "grid.ord")] <- getGrid(target, controls, G)
+    grid[c("grid.min", "grid.max", "grid.rand", "grid.ord")] <- getGrid(target, controls, G) # TODO: this can be done just once
 
     if (yy <= T0) { # only get weights for pre-treatment periods
       # obtaining the optimal weights for the DiSCo method
@@ -80,19 +81,14 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, ...) {
       DiSCo_res_weights <- NA
       mixture <- list(weights.opt = NA, distance.opt = NA, mean = NA)
     }
+    #computing the target quantile function
+    target.q <- mapply(myquant, evgrid, MoreArgs = list(X=target))
 
-    # getting the CDF from the quantile function
-    DiSCo_res2.cdfF <- ecdf(controls.q)
-    DiSCo_res2.cdf <- DiSCo_res2.cdfF(grid$grid.ord)
-
-    y_char <- as.character(yy)
     results <- list()
-    results[["DiSCo_weights"]] <-
-       DiSCo_res_weights # DiSCo estimator
+    results[["DiSCo"]] <- list("weights" = DiSCo_res_weights) # DiSCo estimator
     results[["mixture"]] <- list("weights" = mixture$weights.opt, "distance" = mixture$distance.opt, "mean" = mixture$mean) # mixture of distributions estimator
-    results[["target"]] <- list("cdf" = mixture$target.order, "grid" = grid$grid.ord, "data" = as.vector(target))
-    results[["controls"]] <- list("cdf" = mixture$CDF.matrix, "data" = controls, "id" = controls.id)
-    results[['controls.q']] <- controls.q
+    results[["target"]] <- list("cdf" = mixture$target.order, "grid" = grid$grid.ord, "data" = as.vector(target), "quantiles" = target.q)
+    results[["controls"]] <- list("cdf" = mixture$CDF.matrix, "data" = controls, "id" = controls.id, "quantiles" = controls.q)
     return(results)
 }
 

@@ -42,8 +42,12 @@ DiSCo_CI <- function(controls, bc, weights, mc.cores=1, cl=0.95, num.redraws=500
   #' @param y_name a string for the title of the y-axis.
   #' @param x_name a string for the title of the x-axis.
   #' @return \code{DSC_CI} returns a list containing the following components:
-  #' \item{\code{CI.u}}{a vector of the upper bound.}
-  #' \item{\code{CI.l}}{a vector of the lower bound.}
+  #' \itemize{
+  #' \item{upper}{a vector of the upper bound.}
+  #' \item{lower}{a vector of the lower bound.}
+  #' \item{se}{a vector of the standard errors of each counterfactual quantile estimate.}
+  #' \item{bootmat}{A matrix of the counterfactual quantile estimates for each bootstrap sample.}
+  #' }
   #' @export
   #' @examples
   #' #simulated data from Gaussian mixture
@@ -65,6 +69,6 @@ DiSCo_CI <- function(controls, bc, weights, mc.cores=1, cl=0.95, num.redraws=500
   se <- apply(DSC_res2.CI,1,sd)
 
 
-  return(list(upper=CI.u, lower=CI.l, se=se))
+  return(list(upper=CI.u, lower=CI.l, se=se, bootmat=DSC_res2.CI))
 
 }

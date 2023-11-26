@@ -21,14 +21,14 @@ DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, ww=0){
     for (i in 1:length(perc)){
       for (j in 1:length(keepcon)){
         perc[[i]][[j+1]] <- c_df[[i]][[keepcon[j]]]
-        # perc.q[[i]][,j+1] <- c_df.q[[i]][,keepcon[j]]
+        perc.q[[i]][,j+1] <- c_df.q[[i]][,keepcon[j]]
       }
     }
-    for (i in 1:length(perc)){
-      for (x in 1:length(perc[[i]])){
-        perc.q[[i]][,x] <- mapply(myquant, evgrid, MoreArgs = list(X=perc[[i]][[x]]))
-      }
-    }
+    # for (i in 1:length(perc)){
+    #   for (x in 1:length(perc[[i]])){
+    #     perc.q[[i]][,x] <- mapply(myquant, evgrid, MoreArgs = list(X=perc[[i]][[x]]))
+    #   }
+    # }
 
     for (i in 1:length(c_df)){
       pert[[i]]=c_df[[i]][[idx]]

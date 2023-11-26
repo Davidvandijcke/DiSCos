@@ -29,12 +29,15 @@
 #'
 #' @return A list containing, for each time period, the elements described in the return argument of \code{\link{DiSCo_iter}}, as well as the following additional elements:
 #' \itemize{
-#'  \item{CI}{A list with the confidence intervals and standard errors for the counterfactual quantiles, if `CI` is TRUE and for the periods specified in `CI_periods`. The components are:
-#'    \itemize{
-#'      \item{upper}{A vector containing the upper bounds of the confidence intervals.}
-#'      \item{lower}{A vector containing the lower bounds of the confidence intervals.}
-#'      \item{se}{A vector containing the standard errors of the counterfactual quantiles.}
-#'      }
+#'  \item{DiSco}{
+#'  \itemize{
+#'  \item{CI}{A list with the confidence intervals and standard errors for the counterfactual quantiles, if `CI` is TRUE and for the periods specified in `CI_periods`.
+#'  See the output of \code{\link{DiSCo_CI}} for details.}
+#'  \item{quantile}{The counterfactual quantiles for the target unit.}
+#'  \item{weights}{The optimal weights for the target unit.}
+#'  \item{cdf}{The counterfactual CDF for the target unit.}
+#'  }
+#'  }
 #'  }
 #' \item{perm}{A \code{\link{permut}} object containing the results of the permutation method, if `permutation` is TRUE. Call `summary` on this object to print the overall results of the permutation test.}
 #' }
@@ -57,36 +60,36 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
 
   # create a list to store the results for each period
   results.periods <- list()
-  # make M uneven if it is not
-  if (M %% 2 == 0) {
-    M <- M + 1
-  }
-  evgrid = seq(from=0,to=1,length.out=M)
+
+  evgrid = seq(from=0,to=1,length.out=M+1)
 
   # run the main function in parallel for each period
   periods <- sort(unique(df$t_col)) # we call the iter function on all periods, but won't calculate weights for the post-treatment periods
   results.periods <- mclapply.hack(periods, DiSCo_iter, df, evgrid, id_col.target = id_col.target, M = M, G = G, T0 = T0, mc.cores = num.cores)
-
-
   # turn results.periods into a named list where the name is the period
   names(results.periods) <- as.character(periods)
 
 
-  #####
+  ###############################
   #obtaining the weights as a uniform mean over all time periods
-  Weights_DiSCo_avg <- results.periods$`1`$DiSCo_weights
+  Weights_DiSCo_avg <- results.periods$`1`$DiSCo$weights
   Weights_mixture_avg <- results.periods$`1`$mixture$weights
   for (yy in 2:T0){
-    Weights_DiSCo_avg <- Weights_DiSCo_avg + results.periods[[yy]]$DiSCo_weights
+    Weights_DiSCo_avg <- Weights_DiSCo_avg + results.periods[[yy]]$DiSCo$weights
     Weights_mixture_avg <- Weights_mixture_avg + results.periods[[yy]]$mixture$weights
   }
   Weights_DiSCo_avg <- (1/T0) * Weights_DiSCo_avg
   Weights_mixture_avg <- (1/T0) * Weights_mixture_avg
 
-  # calculating the counterfactual target distribution
+  # calculating the counterfactual target quantiles and CDF
   for (x in seq(1:T_max)) {
-    bc_x <- DiSCo_bc(results.periods[[x]]$controls$data, results.periods[[x]]$controls.q, Weights_DiSCo_avg, evgrid)
-    results.periods[[x]]$counterfactual <- bc_x
+    bc_x <- DiSCo_bc(controls=results.periods[[x]]$controls$data, controls.q=results.periods[[x]]$controls$quantiles,
+                     weights=Weights_DiSCo_avg, evgrid)
+    results.periods[[x]]$DiSCo$quantile <- bc_x
+    grid_ord <- results.periods[[x]]$target$grid
+    cdff <- stats::ecdf(bc_x)
+    DiSCo_cdf <- cdff(grid_ord)
+    results.periods[[x]]$DiSCo$cdf <- DiSCo_cdf
   }
 
   # calculate confidence intervals for selected time periods
@@ -105,33 +108,36 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
     } else {
       CI_temp <- NULL
     }
-    results.periods[[x]]$CI <- CI_temp
+    results.periods[[x]]$DiSCo$CI <- CI_temp
   }
 
   # permutation tests
   if (permutation) {
     controls_per <- lapply(seq(1:T_max), function(x) results.periods[[x]]$controls$data)
     target_per <- lapply(seq(1:T_max), function(x) results.periods[[x]]$target$data)
-    controls.q <- lapply(seq(1:T_max), function(x) results.periods[[x]]$controls.q)
-    perm <- DiSCo_per(c_df=controls_per, t_df=target_per, controls.q=controls.q, T0=T0, weights=Weights_DiSCo_avg, num_cores=num.cores, evgrid=evgrid,
+    controls.q <- lapply(seq(1:T_max), function(x) results.periods[[x]]$controls$quantiles)
+    target.q <- lapply(seq(1:T_max), function(x) results.periods[[x]]$target$quantiles)
+    perm <- DiSCo_per(c_df=controls_per, t_df=target_per, controls.q=controls.q, target.q=target.q, T0=T0, weights=Weights_DiSCo_avg, num_cores=num.cores, evgrid=evgrid,
                       graph=graph)
+    distp <- perm$control.dist
+    distt <- perm$target.dist
+    perm_values <- DiSCo_per_rank(distt, distp)
+    J_1 <- length(distp) + 1
+    p_overall <- mean(unlist(perm_values$ranks)[((T0+1):T_max)]) / (J_1)
+
+    perm_obj <- permut(distp, distt, perm_values$ranks, perm_values$p_t, p_overall, J_1)
   } else {
-    perm <- NULL
+    perm_obj <- NULL
   }
 
-  distp <- perm$control.dist
-  distt <- perm$target.dist
-  perm_values <- DiSCo_per_rank(distt, distp)
-  J_1 <- length(distp) + 1
-  p_overall <- mean(unlist(perm_values$ranks)[((T0+1):T_max)]) / (J_1)
 
-  perm_obj <- permut(distp, distt, perm_values$ranks, perm_values$p_t, p_overall, J_1)
 
   # rename periods for user convenience
   names(results.periods) <- t_min  + seq(1:T_max) - 1
 
 
   return(list(results.periods=results.periods, Weights_DiSCo_avg=Weights_DiSCo_avg,
-              Weights_mixture_avg=Weights_mixture_avg, perm=perm_obj))
+              Weights_mixture_avg=Weights_mixture_avg, perm=perm_obj, params=list(df=df, id_col.target=id_col.target,
+              t0=t0, M=M, G=G, CI=CI, CI_periods=CI_periods)))
 
 }

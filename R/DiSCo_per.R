@@ -19,19 +19,13 @@
 #' @param num_cores Integer, number of cores to use for parallel computation. Set to 1 by default (sequential computation), this can be very slow!
 #' @return List of matrices containing synthetic time path of the outcome variable
 #' for the target unit together with the time paths of the control units
-DiSCo_per <- function(c_df, t_df, controls.q, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, length.out=101),
+DiSCo_per <- function(c_df, t_df, controls.q, target.q, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, length.out=101),
                  graph=TRUE, num_cores = 1, redo_weights=FALSE, weights=NULL){
 
   #----------------------------------------#
   # target
   #----------------------------------------#
 
-  c_df=controls_per
-  t_df=target_per
-  controls.q=controls.q
-  T0=T0
-  weights=Weights_DiSCo_avg
-  num_cores=num.cores
 
   if (redo_weights) {
     #calculate lambda_t for t<=T0
@@ -63,17 +57,12 @@ DiSCo_per <- function(c_df, t_df, controls.q, T0, ww=0, peridx=0, evgrid=seq(fro
     DiSCo_bc(c_df[[x]], controls.q[[x]], lambda.opt, evgrid)
   }, mc.cores = num_cores)
 
-  #computing the target quantile function
-  target_q=list()
 
-  for (t in 1:length(t_df)){
-    target_q[[t]] <- mapply(myquant, evgrid, MoreArgs = list(X=t_df[[t]]))
-  }
 
   #squared Wasserstein distance between the target and the corresponding barycenter
   distt=c()
   for (t in 1:length(c_df)){
-    distt[t]=mean((bc_t[[t]]-target_q[[t]])**2)
+    distt[t]=mean((bc_t[[t]]-target.q[[t]])**2)
   }
 
   #----------------------------------------#

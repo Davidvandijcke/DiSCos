@@ -113,9 +113,31 @@ G = 1000
 num.cores = parallel::detectCores() - 1
 permutation = FALSE
 
-results <- DiSCo(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 5, permutation = TRUE,
-                 CI = TRUE, boots = 20, cl = 0.95, CI_periods = NULL, graph = FALSE)
+set.seed(1860)
+results <- DiSCo(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 5, permutation = FALSE,
+                 CI = FALSE, boots = 2, cl = 0.95, CI_periods = NULL, graph = TRUE)
 
+disco <- results
+
+# plot cdf
+target <- results$results.periods$`1999`$target$cdf
+grid_ord <- results$results.periods$`1999`$target$grid
+bc <- results$results.periods$`1999`$DiSCo$cdf
+
+mixture <- results$results.periods$`1999`$mixture$mean
+plot(grid_ord, mixture,
+     type='l', lwd=4,col='blue', xlab='x',ylab='F(x)',cex.lab=1.4, cex.axis=1.4, ylim = c(0,1))
+lines(grid_ord, bc,lwd=4, col='red', lty=2)
+lines(grid_ord, target,lwd=4, col='black', lty=3)
+
+
+# plot quantiles
+target <- results$results.periods$`1999`$target$quantiles
+grid_ord <- 1:(results$params$M+1) / (results$params$M+1)
+bc <- results$results.periods$`1999`$DiSCo$quantile
+plot(grid_ord, target,
+     type='l', lwd=4,col='blue', xlab='Quantile',ylab='Treatment Effect',cex.lab=1.4, cex.axis=1.4)
+lines(grid_ord, bc,lwd=4, col='red', lty=2)
 
 
 
