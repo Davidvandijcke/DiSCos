@@ -24,7 +24,6 @@
 #' @param CI Logical, indicating whether to compute confidence intervals for the counterfactual quantiles. Default is FALSE.
 #' @param boots Integer, number of bootstrap samples to use for computing confidence intervals. Default is 500.
 #' @param cl Numeric, confidence level for the (two-sided) confidence intervals.
-#' @param CI_periods Vector indicating the time periods for which to compute confidence intervals. Default is NULL which means confidence intervals are computed for all time periods if `CI` is TRUE.
 #' @param graph Logical, indicating whether to plot the permutation graph as in Figure 3 of the paper. Default is FALSE.
 #'
 #' @return A list containing, for each time period, the elements described in the return argument of \code{\link{DiSCo_iter}}, as well as the following additional elements:
@@ -98,13 +97,11 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
   }
 
   # calculate confidence intervals for selected time periods
-  if (is.null(CI_periods) & CI) { # if wants CI for all periods
+  if (CI) { # if wants CI for all periods
     CI_periods <- seq(1, T_max)
-  } else if (!is.null(CI_periods)) { # if wants CI for specific period
-    CI_periods <- sort(CI_periods) - t_min + 1
   }
   for (x in CI_periods) {
-    cat(paste0("Computing confidence intervals for period: ", x + t_min - 1))
+    cat(paste0("Computing confidence intervals for period: ", x + t_min - 1, "\n"))
     controls <- results.periods[[x]]$controls$data
     bc_x <- bc[[x]]
 

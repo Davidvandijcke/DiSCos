@@ -8,7 +8,7 @@
 #' @param agg String indicating the aggregation statistic to be used. Options are "ATT" (average treatment effect on the treated),
 #' @param graph Boolean indicating whether to plot graphs. Default is TRUE.
 #' @export
-DiSCoTEA <- function(disco, agg="ATT", graph=TRUE){
+DiSCoTEA <- function(disco, agg="ATT", graph=TRUE, time=TRUE){
 
   # get treatment time window
   df <- disco$params$df
@@ -20,8 +20,14 @@ DiSCoTEA <- function(disco, agg="ATT", graph=TRUE){
   CI <- disco$params$CI
   cl <- disco$params$cl
 
+  if ((CI) & (length(disco$params$CI_periods) < length(1:T_max))) {
+    stop("To aggregate treatment effect uncertainty, we need confidence intervals for all periods.")
+  }
 
-  if (agg == "ATT") { # average treatment on the treated
+  #---------------------------------------------------------------------------
+  ### average treatment on the treated
+  #---------------------------------------------------------------------------
+  if (agg == "ATT") {
     qtiles_centered <- lapply(1:T_max,
                               function(x) disco$results.periods[[x]]$DiSCo$quantile - disco$results.periods[[x]]$target$quantiles)
 
@@ -30,7 +36,7 @@ DiSCoTEA <- function(disco, agg="ATT", graph=TRUE){
     if (time) { # return at each time point
       treats <- unlist(avg_treat_time)
     } else{
-      treats <- list(mean(unlist(avg_treat_time)[T0:T_max]))
+      treats <- as.vector(mean(unlist(avg_treat_time)[T0:T_max]))
     }
 
     if (CI) { # get confidence intervals if they were calculated before
@@ -38,52 +44,58 @@ DiSCoTEA <- function(disco, agg="ATT", graph=TRUE){
       avg_treat_time_boot <- sapply(qtiles_centered_boot, function(x) apply(x, 2, mean))
 
       if (time) { # return at each time point
-        if (length(disco$params$CI_periods) < length(T0:T_max)) {
-          stop("To plot effects over time, CI_periods must be the same length as the number of time periods.")
-        }
         sds <- apply(avg_treat_time_boot, 2, sd)
         ci_lower <- apply(avg_treat_time_boot,2,stats::quantile, probs=(1-cl)/2)
         ci_upper <- apply(avg_treat_time_boot,2,stats::quantile, probs=cl+(1-cl)/2)
       } else {
         avg_treat_boot <- apply(avg_treat_time_boot[,T0:T_max], 1, mean)
-        sds <- list(sd(avg_treat_boot))
+        sds <- as.vector(sd(avg_treat_boot))
         ci_lower <- stats::quantile(avg_treat_boot, probs=(1-cl)/2)
         ci_upper <- stats::quantile(avg_treat_boot, probs=cl+(1-cl)/2)
       }
     } else {
       sds <- list(NA)
+      ci_lower <- NA
+      ci_upper <- NA
     }
     if (graph) {
+      minx <- minx <- min(c(treats, ci_lower), na.rm = TRUE)
+      maxx <- max(c(treats, ci_upper), na.rm = TRUE)
       if (time) {
         xlab <- "Time"
-        x <- T0:T_max
-        minx <- min(ci_lower)
-        maxx <- max(ci_lower)
+        x <- t_min:t_max
         plot(x=x, y=treats, ylim=c(minx - 1/3*abs(minx), maxx + 1/3*abs(maxx)), type="l", xlab=xlab, ylab="ATT")
-        lines(x=x, y=ci_lower, col="grey")
-        lines(x=x, y=ci_upper, col="grey")
+        if (CI) {
+          lines(x=x, y=ci_lower, col="grey")
+          lines(x=x, y=ci_upper, col="grey")
+        }
         abline(v=t0, col="red", lty="longdash")
       } else {
         xlab <- ""
         x <- 1
         # plot point without x axis ticks
-        plot(x=x, y=treats, ylim=c(ci_lower - 1/3*abs(ci_lower), ci_upper + 1/3*abs(ci_upper)), type="p", xlab=xlab, ylab="ATT", xaxt="n")
+        plot(x=x, y=treats, ylim=c(minx - 1/3*abs(minx), maxx + 1/3*abs(maxx)), type="p", xlab=xlab, ylab="ATT", xaxt="n")
         # plot whiskers around point
         segments(x0=x, y0=ci_lower, x1=x, y1=ci_upper, col="grey")
       }
-
-
-
-
     }
 
+  #---------------------------------------------------------------------------
+  ### cdfs
+  #---------------------------------------------------------------------------
   } else if (agg == "cdf"){
 
-    avg_treat_time <- lapply(qtiles_centered, mean)
-
+    cdf_centered <- list()
+    for (i in 1:T_max) {
+      cdff <- stats::ecdf(qtiles_centered[[i]])
+      cdf_centered[[i]] <- cdff(disco$results.periods[[i]]$target$grid)
+    }
     if (CI) {
-      avg_treat_time_boot <- lapply(qtiles_centered_boot, function(x) apply(x, 2, mean))
-      sds <- lapply(avg_treat_time_boot, sd)
+      cdf_boot <- list()
+      for (i in 1:T_max) {
+        # apply ecdf to each column of qtiles_centered_boot[[i]]
+        cdf_boot[[i]] <- apply(qtiles_centered_boot[[i]], 2, function(x) stats::ecdf(x)(disco$results.periods[[i]]$target$grid))
+      }
     }
   }
 
