@@ -25,22 +25,14 @@ DiSCo_CI_iter <- function(redraw, controls, bc, weights, cl=0.95, evgrid = seq(f
 DiSCo_CI <- function(controls, bc, weights, mc.cores=1, cl=0.95, num.redraws=500, evgrid = seq(from=0, to=1, length.out=1001)){
   #' Confidence Intervals for the DiSCo quantile
   #'
-  #' Function for computing the confidence interval (at a specific period) in the DSC method
-  #' @param df_control a list or matrix:
-  #' in list form, each list element contains a vector of observations for the given control unit;
-  #' in matrix form, each column corresponds to one unit and each row is one observation.
-  #' @param df_target a vector of observations.
-  #' @param M an integer specifying the number of draws from the uniform distribution for approximating the integral.
-  #' @param solver a solver for the optimization problem; see \code{\link[CVXR]{installed_solvers}} in CVXR for more options.
-  #' @param w_t 0 or a vector. By default, i.e. 0, \code{DSC_CI} calculates the confidence interval of a pre-treatment period,
-  #' weights of control units do not need to be specified. To calculate the confidence interval of a post-treatment period,
-  #' a vector of optimal weights (pre-calculated using pre-treatment observations) is needed.
-  #' @param cl a float specifying the confidence level.
-  #' @param num.redraws an integer specifying the number of redraws used in the bootstrap approach.
-  #' @param evgrid a vector of gridpoints used to evaluate quantile functions.
-  #' @param graph \code{TRUE/FALSE}, indicating whether to output a plot of the confidence interval.
-  #' @param y_name a string for the title of the y-axis.
-  #' @param x_name a string for the title of the x-axis.
+  #' Function for computing the confidence intervals in the DiSCo method
+  #' @param controls A list containing the raw data for the control group
+  #' @param bc A list of barycenters for the control group
+  #' @param weights A vector of optimal weights
+  #' @param mc.cores Number of cores to use for parallelization
+  #' @param cl The confidence level for the confidence interval
+  #' @param num.redraws The number of bootstrap samples to draw
+  #' @param evgrid The grid of quantiles to evaluate the counterfactual quantile function
   #' @return \code{DSC_CI} returns a list containing the following components:
   #' \itemize{
   #' \item{\code{upper} }{a vector of the upper bound.}
@@ -48,12 +40,6 @@ DiSCo_CI <- function(controls, bc, weights, mc.cores=1, cl=0.95, num.redraws=500
   #' \item{\code{se} }{A vector of the standard errors of each counterfactual quantile estimate.}
   #' \item{\code{bootmat} }{A matrix of the counterfactual quantile estimates for each bootstrap sample.}
   #' }
-  #' @export
-  #' @examples
-  #' #simulated data from Gaussian mixture
-  #' #ex_gmm() calls the simulated data
-  #' #details can be found by ??ex_gmm
-  #' DSC_CI(df_control=ex_gmm()$control, df_target=ex_gmm()$target, M=100, solver="SCS", w_t=0, cl=0.99, num.redraws=500, evgrid = seq(from=0, to=1, length.out=1001),graph=TRUE, y_name='y', x_name='x')
 
 
   DSC_res2.CI <- mclapply.hack(1:num.redraws, DiSCo_CI_iter, controls=controls, bc=bc,

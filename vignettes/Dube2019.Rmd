@@ -42,5 +42,22 @@ which gives optimal weights for each period. This problem can be solved by a sim
 
 
 # Illustration
+The data from @dube2019minimum is available in the package. We load it here:
+
+```{r}
+data("dube")
+head(dube)
+```
+To learn more about the data, just type `?dube` in the console. We have already renamed the outcome, id, and time variables to `y_col`, `id_col`, and `time_col`, respectively, which is required before passing the dataframe to the DiSCo command. We also need to set the two following parameters:
+```{r}
+id_col.target = 2
+t0 = 2003
+```
+which indicate the id of the treated unit and the time period of the intervention, respectively. We can now run the DiSCo command:
+```{r}
+results <- DiSCo(dube, id_col.target, t0, M = 1000, G = 1000, num.cores = 5, permutation = FALSE,
+                 CI = TRUE, boots = 10, cl = 0.95, graph = TRUE)
+```
+where we have chosen grids of 1000 grid points and opted for parallel computation with 5 cores to speed up the permutation test and confidence intervals, which we calculate using 500 resamples. We also set the `graph` argument to TRUE to plot the permutation test results. 
 
 

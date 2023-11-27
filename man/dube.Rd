@@ -11,7 +11,7 @@ A data frame with 652,870 rows and 3 columns:
 \describe{
 \item{id_col}{State FIPS}
 \item{time_col}{Year}
-\item{y_col}{\code{adj0contpov} variable in \insertCite{dube2019minimum}{DiSCo}. Captures the distribution of equalized family income from wages and salary, defined as multiples of the federal poverty threshold.}
+\item{y_col}{\code{adj0contpov} variable in \insertCite{dube2019minimum;textual}{DiSCo}. Captures the distribution of equalized family income from wages and salary, defined as multiples of the federal poverty threshold.}
 ...
 }
 }
@@ -23,6 +23,6 @@ A data frame with 652,870 rows and 3 columns:
 dube
 }
 \description{
-As used in the empirical application of \insertCite{gunsilius2023distributional}{DiSCo}.
+As used in the empirical application of \insertCite{gunsilius2023distributional;textual}{DiSCo}.
 }
 \keyword{datasets}

@@ -15,31 +15,19 @@ DiSCo_CI(
 )
 }
 \arguments{
-\item{cl}{a float specifying the confidence level.}
+\item{controls}{A list containing the raw data for the control group}
 
-\item{num.redraws}{an integer specifying the number of redraws used in the bootstrap approach.}
+\item{bc}{A list of barycenters for the control group}
 
-\item{evgrid}{a vector of gridpoints used to evaluate quantile functions.}
+\item{weights}{A vector of optimal weights}
 
-\item{df_control}{a list or matrix:
-in list form, each list element contains a vector of observations for the given control unit;
-in matrix form, each column corresponds to one unit and each row is one observation.}
+\item{mc.cores}{Number of cores to use for parallelization}
 
-\item{df_target}{a vector of observations.}
+\item{cl}{The confidence level for the confidence interval}
 
-\item{M}{an integer specifying the number of draws from the uniform distribution for approximating the integral.}
+\item{num.redraws}{The number of bootstrap samples to draw}
 
-\item{solver}{a solver for the optimization problem; see \code{\link[CVXR]{installed_solvers}} in CVXR for more options.}
-
-\item{w_t}{0 or a vector. By default, i.e. 0, \code{DSC_CI} calculates the confidence interval of a pre-treatment period,
-weights of control units do not need to be specified. To calculate the confidence interval of a post-treatment period,
-a vector of optimal weights (pre-calculated using pre-treatment observations) is needed.}
-
-\item{graph}{\code{TRUE/FALSE}, indicating whether to output a plot of the confidence interval.}
-
-\item{y_name}{a string for the title of the y-axis.}
-
-\item{x_name}{a string for the title of the x-axis.}
+\item{evgrid}{The grid of quantiles to evaluate the counterfactual quantile function}
 }
 \value{
 \code{DSC_CI} returns a list containing the following components:
@@ -51,11 +39,5 @@ a vector of optimal weights (pre-calculated using pre-treatment observations) is
 }
 }
 \description{
-Function for computing the confidence interval (at a specific period) in the DSC method
-}
-\examples{
-#simulated data from Gaussian mixture
-#ex_gmm() calls the simulated data
-#details can be found by ??ex_gmm
-DSC_CI(df_control=ex_gmm()$control, df_target=ex_gmm()$target, M=100, solver="SCS", w_t=0, cl=0.99, num.redraws=500, evgrid = seq(from=0, to=1, length.out=1001),graph=TRUE, y_name='y', x_name='x')
+Function for computing the confidence intervals in the DiSCo method
 }

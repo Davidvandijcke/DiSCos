@@ -17,7 +17,7 @@
 #' @param id_col.target Variable indicating the name of the target unit, as specified in the id_col column of the data table.
 #' This variable can be any type, as long as it is the same type as the id_col column of the data table.
 #' @param t0 Integer indicating period of treatment.
-#' @param M Integer indicating the number of control units to use in the DiSCo method. Default is 1000.
+#' @param M Integer indicating the number of control quantiles to use in the DiSCo method. Default is 1000.
 #' @param G Integer indicating the number of grid points for the grid on which the estimated functions are evaluated. Default is 1000.
 #' @param num.cores Integer, number of cores to use for parallel computation. Default is 1 (sequential computation). If the `permutation` or `CI` arguments are set to TRUE, this can be very slow!
 #' @param permutation Logical, indicating whether to use the permutation method for computing the optimal weights. Default is FALSE.
@@ -44,6 +44,7 @@
 #' @importFrom Rdpack reprompt
 #' @references
 #'  \insertAllCited()
+#' @export
 
 
 DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, permutation = FALSE,
@@ -85,10 +86,10 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
   Weights_DiSCo_avg <- (1/T0) * Weights_DiSCo_avg
   Weights_mixture_avg <- (1/T0) * Weights_mixture_avg
 
+  bc <- lapply(seq(1:T_max), function(x) DiSCo_bc(controls=results.periods[[x]]$controls$data, controls.q=results.periods[[x]]$controls$quantiles, Weights_DiSCo_avg, evgrid))
   # calculating the counterfactual target quantiles and CDF
   for (x in seq(1:T_max)) {
-    bc_x <- DiSCo_bc(controls=results.periods[[x]]$controls$data, controls.q=results.periods[[x]]$controls$quantiles,
-                     weights=Weights_DiSCo_avg, evgrid)
+    bc_x <- bc[[x]]
     results.periods[[x]]$DiSCo$quantile <- bc_x
     grid_ord <- results.periods[[x]]$target$grid
     cdff <- stats::ecdf(bc_x)

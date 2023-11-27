@@ -2,7 +2,8 @@
 
 S3method(print,permut)
 S3method(summary,permut)
-export(DiSCo_CI)
+export(DiSCo)
+export(DiSCoTEA)
 export(DiSCo_per_iter)
 export(DiSCo_per_rank)
 export(checks)

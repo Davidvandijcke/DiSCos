@@ -41,6 +41,7 @@
 #'   }
 #'   \item{\code{controls.q} }{Quantiles for the control units, evaluated on the specified grid.}
 #' }
+#' @export
 DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, ...) {
 
     # target

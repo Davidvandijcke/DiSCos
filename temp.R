@@ -1,6 +1,6 @@
 # Load required packages
 packages_load <- c("haven", "base", "data.table", "latex2exp", "CVXR",  # used to compute the weights using the alternative using mixtures of CDF
-                   "here", "dplyr", "pracma", "quadprog", "R.utils", "foreach")
+                   "here", "dplyr", "pracma", "quadprog", "R.utils", "foreach", "DiSCo")
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(char = packages_load, character.only = TRUE)
 
@@ -17,22 +17,6 @@ fips.target <- 2 # target state is AK
 
 
 #####
-# Required functions
-# loading the function for computing the optimal weights
-source('R/DiSCo_weights_reg.R')
-# loading the function for computing the barycenter and the donor distributions
-source('R/DiSCo_bc.R')
-# loading the function for performing the permutation test
-source('R/DiSCo_per.R')
-## function to compute quantile function
-myquant <- function(X,q){
-  # sort if unsorted
-  if (is.unsorted(X)) X <- sort(X)
-  # compute empirical CDF
-  X.cdf <- 1:length(X) / length(X)
-  # obtain the corresponding empirical quantile
-  return(X[which(X.cdf >= q)[1]])
-}
 
 #####
 # loading the data-set on minimum wage from Dube (2019) to obtain states that did not have a

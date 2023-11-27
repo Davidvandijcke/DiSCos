@@ -7,6 +7,7 @@
 #' @param disco Output of the DiSCo function
 #' @param agg String indicating the aggregation statistic to be used. Options are "ATT" (average treatment effect on the treated),
 #' @param graph Boolean indicating whether to plot graphs. Default is TRUE.
+#' @export
 DiSCoTEA <- function(disco, agg="ATT", graph=TRUE){
 
   # get treatment time window

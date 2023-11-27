@@ -18,7 +18,7 @@ checks(df, id_col.target, T0, M, G, num.cores, permutation)
 \item{id_col.target}{Variable indicating the name of the target unit, as specified in the id_col column of the data table.
 This variable can be any type, as long as it is the same type as the id_col column of the data table.}
 
-\item{M}{Integer indicating the number of control units to use in the DiSCo method. Default is 1000.}
+\item{M}{Integer indicating the number of control quantiles to use in the DiSCo method. Default is 1000.}
 
 \item{G}{Integer indicating the number of grid points for the grid on which the estimated functions are evaluated. Default is 1000.}
 

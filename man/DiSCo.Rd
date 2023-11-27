@@ -32,7 +32,7 @@ This variable can be any type, as long as it is the same type as the id_col colu
 
 \item{t0}{Integer indicating period of treatment.}
 
-\item{M}{Integer indicating the number of control units to use in the DiSCo method. Default is 1000.}
+\item{M}{Integer indicating the number of control quantiles to use in the DiSCo method. Default is 1000.}
 
 \item{G}{Integer indicating the number of grid points for the grid on which the estimated functions are evaluated. Default is 1000.}
 
