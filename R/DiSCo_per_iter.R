@@ -1,4 +1,15 @@
-
+#' @title DiSCo_per_iter
+#' @description This function performs one iteration of the permutation test
+#' @param c_df List of control units
+#' @param c_df.q List of quantiles of control units
+#' @param t_df List of target unit
+#' @param T0 Index of last pre-treatment period
+#' @param peridx Vector of indices of control units
+#' @param evgrid Vector of evaluation grid points
+#' @param idx Index of permuted target unit
+#' @param ww Optional vector of weights. Default is uniform weights.
+#' @return List of squared Wasserstein distances between the target unit and the control units
+#' @export
 DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, ww=0){
     # One iteration of the permutation test
 

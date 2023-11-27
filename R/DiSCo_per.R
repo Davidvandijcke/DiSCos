@@ -4,7 +4,7 @@
 #' @description Function to implement permutation test for Distributional Synthetic Controls
 #' @details This program iterates through all units and computes the optimal weights on the other units
 #' for replicating the unit of iteration's outcome variable, assuming that it is the treated unit.
-#' See Algorithm 1 in \insertref{gunsilius2020distributional}{DiSCo} for more details.
+#' See Algorithm 1 in \insertCite{gunsilius2023distributional;textual}{DiSCo} for more details.
 #'
 #' @param c_df List with matrices of control distributions
 #' @param t_df Matrix containing the target distribution
@@ -19,6 +19,8 @@
 #' @param num_cores Integer, number of cores to use for parallel computation. Set to 1 by default (sequential computation), this can be very slow!
 #' @return List of matrices containing synthetic time path of the outcome variable
 #' for the target unit together with the time paths of the control units
+#' @references
+#' \insertAllCited{}
 DiSCo_per <- function(c_df, t_df, controls.q, target.q, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, length.out=101),
                  graph=TRUE, num_cores = 1, redo_weights=FALSE, weights=NULL){
 
@@ -108,12 +110,12 @@ DiSCo_per <- function(c_df, t_df, controls.q, target.q, T0, ww=0, peridx=0, evgr
 }
 
 
-
+#' @title DiSCo_per_rank
+#' @description This function ranks the squared Wasserstein distances and returns the p-values for each time period
 #' @param distt List of squared Wasserstein distances between the target unit and the control units
 #' @param distp List of squared Wasserstein distances between the control units
 #' @return List of p-values for each time period
 #' @export
-
 ## rank the squared Wasserstein distances and get the rank of the target unit
 # combine distt and distp
 DiSCo_per_rank <- function(distt, distp) {
@@ -135,8 +137,8 @@ DiSCo_per_rank <- function(distt, distp) {
 }
 
 
-#' @ title permut
-#' @ description Object to hold results of permutation test
+#' @title permut
+#' @description Object to hold results of permutation test
 #'
 #' @param distp List of squared Wasserstein distances between the control units
 #' @param distt List of squared Wasserstein distances between the target unit and the control units

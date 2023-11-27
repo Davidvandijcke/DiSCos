@@ -19,9 +19,12 @@ myquant <- function(X,q){
 }
 
 
-#' Set up a grid for the estimation of the quantile functions and CDFs
+#' @title getGrid
+#' @description Set up a grid for the estimation of the quantile functions and CDFs
 #'
-#' @inheritParams DiSco_iter
+#' @param target A vector containing the data for the target unit
+#' @param controls A list containing the data for the control units
+#' @param G The number of grid points
 #' @return A list containing the following elements:
 #' \itemize{
 #' \item{grid.min}{The minimum value of the grid}
@@ -29,6 +32,7 @@ myquant <- function(X,q){
 #' \item{grid.rand}{A vector containing the grid points}
 #' \item{grid.ord}{A vector containing the grid points, ordered}
 #' }
+#' @keywords internal
 #' @export
 #' @examples
 #' set.seed(123)
@@ -54,12 +58,14 @@ getGrid <- function(target, controls, G) {
   return(list(grid.min, grid.max, grid.rand, grid.ord))
 }
 
+#' @title checks
 #' Carry out checks on the inputs
 #'
 #' @inheritParams DiSCo
 #' @param permutation logical, whether to use permutation or not
 #' @return NULL
 #' @export
+#' @keywords internal
 #' @examples
 #' df <- data.frame(id_col = c(1,1,1,2,2,2,3,3,3), t_col = c(1,2,3,1,2,3,1,2,3), y_col = c(1,1,0,1,1,0,1,1,0))
 #' id_col.target <- 1
@@ -136,6 +142,7 @@ checks <- function(df, id_col.target, T0, M, G, num.cores, permutation) {
 #' @param x a vector
 #' @return TRUE if x is integer, FALSE otherwise
 #' @export
+#' @keywords internal
 is.integer <- function(x) {
   is.numeric(x) && all(x == as.integer(x))
 }
@@ -163,6 +170,7 @@ is.integer <- function(x) {
 #' @param verbose Should users be warned this is hack-y? Defaults to FALSE.
 #' @seealso mclapply
 #' @export
+#' @keywords internal
 #' @examples
 #' mclapply.hack()
 #'

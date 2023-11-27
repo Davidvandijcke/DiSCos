@@ -43,10 +43,10 @@ DiSCo_CI <- function(controls, bc, weights, mc.cores=1, cl=0.95, num.redraws=500
   #' @param x_name a string for the title of the x-axis.
   #' @return \code{DSC_CI} returns a list containing the following components:
   #' \itemize{
-  #' \item{upper}{a vector of the upper bound.}
-  #' \item{lower}{a vector of the lower bound.}
-  #' \item{se}{a vector of the standard errors of each counterfactual quantile estimate.}
-  #' \item{bootmat}{A matrix of the counterfactual quantile estimates for each bootstrap sample.}
+  #' \item{\code{upper} }{a vector of the upper bound.}
+  #' \item{\code{lower} }{a vector of the lower bound.}
+  #' \item{\code{se} }{A vector of the standard errors of each counterfactual quantile estimate.}
+  #' \item{\code{bootmat} }{A matrix of the counterfactual quantile estimates for each bootstrap sample.}
   #' }
   #' @export
   #' @examples

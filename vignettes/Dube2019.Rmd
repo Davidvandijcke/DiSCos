@@ -1,0 +1,46 @@
+---
+title: "Empirical Application in Gunsilius (2023): Dube (2019)"
+author: "David Van Dijcke and Florian Gunsilius"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Dube2019}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: ../inst/REFERENCES.bib
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(DiSCo)
+```
+
+# Introduction
+
+This vignette demonstrates how to use the DiSCo package by way of the empirical application in @gunsilius2023distributional, which is based on @dube2019minimum. We illustrate the use of the two main functions: 1) `DiSCo`, which estimates the raw distributional counterfactuals, computes confidence intervals, and optionally performs a permutation test; and 2) `DiSCoTEA`, the "Treatment Effect Aggregator", which takes in the distributional counterfactuals and computes aggregate treatment effects using a user-specified aggregation statistic.
+
+# Distributional Synthetic Controls
+
+We briefly review the main idea behind Distributional Synthetic Controls. Denote $Y_{jt,N}$ the outcome of group $j$ in time period $t$ in the absence of an intervention. Also denote $Y_{jt,I}$ the outcome in the presence of an intervention at time $t > T_0$. Denote the quantile function, 
+\[
+F^{-1}(q):=\inf _{y \in \mathbb{R}}\{F(y) \geq q\}, \quad q \in(0,1),
+\]
+where $F(y)$ is the corresponding cumulative distribution function. One unit $j=1$ has received treatment, while the other units $j=2,\ldots,J$ have not. Then the goal is to estimate the counterfactual quantile function $F_{Y_{1 t}, N}^{-1}$ of the treated unit had it not received treatment by an optimally weighted average of the control units' quantile functions,
+\[
+F_{Y_{1 t}, N}^{-1}(q)=\sum_{j=2}^{J+1} \lambda_j^* F_{Y_{j t}}^{-1}(q) \quad \text { for all } q \in(0,1)
+\]
+In practice, we do this by solving the following optimization problem:
+\[
+\vec{\lambda}_t^*=\underset{\vec{\lambda} \in \Delta^J}{\operatorname{argmin}} \int_0^1\left|\sum_{j=2}^{J+1} \lambda_j F_{Y_{j t}}^{-1}(q)-F_{Y_{1 t}}^{-1}(q)\right|^2 d q
+\]
+which gives optimal weights for each period. This problem can be solved by a simple weighted regression, which is implemented in the `DiSCo_weights_reg` function. To obtain the overall optimal weights $\vec{\lambda}^*$, we take the average of the optimal weights across all periods.
+
+
+# Illustration
+
+

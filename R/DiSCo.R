@@ -1,7 +1,7 @@
 
 #' @title DiSCo
 #'
-#' @description This function implements the distributional synthetic controls (DiSCo) method from \insertref{gunsilius2020distributional}{DiSCo},
+#' @description This function implements the distributional synthetic controls (DiSCo) method from \insertCite{gunsilius2023distributional;textual}{DiSCo}.
 #' as well as the alternative mixture of distributions approach.
 #'
 #' @details This function is called for every time period in the DiSCo function. It implements the DiSCo method for a single time period, as well as the mixture of distributions approach.
@@ -10,9 +10,9 @@
 #'
 #' @param df Data frame or data table containing the distributional data for the target and control units. The data table should contain the following columns:
 #' \itemize{
-#' \item{y_col}{A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)}
-#' \item{id_col}{A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals}
-#' \item{time_col}{A vector containing the time period of the observation for each unit. This should be an increasing integer, and the first period should be equal to 1.}
+#' \item{\code{y_col} }{A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)}
+#' \item{\code{id_col} }{A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals}
+#' \item{\code{time_col} }{A vector containing the time period of the observation for each unit. This should be an increasing integer, and the first period should be equal to 1.}
 #' }
 #' @param id_col.target Variable indicating the name of the target unit, as specified in the id_col column of the data table.
 #' This variable can be any type, as long as it is the same type as the id_col column of the data table.
@@ -25,22 +25,26 @@
 #' @param boots Integer, number of bootstrap samples to use for computing confidence intervals. Default is 500.
 #' @param cl Numeric, confidence level for the (two-sided) confidence intervals.
 #' @param CI_periods Vector indicating the time periods for which to compute confidence intervals. Default is NULL which means confidence intervals are computed for all time periods if `CI` is TRUE.
-#' @graph Logical, indicating whether to plot the permutation graph as in Figure 3 of the paper. Default is FALSE.
+#' @param graph Logical, indicating whether to plot the permutation graph as in Figure 3 of the paper. Default is FALSE.
 #'
 #' @return A list containing, for each time period, the elements described in the return argument of \code{\link{DiSCo_iter}}, as well as the following additional elements:
 #' \itemize{
-#'  \item{DiSco}{
+#'  \item{\code{DiSco}}{
 #'  \itemize{
-#'  \item{CI}{A list with the confidence intervals and standard errors for the counterfactual quantiles, if `CI` is TRUE and for the periods specified in `CI_periods`.
+#'  \item{\code{CI} }{A list with the confidence intervals and standard errors for the counterfactual quantiles, if `CI` is TRUE and for the periods specified in `CI_periods`.
 #'  See the output of \code{\link{DiSCo_CI}} for details.}
-#'  \item{quantile}{The counterfactual quantiles for the target unit.}
-#'  \item{weights}{The optimal weights for the target unit.}
-#'  \item{cdf}{The counterfactual CDF for the target unit.}
+#'  \item{\code{quantile} }{The counterfactual quantiles for the target unit.}
+#'  \item{\code{weights} }{The optimal weights for the target unit.}
+#'  \item{\code{cdf} }{The counterfactual CDF for the target unit.}
 #'  }
 #'  }
-#'  }
-#' \item{perm}{A \code{\link{permut}} object containing the results of the permutation method, if `permutation` is TRUE. Call `summary` on this object to print the overall results of the permutation test.}
+#' \item{\code{perm} }{A \code{\link{permut}} object containing the results of the permutation method, if `permutation` is TRUE.
+#' Call `summary` on this object to print the overall results of the permutation test.}
 #' }
+#' @importFrom Rdpack reprompt
+#' @references
+#'  \insertAllCited()
+
 
 DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, permutation = FALSE,
                   CI = FALSE, boots = 500, cl = 0.95, CI_periods = NULL, graph = FALSE) {
@@ -138,6 +142,6 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
 
   return(list(results.periods=results.periods, Weights_DiSCo_avg=Weights_DiSCo_avg,
               Weights_mixture_avg=Weights_mixture_avg, perm=perm_obj, params=list(df=df, id_col.target=id_col.target,
-              t0=t0, M=M, G=G, CI=CI, CI_periods=CI_periods)))
+              t0=t0, M=M, G=G, CI=CI, CI_periods=CI_periods, cl=cl)))
 
 }

@@ -15,10 +15,17 @@ BugReports: https://github.com/
 URL: https://github.com/
 LazyData: TRUE
 Imports: data.table, CVXR, pracma, quadprog, Rdpack, parallel
-Depends: data.table
+Depends: 
+    data.table,
+    R (>= 2.10)
 RdMacros: Rdpack
 Suggests: 
-    haven, utils, latex2exp
+    haven,
+    utils,
+    latex2exp,
+    knitr,
+    rmarkdown
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.2
+VignetteBuilder: knitr

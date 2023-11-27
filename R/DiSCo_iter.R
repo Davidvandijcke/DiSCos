@@ -1,4 +1,3 @@
-
 #' @title DiSCo_iter
 #'
 #' @description This function implements the DiSCo method for a single time period, as well as the mixture of distributions approach.
@@ -16,31 +15,31 @@
 #'
 #' @return A list with the following elements:
 #' \itemize{
-#'   \item{DiSCo_weights}{Weights calculated using the DiSCo method.}
-#'   \item{mixture}{
+#'   \item{\code{DiSCo_weights} }{Weights calculated using the DiSCo method.}
+#'   \item{\code{mixture} }{
 #'     \itemize{
-#'       \item{weights}{Optimal weights for the mixture approach.}
-#'       \item{distance}{Value of the objective function for the mixture approach.}
-#'       \item{mean}{Weighted mixture of the controls' CDFs.}
+#'       \item{\code{weights} }{Optimal weights for the mixture approach.}
+#'       \item{\code{distance} }{Value of the objective function for the mixture approach.}
+#'       \item{\code{mean} }{Weighted mixture of the controls' CDFs.}
 #'     }
 #'   }
-#'   \item{target}{
+#'   \item{\code{target} }{
 #'     \itemize{
-#'       \item{cdf}{Empirical CDF of the target.}
-#'       \item{grid}{Grid on which the quantile and CDF functions were evaluated.}
-#'       \item{data}{Original data for the target unit.}
-#'       \item{quantiles}{Quantiles for the target unit, evaluated on the specified grid.}
+#'       \item{\code{cdf} }{Empirical CDF of the target.}
+#'       \item{\code{grid} }{Grid on which the quantile and CDF functions were evaluated.}
+#'       \item{\code{data} }{Original data for the target unit.}
+#'       \item{\code{quantiles} }{Quantiles for the target unit, evaluated on the specified grid.}
 #'     }
 #'   }
-#'   \item{controls}{
+#'   \item{\code{controls} }{
 #'     \itemize{
-#'       \item{data}{Original data for the control units.}
-#'       \item{cdf}{Empirical CDFs of the control units.}
-#'       \item{id}{IDs of the control units.}
-#'       \item{quantiles}{Quantiles for the control units, evaluated on the specified grid.}
+#'       \item{\code{data} }{Original data for the control units.}
+#'       \item{\code{cdf} }{Empirical CDFs of the control units.}
+#'       \item{\code{id} }{IDs of the control units.}
+#'       \item{\code{quantiles} }{Quantiles for the control units, evaluated on the specified grid.}
 #'     }
 #'   }
-#'   \item{controls.q}{Quantiles for the control units, evaluated on the specified grid.}
+#'   \item{\code{controls.q} }{Quantiles for the control units, evaluated on the specified grid.}
 #' }
 DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, ...) {
 

@@ -1,7 +1,7 @@
 #' Function for computing barycenters in the DiSCo method at every time period
 #'
 #' Compute barycenters in the DiSCo method at every time period, as in Definition 1,
-#' Step 4 in  \insertref{gunsilius2020distributional}{DiSCo}.
+#' Step 4 in
 #' This program takes in samples from the distributions of the controls and puts out
 #' the associated barycenters and control group quantile functions.
 #' The control distributions can be given in list form, where each list element contains a
@@ -14,6 +14,8 @@
 #' @param evgrid Optional vector containing an evenly spaced grid on [0,1] on which the quantile function for the control units will be evaluated
 #' By default, a grid of 100 points is used.
 #' @return The quantile function of the barycenter associated with the "weights" evaluated at the vector "evgrid"
+#' @references
+#' \insertAllCited{}
 DiSCo_bc <- function(controls, controls.q, weights, evgrid = seq(from=0, to=1, length.out=101)){
 
   if (!is.list(controls) && !is.matrix(controls)){
