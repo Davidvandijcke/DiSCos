@@ -20,7 +20,7 @@ setting, following the method proposed in Gunsilius (2023).
 ## Getting Started
 
 Have a look at the vignette replicating the [empirical
-application](./vignettes/Dube2019.Rmd) in the paper to get started.
+application](./doc/Dube2019.html) in the paper to get started.
 
 ## Installation
 

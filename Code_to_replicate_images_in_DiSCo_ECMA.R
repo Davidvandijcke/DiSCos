@@ -214,11 +214,11 @@ for(yy in 1:7){
   objective <- cvxr_norm((CDF.matrix[,2:ncol(CDF.matrix)] %*% theweights - CDF.matrix[,1]))
 
   # the constraints for the unit simplex
-  constraints <- list(theweights>=0, sum_entries(theweights) == 1)
+  constraints <- list(theweights>=0, CVXR::sum_entries(theweights) == 1)
   # the optimization problem
-  problem <- Problem(Minimize(objective),constraints)
+  problem <- CVXR::Problem(CVXR::Minimize(objective),constraints)
   # solving the optimization problem
-  results <- solve(problem, solver = "SCS")
+  results <- CVXR::solve(problem, solver = "SCS")
 
   # returning the optimal weights and the value function which provides the
   # squared Wasserstein distance between the target and the corresponding barycenter

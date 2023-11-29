@@ -1,23 +1,34 @@
 ---
-title: "Empirical Application in Gunsilius (2023): Dube (2019)"
-author: "David Van Dijcke and Florian Gunsilius"
+title: "Empirical Application in Gunsilius (2023)"
+author: "David Van Dijcke"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Dube2019}
+  %\VignetteIndexEntry{Empirical Application in Gunsilius (2023)}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: ../inst/REFERENCES.bib
 ---
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 ```
 
-```{r setup}
+```{r, include=FALSE}
+# fldr <- here::here("R/")
+# sapply(paste0(fldr,list.files(fldr)), source)# library(CVXR)
+library(pracma)
+library(quadprog)
+library(parallel)
+library(stats)
+library(data.table)
+library(CVXR)
 library(DiSCo)
+# fldr <- here::here("R/")
+# sapply(paste0(fldr,list.files(fldr)), source)
 ```
 
 # Introduction
@@ -50,14 +61,17 @@ head(dube)
 ```
 To learn more about the data, just type `?dube` in the console. We have already renamed the outcome, id, and time variables to `y_col`, `id_col`, and `time_col`, respectively, which is required before passing the dataframe to the DiSCo command. We also need to set the two following parameters:
 ```{r}
-id_col.target = 2
-t0 = 2003
+id_col.target <- 2
+t0 <- 2003
 ```
 which indicate the id of the treated unit and the time period of the intervention, respectively. We can now run the DiSCo command:
-```{r}
+
+```{r, cache=TRUE}
+# if the below gives issues it's the knit cache...
 results <- DiSCo(dube, id_col.target, t0, M = 1000, G = 1000, num.cores = 5, permutation = FALSE,
-                 CI = TRUE, boots = 10, cl = 0.95, graph = TRUE)
+                 CI = TRUE, boots = 1000, cl = 0.95, CI_placebo=TRUE, graph = TRUE, qmethod=NULL)
 ```
+
 where we have chosen grids of 1000 grid points and opted for parallel computation with 5 cores to speed up the permutation test and confidence intervals, which we calculate using 500 resamples. We also set the `graph` argument to TRUE to plot the permutation test results. 
 
 

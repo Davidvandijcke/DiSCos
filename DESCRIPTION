@@ -24,7 +24,8 @@ Suggests:
     utils,
     latex2exp,
     knitr,
-    rmarkdown
+    rmarkdown,
+    CVXR
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.2

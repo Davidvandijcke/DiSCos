@@ -77,7 +77,7 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, ..
       DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M, qmethod=qmethod)
 
     # obtaining the optimal weights for the mixture of distributions method
-      mixture <- DiSCo_mixture(controls, target, grid$grid.min, grid$grid.max, grid$grid.rand)
+      mixture <- DiSCo_mixture(controls, target, grid$grid.min, grid$grid.max, grid$grid.rand, M)
     } else {
       DiSCo_res_weights <- NA
       mixture <- list(weights.opt = NA, distance.opt = NA, mean = NA)

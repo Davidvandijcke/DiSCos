@@ -98,7 +98,8 @@ num.cores = parallel::detectCores() - 1
 permutation = FALSE
 
 set.seed(1860)
-results <- DiSCo(df, id_col.target, t0, M = 100, G = 1000, num.cores = 5, permutation = FALSE,
+data("dube")
+results <- DiSCo::DiSCo(dube, id_col.target, t0, M = 10-0, G = 1000, num.cores = 5, permutation = FALSE,
                  CI = TRUE, boots = 1000, cl = 0.95, CI_periods = NULL, CI_placebo=TRUE, graph = TRUE, qmethod=NULL)
 
 disco <- results

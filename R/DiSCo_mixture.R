@@ -1,5 +1,5 @@
 
-DiSCo_mixture <- function(controls1, target, grid.min, grid.max, grid.rand) {
+DiSCo_mixture <- function(controls1, target, grid.min, grid.max, grid.rand, M) {
 
   ###### The mixture of distributions approach
   # we again only focus on the first half of the data
@@ -10,7 +10,7 @@ DiSCo_mixture <- function(controls1, target, grid.min, grid.max, grid.rand) {
 
   # Estimating the empirical CDFs
   CDF.control <- lapply(controls1,ecdf)
-  CDF.target <- ecdf(target)
+  CDF.target <- stats::ecdf(target)
 
 
   # Evaluating the CDF on the random grid
@@ -27,9 +27,9 @@ DiSCo_mixture <- function(controls1, target, grid.min, grid.max, grid.rand) {
   objective <- CVXR::cvxr_norm((CDF.matrix[,2:ncol(CDF.matrix)] %*% theweights - CDF.matrix[,1]))
 
   # the constraints for the unit simplex
-  constraints <- list(theweights>=0, sum_entries(theweights) == 1)
+  constraints <- list(theweights>=0, CVXR::sum_entries(theweights) == 1)
   # the optimization problem
-  problem <- CVXR::Problem(Minimize(objective),constraints)
+  problem <- CVXR::Problem(CVXR::Minimize(objective),constraints)
   # solving the optimization problem
   results <- CVXR::solve(problem, solver = "SCS")
 
@@ -46,7 +46,7 @@ DiSCo_mixture <- function(controls1, target, grid.min, grid.max, grid.rand) {
   target.order <- CDF.matrix[order(grid.rand, decreasing=FALSE),1]
 
 
-  return(list("weights.opt" = theweights.opt, "distance.opt" = thedistance.opt, 
+  return(list("weights.opt" = theweights.opt, "distance.opt" = thedistance.opt,
               "mean" = themean.order, "target.order" = target.order, "cdf" = CDF.matrix))
 
 }

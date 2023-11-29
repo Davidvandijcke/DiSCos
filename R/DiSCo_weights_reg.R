@@ -43,7 +43,7 @@ DiSCo_weights_reg <- function(controls,target, M = 500, qmethod=NULL, simplex=FA
   # M is the number of draws from the uniform distribution for approximating the integral
 
   ## Sampling from this quantile function M times
-  Mvec <- runif(M, min = 0, max = 1)
+  Mvec <- stats::runif(M, min = 0, max = 1)
   controls.s <- matrix(0,nrow = M, ncol = length(controls))
   for (jj in 1:length(controls)){
     # controls.s[,jj] <- mapply(myquant, Mvec, MoreArgs=list(X=controls[[jj]]))
@@ -61,7 +61,7 @@ DiSCo_weights_reg <- function(controls,target, M = 500, qmethod=NULL, simplex=FA
     # if the values in controls.s and target.s are too large it can happen that we run into
     # overflow errors. For this reason we scale both the vector and the matrix by the Frobenius
     # norm of the matrix
-    sc <- norm(controls.s,"2")
+    sc <- CVXR::norm(controls.s,"2")
 
   if (simplex) { lb <- 0 } else { lb <- NULL }
   # solve with the pracma package, which runs FORTRAN under the hood so it is fast
