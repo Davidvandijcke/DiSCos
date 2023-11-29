@@ -1,0 +1,77 @@
+---
+title: "Empirical Application in Gunsilius (2023)"
+author: "David Van Dijcke"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Empirical Application in Gunsilius (2023)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: ../inst/REFERENCES.bib
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r, include=FALSE}
+# fldr <- here::here("R/")
+# sapply(paste0(fldr,list.files(fldr)), source)# library(CVXR)
+library(pracma)
+library(quadprog)
+library(parallel)
+library(stats)
+library(data.table)
+library(CVXR)
+library(DiSCo)
+# fldr <- here::here("R/")
+# sapply(paste0(fldr,list.files(fldr)), source)
+```
+
+# Introduction
+
+This vignette demonstrates how to use the DiSCo package by way of the empirical application in @gunsilius2023distributional, which is based on @dube2019minimum. We illustrate the use of the two main functions: 1) `DiSCo`, which estimates the raw distributional counterfactuals, computes confidence intervals, and optionally performs a permutation test; and 2) `DiSCoTEA`, the "Treatment Effect Aggregator", which takes in the distributional counterfactuals and computes aggregate treatment effects using a user-specified aggregation statistic.
+
+# Distributional Synthetic Controls
+
+We briefly review the main idea behind Distributional Synthetic Controls. Denote $Y_{jt,N}$ the outcome of group $j$ in time period $t$ in the absence of an intervention. Also denote $Y_{jt,I}$ the outcome in the presence of an intervention at time $t > T_0$. Denote the quantile function, 
+\[
+F^{-1}(q):=\inf _{y \in \mathbb{R}}\{F(y) \geq q\}, \quad q \in(0,1),
+\]
+where $F(y)$ is the corresponding cumulative distribution function. One unit $j=1$ has received treatment, while the other units $j=2,\ldots,J$ have not. Then the goal is to estimate the counterfactual quantile function $F_{Y_{1 t}, N}^{-1}$ of the treated unit had it not received treatment by an optimally weighted average of the control units' quantile functions,
+\[
+F_{Y_{1 t}, N}^{-1}(q)=\sum_{j=2}^{J+1} \lambda_j^* F_{Y_{j t}}^{-1}(q) \quad \text { for all } q \in(0,1)
+\]
+In practice, we do this by solving the following optimization problem:
+\[
+\vec{\lambda}_t^*=\underset{\vec{\lambda} \in \Delta^J}{\operatorname{argmin}} \int_0^1\left|\sum_{j=2}^{J+1} \lambda_j F_{Y_{j t}}^{-1}(q)-F_{Y_{1 t}}^{-1}(q)\right|^2 d q
+\]
+which gives optimal weights for each period. This problem can be solved by a simple weighted regression, which is implemented in the `DiSCo_weights_reg` function. To obtain the overall optimal weights $\vec{\lambda}^*$, we take the average of the optimal weights across all periods.
+
+
+# Illustration
+The data from @dube2019minimum is available in the package. We load it here:
+
+```{r}
+data("dube")
+head(dube)
+```
+To learn more about the data, just type `?dube` in the console. We have already renamed the outcome, id, and time variables to `y_col`, `id_col`, and `time_col`, respectively, which is required before passing the dataframe to the DiSCo command. We also need to set the two following parameters:
+```{r}
+id_col.target <- 2
+t0 <- 2003
+```
+which indicate the id of the treated unit and the time period of the intervention, respectively. We can now run the DiSCo command:
+
+```{r, cache=TRUE}
+# if the below gives issues it's the knit cache...
+results <- DiSCo(dube, id_col.target, t0, M = 1000, G = 1000, num.cores = 5, permutation = FALSE,
+                 CI = TRUE, boots = 1000, cl = 0.95, CI_placebo=TRUE, graph = TRUE, qmethod=NULL)
+```
+
+where we have chosen grids of 1000 grid points and opted for parallel computation with 5 cores to speed up the permutation test and confidence intervals, which we calculate using 500 resamples. We also set the `graph` argument to TRUE to plot the permutation test results. 
+
+
