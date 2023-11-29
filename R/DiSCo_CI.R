@@ -1,6 +1,7 @@
 
 
-DiSCo_CI_iter <- function(redraw, controls, bc, weights, cl=0.95, evgrid = seq(from=0, to=1, length.out=1001)){
+DiSCo_CI_iter <- function(redraw, controls, bc, weights, cl=0.95,
+                          evgrid = seq(from=0, to=1, length.out=1001), qmethod=NULL){
   set.seed(redraw*1) # for reproducibility
   # drawing m = 100% of samples from controls
 
@@ -12,7 +13,8 @@ DiSCo_CI_iter <- function(redraw, controls, bc, weights, cl=0.95, evgrid = seq(f
     # sampling from controls
     idx <- sample(1:sz, m.c, replace=TRUE)
     mycon[[ii]] <- controls[[ii]][idx]
-    mycon.q[,ii] <- mapply(myquant, evgrid, MoreArgs = list(X=mycon[[ii]]))
+    # mycon.q[,ii] <- mapply(myquant, evgrid, MoreArgs = list(X=mycon[[ii]]))
+    mycon.q[,ii] <- myQuant(mycon[[ii]], evgrid, qmethod)
   }
 
 
@@ -22,7 +24,7 @@ DiSCo_CI_iter <- function(redraw, controls, bc, weights, cl=0.95, evgrid = seq(f
 
 
 
-DiSCo_CI <- function(controls, bc, weights, mc.cores=1, cl=0.95, num.redraws=500, evgrid = seq(from=0, to=1, length.out=1001)){
+DiSCo_CI <- function(controls, bc, weights, mc.cores=1, cl=0.95, num.redraws=500, evgrid = seq(from=0, to=1, length.out=1001), qmethod=NULL){
   #' Confidence Intervals for the DiSCo quantile
   #'
   #' Function for computing the confidence intervals in the DiSCo method
@@ -49,8 +51,15 @@ DiSCo_CI <- function(controls, bc, weights, mc.cores=1, cl=0.95, num.redraws=500
 
   # DiSCo_CI_iter(1, controls=controls, bc=bc, weights=weights, cl=cl, evgrid = evgrid)
   # obtain the cl% confidence interval
-  CI.u <- apply(DSC_res2.CI,1,stats::quantile, probs=cl+(1-cl)/2)
-  CI.l <- apply(DSC_res2.CI,1,stats::quantile, probs=(1-cl)/2)
+  if (!is.null(qmethod)){
+    if (qmethod=="qkden") {
+      # estimate bandwidth once
+      bw <- stats::bw.nrd0(DSC_res2.CI[,1])
+    }
+  }
+  # we do the quantiles in parallel cause the qmethod=qkden is slow
+  CI.u <- unlist(mclapply.hack(1:dim(DSC_res2.CI)[2], function(x) myQuant(DSC_res2.CI[,x], q=cl+(1-cl)/2, qmethod=qmethod, bw=bw), mc.cores=mc.cores))
+  CI.l <- unlist(mclapply.hack(1:dim(DSC_res2.CI)[2], function(x) myQuant(DSC_res2.CI[,x], q=(1-cl)/2, qmethod=qmethod, bw=bw), mc.cores=mc.cores))
 
   se <- apply(DSC_res2.CI,1,sd)
 

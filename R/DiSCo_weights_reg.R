@@ -18,7 +18,13 @@
 #' @return Vector of optimal synthetic control weights
 #' @references
 #' \insertAllCited{}
-DiSCo_weights_reg <- function(controls,target, M = 500){
+DiSCo_weights_reg <- function(controls,target, M = 500, qmethod=NULL, simplex=FALSE){
+
+  if (!is.null(qmethod)){
+    if (qmethod=="extreme"){
+      qmethod <- NULL # heavy tails of extreme quantiles mess up the regression, so just use the standard one
+    }
+  }
 
   if (!is.vector(target)){
     stop("Target needs to be given as a vector.")
@@ -40,11 +46,13 @@ DiSCo_weights_reg <- function(controls,target, M = 500){
   Mvec <- runif(M, min = 0, max = 1)
   controls.s <- matrix(0,nrow = M, ncol = length(controls))
   for (jj in 1:length(controls)){
-    controls.s[,jj] <- mapply(myquant, Mvec, MoreArgs=list(X=controls[[jj]]))
+    # controls.s[,jj] <- mapply(myquant, Mvec, MoreArgs=list(X=controls[[jj]]))
+    controls.s[,jj] <- myQuant(controls[[jj]], Mvec, qmethod)
   }
 
   target.s <- matrix(0, nrow = M, ncol=1)
-  target.s[,1] <- mapply(myquant, Mvec, MoreArgs=list(X=target))
+  # target.s[,1] <- mapply(myquant, Mvec, MoreArgs=list(X=target))
+  target.s[,1] <- myQuant(target, Mvec, qmethod)
 
   ## Solving the optimization using constrained linear regression
 
@@ -55,11 +63,11 @@ DiSCo_weights_reg <- function(controls,target, M = 500){
     # norm of the matrix
     sc <- norm(controls.s,"2")
 
-
+  if (simplex) { lb <- 0 } else { lb <- NULL }
   # solve with the pracma package, which runs FORTRAN under the hood so it is fast
   weights.opt <- pracma::lsqlincon(controls.s/sc,target.s/sc, A=NULL,b=NULL,
-                  Aeq = Aequ, # LHS of equality constraint: matrix of 1s, need coefficients to lie in unit simplex
-                  beq = 1, 0, 1 # RHS of equality constraint, unit simplex
+                  Aeq = Aequ, # LHS of equality constraint: matrix of 1s, need coefficients to lie sum up to 1
+                  beq = 1, lb, 1 # RHS of equality constraint, unit simplex if lb = 0, otherwise just sum up to 1
                   )
 
 

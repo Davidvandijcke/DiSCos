@@ -22,7 +22,7 @@
 #' @references
 #' \insertAllCited{}
 DiSCo_per <- function(c_df, t_df, controls.q, target.q, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, length.out=101),
-                 graph=TRUE, num_cores = 1, redo_weights=FALSE, weights=NULL){
+                 graph=TRUE, num_cores = 1, redo_weights=FALSE, weights=NULL, qmethod=NULL){
 
   #----------------------------------------#
   # target
@@ -35,7 +35,7 @@ DiSCo_per <- function(c_df, t_df, controls.q, target.q, T0, ww=0, peridx=0, evgr
 
 
     lambda_t <- parallel::mclapply.hack(seq_len(T0), function(t) {
-      DiSCo_weights_reg(c_df[[t]], as.vector(t_df[[t]]), 1000)
+      DiSCo_weights_reg(c_df[[t]], as.vector(t_df[[t]]), 1000, qmethod=qmethod)
     }, mc.cores = num_cores)
 
     #calculate the average optimal lambda
@@ -80,7 +80,7 @@ DiSCo_per <- function(c_df, t_df, controls.q, target.q, T0, ww=0, peridx=0, evgr
 
   cat("Starting permutation test...")
   distp <- mclapply.hack(seq_len(length(peridx)), function(idx) {
-    DiSCo_per_iter(c_df=c_df, c_df.q=controls.q, t_df=t_df, T0=T0, ww=ww, peridx=peridx, evgrid=evgrid, idx=idx)
+    DiSCo_per_iter(c_df=c_df, c_df.q=controls.q, t_df=t_df, T0=T0, ww=ww, peridx=peridx, evgrid=evgrid, idx=idx, qmethod=qmethod)
   }, mc.cores = num_cores)
   cat('Permutation finished!')
 

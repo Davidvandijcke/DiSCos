@@ -9,14 +9,48 @@
 #' X <- rnorm(100)
 #' q <- 0.1
 #' myquant(X,q)
-myquant <- function(X,q){
+myquant <- function(X,q, qmethod=NULL){
   # sort if unsorted
   if (is.unsorted(X)) X <- sort(X)
-  # compute empirical CDF
-  X.cdf <- 1:length(X) / length(X)
-  # obtain the corresponding empirical quantile
-  return(X[which(X.cdf >= q)[1]])
+
+  if (is.null(qmethod)) { # use old-fashioned quantiles
+    stats::quantile(X, probs=q)
+  } else if (qmethod=="qkden") {
+    evmix::qkden(p=c(0.1, 0.2), kerncentres=X)
+  }
 }
+
+
+#' Compute the empirical quantile function
+#'
+#' @param X A vector containing the data
+#' @param q A vector containing the quantiles
+#' @return A vector containing the empirical quantile function
+#' @export
+#' @examples
+#' set.seed(123)
+#' X <- rnorm(100)
+#' q <- 0.1
+#' myquant(X,q)
+myQuant <- function(X,q, qmethod=NULL,...){
+  # sort if unsorted
+  if (is.unsorted(X)) X <- sort(X)
+
+  if (is.null(qmethod)) { # use old-fashioned quantiles
+    return(stats::quantile(X, probs=q))
+  } else if (qmethod=="qkden") {
+    temp <- evmix::qkden(p=q, kerncentres=X,...)
+    temp[1] <- min(c(temp[2]), min(X))
+    temp[length(temp)] <- max(c(temp[length(temp)-1]), max(X))
+    return(temp)
+  } else if (qmethod=="extreme"){
+    temp <- extremeStat::distLquantile(X, probs=q, quiet=TRUE)['weighted1',1:length(q)] # take distribution with best fit
+    temp[1] <- min(c(temp[2]), min(X))
+    temp[length(temp)] <- max(c(temp[length(temp)-1]), max(X))
+    return(temp)
+  }
+}
+
 
 
 #' @title getGrid

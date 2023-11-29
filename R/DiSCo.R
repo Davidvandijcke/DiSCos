@@ -22,9 +22,12 @@
 #' @param num.cores Integer, number of cores to use for parallel computation. Default is 1 (sequential computation). If the `permutation` or `CI` arguments are set to TRUE, this can be very slow!
 #' @param permutation Logical, indicating whether to use the permutation method for computing the optimal weights. Default is FALSE.
 #' @param CI Logical, indicating whether to compute confidence intervals for the counterfactual quantiles. Default is FALSE.
+#' @param CI_placebo Logical, indicating whether to compute confidence intervals for the pre-treatment periods. Default is TRUE.
+#' If you have a lot of pre-treatment periods, setting this to FALSE can speed up the computation.
 #' @param boots Integer, number of bootstrap samples to use for computing confidence intervals. Default is 500.
 #' @param cl Numeric, confidence level for the (two-sided) confidence intervals.
 #' @param graph Logical, indicating whether to plot the permutation graph as in Figure 3 of the paper. Default is FALSE.
+#' @param qmethod Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the quantile function from the \code{\}
 #'
 #' @return A list containing, for each time period, the elements described in the return argument of \code{\link{DiSCo_iter}}, as well as the following additional elements:
 #' \itemize{
@@ -47,7 +50,8 @@
 
 
 DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, permutation = FALSE,
-                  CI = FALSE, boots = 500, cl = 0.95, CI_periods = NULL, graph = FALSE) {
+                  CI = FALSE, CI_placebo=FALSE, boots = 500, cl = 0.95, CI_periods = NULL, graph = FALSE,
+                  qmethod=NULL) {
 
   # make sure we have a data table
   df <- as.data.table(df)
@@ -69,7 +73,8 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
 
   # run the main function in parallel for each period
   periods <- sort(unique(df$t_col)) # we call the iter function on all periods, but won't calculate weights for the post-treatment periods
-  results.periods <- mclapply.hack(periods, DiSCo_iter, df, evgrid, id_col.target = id_col.target, M = M, G = G, T0 = T0, mc.cores = num.cores)
+  results.periods <- mclapply.hack(periods, DiSCo_iter, df, evgrid, id_col.target = id_col.target, M = M,
+                                   G = G, T0 = T0, mc.cores = num.cores, qmethod=qmethod)
   # turn results.periods into a named list where the name is the period
   names(results.periods) <- as.character(periods)
 
@@ -97,8 +102,10 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
   }
 
   # calculate confidence intervals for selected time periods
-  if (CI) { # if wants CI for all periods
+  if (CI & CI_placebo) { # if wants CI for all periods
     CI_periods <- seq(1, T_max)
+  } else if (CI & !CI_placebo) {
+    CI_periods <- seq(T0+1, T_max)
   }
   for (x in CI_periods) {
     cat(paste0("Computing confidence intervals for period: ", x + t_min - 1, "\n"))
@@ -106,7 +113,8 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
     bc_x <- bc[[x]]
 
     if (CI) {
-      CI_temp <- DiSCo_CI(controls=controls, bc=bc_x, weights=Weights_DiSCo_avg, mc.cores=num.cores, cl=cl, num.redraws=boots, evgrid = evgrid)
+      CI_temp <- DiSCo_CI(controls=controls, bc=bc_x, weights=Weights_DiSCo_avg,
+                          mc.cores=num.cores, cl=cl, num.redraws=boots, evgrid = evgrid, qmethod=qmethod)
     } else {
       CI_temp <- NULL
     }
@@ -120,7 +128,7 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
     controls.q <- lapply(seq(1:T_max), function(x) results.periods[[x]]$controls$quantiles)
     target.q <- lapply(seq(1:T_max), function(x) results.periods[[x]]$target$quantiles)
     perm <- DiSCo_per(c_df=controls_per, t_df=target_per, controls.q=controls.q, target.q=target.q, T0=T0, weights=Weights_DiSCo_avg, num_cores=num.cores, evgrid=evgrid,
-                      graph=graph)
+                      graph=graph, qmethod=qmethod)
     distp <- perm$control.dist
     distt <- perm$target.dist
     perm_values <- DiSCo_per_rank(distt, distp)
@@ -140,6 +148,6 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
 
   return(list(results.periods=results.periods, Weights_DiSCo_avg=Weights_DiSCo_avg,
               Weights_mixture_avg=Weights_mixture_avg, perm=perm_obj, params=list(df=df, id_col.target=id_col.target,
-              t0=t0, M=M, G=G, CI=CI, CI_periods=CI_periods, cl=cl)))
+              t0=t0, M=M, G=G, CI=CI, CI_periods=CI_periods, cl=cl, CI_placebo=CI_placebo, qmethod=qmethod)))
 
 }

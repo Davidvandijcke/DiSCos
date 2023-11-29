@@ -167,7 +167,7 @@ for(yy in 1:7){
 
 
   # obtaining the optimal weights for the DiSCo method
-  DiSCo_res_weights <- DiSCo_weights_reg(controls1,as.vector(target[[3]]), 1000)
+  DiSCo_res_weights <- DiSCo_weights_reg(controls1,as.vector(target[[3]]), 1000, qmethod=qmethod)
 
   DiSCo_res2 <- DiSCo_bc(controls1,DiSCo_res_weights,seq(from=0,to=1,length.out=1001))
 

@@ -10,7 +10,7 @@
 #' @param ww Optional vector of weights. Default is uniform weights.
 #' @return List of squared Wasserstein distances between the target unit and the control units
 #' @export
-DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, ww=0){
+DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, ww=0, qmethod=NULL){
     # One iteration of the permutation test
 
     #create new control and target
@@ -52,7 +52,7 @@ DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, ww=0){
     lambda_tp=list()
 
     for (t in 1:T0){
-      lambda_tp[[t]] <- DiSCo_weights_reg(perc[[t]],as.vector(pert[[t]]), 1000)
+      lambda_tp[[t]] <- DiSCo_weights_reg(perc[[t]],as.vector(pert[[t]]), 1000, qmethod=qmethod)
     }
 
 
@@ -77,7 +77,8 @@ DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, ww=0){
     target_q=list()
 
     for (t in 1:length(pert)){
-      target_q[[t]] <- mapply(myquant, evgrid, MoreArgs = list(X=pert[[t]]))
+      # target_q[[t]] <- mapply(myquant, evgrid, MoreArgs = list(X=pert[[t]]))
+      target_q[[t]] <- myQuant(pert[[t]], evgrid, qmethod)
     }
 
 
