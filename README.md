@@ -4,14 +4,14 @@
 # DiSCo <img src="man/figures/logo.png" align="right" alt="" width="155" />
 
 [![](http://cranlogs.r-pkg.org/badges/grand-total/DiSCo?color=blue)](https://cran.r-project.org/package=DiSCo)
-[![](http://cranlogs.r-pkg.org/badges/last-month/DiSco?color=blue)](https://cran.r-project.org/package=DiSco)
-[![](https://www.r-pkg.org/badges/version/DiSco?color=blue)](https://cran.r-project.org/package=DiSco)
+[![](http://cranlogs.r-pkg.org/badges/last-month/DiSCo?color=blue)](https://cran.r-project.org/package=DiSCo)
+[![](https://www.r-pkg.org/badges/version/DiSCo?color=blue)](https://cran.r-project.org/package=DiSCo)
 [![](https://img.shields.io/badge/devel%20version-0.0.0.9000-blue.svg)](https://github.com/Davidvandijcke/DiSCo)
 [![CRAN
-checks](https://badges.cranchecks.info/summary/DiSco.svg)](https://cran.r-project.org/web/checks/check_results_DiSco.html)
+checks](https://badges.cranchecks.info/summary/DiSCo.svg)](https://cran.r-project.org/web/checks/check_results_DiSCo.html)
 [![](https://img.shields.io/github/last-commit/Davidvandijcke/DiSCo.svg)](https://github.com/Davidvandijcke/DiSCo/commits/main)
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+<!-- README.mdƒ is generated from README.Rmd. Please edit that file -->
 
 The **DiSCo** package contains tools for computing counterfactual
 quantile functions in a Distributional Synthetic Controls (DiSco)
