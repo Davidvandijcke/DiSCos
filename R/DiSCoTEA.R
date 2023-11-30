@@ -10,7 +10,7 @@
 #' @param n_per_window Integer indicating the number of periods to include in each plot window, if graph=TRUE. Default is NULL, which means that the entire time window is used.
 #' This can lead to margin errors on the plot window if the number of time periods is large, in which case it is recommended to specify a smaller number (e.g. <=10).
 #' @export
-DiSCoTEA <- function(disco, agg="ATT", graph=TRUE, time=TRUE, n_per_window=NULL, savePlots) {
+DiSCoTEA <- function(disco, agg="ATT", graph=TRUE, time=TRUE, n_per_window=NULL, savePlots=FALSE) {
 
   # reconstruct some parameters
   df <- disco$params$df
@@ -38,9 +38,6 @@ DiSCoTEA <- function(disco, agg="ATT", graph=TRUE, time=TRUE, n_per_window=NULL,
     T_start <- 1
   }
 
-  if ((CI) & (length(disco$params$CI_periods) < length(1:T_max))) {
-    stop("To aggregate treatment effect uncertainty, we need confidence intervals for all periods.")
-  }
 
   # calculate quantile treatment effects
   qtiles_centered <- lapply(T_start:T_max,
@@ -91,6 +88,7 @@ DiSCoTEA <- function(disco, agg="ATT", graph=TRUE, time=TRUE, n_per_window=NULL,
       if (time) {
         xlab <- "Time"
         x <- t_start:t_max
+        dev.new(width = 5, height = 5)
         plot(x=x, y=treats, ylim=c(minx - 1/3*abs(minx), maxx + 1/3*abs(maxx)), type="l", xlab=xlab, ylab="ATT", xaxt="n")
         axis(1, at=x, las=2)
         if (CI) {
@@ -141,9 +139,42 @@ DiSCoTEA <- function(disco, agg="ATT", graph=TRUE, time=TRUE, n_per_window=NULL,
     if (graph) {
       plotDistOverTime(treats, grid, t_start, t_max, n_per_window, CI, ci_lower, ci_upper, savePlots=savePlots, plotName=agg)
     }
-  #---------------------------------------------------------------------------
-  ### quantiles of treatment effects
-  #---------------------------------------------------------------------------
+    #---------------------------------------------------------------------------
+    ### cdfs
+    #---------------------------------------------------------------------------
+  } else if (agg == "cdf"){
+
+    treats <- list()
+    grid <- seq(floor(quantile(unlist(qtiles_centered), 0.01)), ceil(quantile(unlist(qtiles_centered), 0.99)), length.out = disco$params$G)
+
+    for (i in 1:length(qtiles_centered)) {
+      cdff <- stats::ecdf(qtiles_centered[[i]])
+      treats[[i]] <- cdff(grid)
+    }
+    if (CI) {
+      cdf_boot <- list()
+      sds <- list()
+      ci_lower <- list()
+      ci_upper <- list()
+
+      for (i in 1:length(qtiles_centered)) {
+        # apply ecdf to each column of qtiles_centered_boot[[i]]
+        cdf_boot[[i]] <- apply(qtiles_centered_boot[[i]], 2, function(x) stats::ecdf(x)(grid))
+        sds[[i]] <- apply(cdf_boot[[i]], 1, sd)
+        ci_lower[[i]] <- apply(cdf_boot[[i]],1,stats::quantile, probs=(1-cl)/2)
+        ci_upper[[i]] <- apply(cdf_boot[[i]],1,stats::quantile, probs=cl+(1-cl)/2)
+      }
+    } else {
+      sds <- NA
+      ci_lower <- NA
+      ci_upper <- NA
+    }
+    if (graph) {
+      plotDistOverTime(treats, grid, t_start, t_max, n_per_window, CI, ci_lower, ci_upper, savePlots=savePlots, plotName=agg)
+    }
+    #---------------------------------------------------------------------------
+    ### quantiles of treatment effects
+    #---------------------------------------------------------------------------
   } else if (agg == "quantileTreat") {
 
     treats <-  qtiles_centered

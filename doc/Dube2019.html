@@ -12,7 +12,7 @@
 
 <meta name="author" content="David Van Dijcke" />
 
-<meta name="date" content="2023-11-29" />
+<meta name="date" content="2023-11-30" />
 
 <title>Empirical Application in Gunsilius (2023)</title>
 
@@ -363,7 +363,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">Empirical Application in Gunsilius
 (2023)</h1>
 <h4 class="author">David Van Dijcke</h4>
-<h4 class="date">2023-11-29</h4>
+<h4 class="date">2023-11-30</h4>
 
 
 
@@ -431,8 +431,8 @@ DiSCo command. We also need to set the two following parameters:</p>
 <p>which indicate the id of the treated unit and the time period of the
 intervention, respectively. We can now run the DiSCo command:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># if the below gives issues it&#39;s the knit cache...</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">DiSCo</span>(dube, id_col.target, t0, <span class="at">M =</span> <span class="dv">1000</span>, <span class="at">G =</span> <span class="dv">1000</span>, <span class="at">num.cores =</span> <span class="dv">5</span>, <span class="at">permutation =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>                 <span class="at">CI =</span> <span class="cn">TRUE</span>, <span class="at">boots =</span> <span class="dv">1000</span>, <span class="at">cl =</span> <span class="fl">0.95</span>, <span class="at">CI_placebo=</span><span class="cn">TRUE</span>, <span class="at">graph =</span> <span class="cn">TRUE</span>, <span class="at">qmethod=</span><span class="cn">NULL</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>disco <span class="ot">&lt;-</span> <span class="fu">DiSCo</span>(dube, id_col.target, t0, <span class="at">M =</span> <span class="dv">1000</span>, <span class="at">G =</span> <span class="dv">1000</span>, <span class="at">num.cores =</span> <span class="dv">5</span>, <span class="at">permutation =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>                 <span class="at">CI =</span> <span class="cn">TRUE</span>, <span class="at">boots =</span> <span class="dv">1000</span>, <span class="at">cl =</span> <span class="fl">0.95</span>, <span class="at">CI_placebo=</span><span class="cn">TRUE</span>, <span class="at">graph =</span> <span class="cn">FALSE</span>, <span class="at">qmethod=</span><span class="cn">NULL</span>)</span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; Computing confidence intervals for period: 1998</span></span>
 <span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; Computing confidence intervals for period: 1999</span></span>
 <span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; Computing confidence intervals for period: 2000</span></span>
@@ -442,10 +442,60 @@ intervention, respectively. We can now run the DiSCo command:</p>
 <span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; Computing confidence intervals for period: 2004</span></span></code></pre></div>
 <p>where we have chosen grids of 1000 grid points and opted for parallel
 computation with 5 cores to speed up the permutation test and confidence
-intervals, which we calculate using 500 resamples. We also set the
-<code>graph</code> argument to TRUE to plot the permutation test
-results.</p>
+intervals, which we calculate using 500 resamples.</p>
+<p>We can use the DiSCo Treatment Effect Aggregator
+(<code>DiSCoTEA</code>) function to aggregate the resulting
+counterfactual quantile functions into various treatment effect
+measures. For example, we can calculate the average treatment effect
+(ATE) as follows:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">DiSCoTEA</span>(disco,  <span class="at">agg=</span><span class="st">&quot;ATT&quot;</span>, <span class="at">graph=</span><span class="cn">TRUE</span>, <span class="at">time=</span><span class="cn">TRUE</span>)</span></code></pre></div>
+<p>We can also look at the CDF of the treatment effects,</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">DiSCoTEA</span>(disco,  <span class="at">agg=</span><span class="st">&quot;cdfTreat&quot;</span>, <span class="at">graph=</span><span class="cn">TRUE</span>, <span class="at">time=</span><span class="cn">TRUE</span>, <span class="at">n_per_window=</span><span class="cn">NULL</span>)</span></code></pre></div>
+<p>Or the quantile function:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">DiSCoTEA</span>(disco,  <span class="at">agg=</span><span class="st">&quot;quantileTreat&quot;</span>, <span class="at">graph=</span><span class="cn">TRUE</span>, <span class="at">time=</span><span class="cn">TRUE</span>, <span class="at">n_per_window=</span><span class="cn">NULL</span>)</span></code></pre></div>
+<p>To inspect what is happening at the higher quantiles, where we appear
+to see an increase in family income as a result of the minimum wage
+policy, we can separately plot the observed and counterfactual
+functions,</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">DiSCoTEA</span>(disco,  <span class="at">agg=</span><span class="st">&quot;quantile&quot;</span>, <span class="at">graph=</span><span class="cn">TRUE</span>, <span class="at">time=</span><span class="cn">TRUE</span>, <span class="at">n_per_window=</span><span class="cn">NULL</span>)</span></code></pre></div>
+</div>
+<div id="permutation-test" class="section level1">
+<h1>Permutation test</h1>
+<p>Similar to the canonical permutation test in <span class="citation">Abadie, Diamond, and Hainmueller (2010)</span>, we can
+carry out a distributional permutation test. The idea is entirely
+analogous: we iteratively reassign the treatment to units in the set of
+controls and estimate “placebo” quantile functions. Then we calculate
+the squared Wasserstein error of the entire distribution as, <span class="math display">\[
+d_{t t}^2:=\int_0^1\left|F_{Y_{u t, N}}^{-1}(q)-F_{Y_{u
+t}}^{-1}(q)\right|^2 d q
+\]</span> for each time period. The <code>permutation</code> option in
+the <code>DiSCo</code> function allows one to plot the time evolution of
+these terms for all units by setting <code>graph = TRUE</code>, to
+visually inspect the abnormality of the “true” treatment effects. We
+also calculate the p-value of the test as, <span class="math display">\[
+p_t=\frac{r\left(d_{1 t}\right)}{J+1}
+\]</span> where <span class="math inline">\(r(d_{1t})\)</span> is the
+rank of the true treatment effect in the distribution of placebo
+effects.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">dev.new</span>(<span class="at">width =</span> <span class="dv">5</span>, <span class="at">height =</span> <span class="dv">5</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">DiSCo</span>(dube, id_col.target, t0, <span class="at">M =</span> <span class="dv">1000</span>, <span class="at">G =</span> <span class="dv">1000</span>, <span class="at">num.cores =</span> <span class="dv">5</span>, <span class="at">permutation =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>                 <span class="at">CI =</span> <span class="cn">FALSE</span>, <span class="at">boots =</span> <span class="dv">1000</span>, <span class="at">cl =</span> <span class="fl">0.95</span>, <span class="at">CI_placebo=</span><span class="cn">TRUE</span>, <span class="at">graph =</span> <span class="cn">TRUE</span>, <span class="at">qmethod=</span><span class="cn">NULL</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; Computing confidence intervals for period: 1998</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; Computing confidence intervals for period: 1999</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; Computing confidence intervals for period: 2000</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; Computing confidence intervals for period: 2001</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; Computing confidence intervals for period: 2002</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; Computing confidence intervals for period: 2003</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; Computing confidence intervals for period: 2004</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt; Starting permutation test...Permutation finished!</span></span></code></pre></div>
 <div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-abadie2010synthetic" class="csl-entry">
+Abadie, Alberto, Alexis Diamond, and Jens Hainmueller. 2010.
+<span>“Synthetic Control Methods for Comparative Case Studies:
+Estimating the Effect of California’s Tobacco Control Program.”</span>
+<em>Journal of the American Statistical Association</em> 105 (490):
+493–505.
+</div>
 <div id="ref-dube2019minimum" class="csl-entry">
 Dube, Arindrajit. 2019. <span>“Minimum Wages and the Distribution of
 Family Incomes.”</span> <em>American Economic Journal: Applied

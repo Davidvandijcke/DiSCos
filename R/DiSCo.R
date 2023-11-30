@@ -106,6 +106,8 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
     CI_periods <- seq(1, T_max)
   } else if (CI & !CI_placebo) {
     CI_periods <- seq(T0+1, T_max)
+  } else{
+    CI_periods <- seq(1, T_max)
   }
   for (x in CI_periods) {
     cat(paste0("Computing confidence intervals for period: ", x + t_min - 1, "\n"))
@@ -148,6 +150,6 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
 
   return(list(results.periods=results.periods, Weights_DiSCo_avg=Weights_DiSCo_avg,
               Weights_mixture_avg=Weights_mixture_avg, perm=perm_obj, params=list(df=df, id_col.target=id_col.target,
-              t0=t0, M=M, G=G, CI=CI, CI_periods=CI_periods, cl=cl, CI_placebo=CI_placebo, qmethod=qmethod)))
+              t0=t0, M=M, G=G, CI=CI, cl=cl, CI_placebo=CI_placebo, qmethod=qmethod)))
 
 }
