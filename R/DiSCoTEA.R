@@ -5,7 +5,10 @@
 #' @details This function takes in the output of the DiSCo_per function and computes aggregate treatment effect using a user-specified aggregation statistic. The default is the average treatment effect (ATE).
 #'
 #' @param disco Output of the DiSCo function
-#' @param agg String indicating the aggregation statistic to be used. Options are "ATT" (average treatment effect on the treated),
+#' @param agg String indicating the aggregation statistic to be used. Options are
+#' \itemize{
+#'  \item{\code{quantileDiff} }{Difference in quantiles between the target and the weighted average of the controls.}
+#'  \item{\code{quantile} }{.}
 #' @param graph Boolean indicating whether to plot graphs. Default is TRUE.
 #' @param n_per_window Integer indicating the number of periods to include in each plot window, if graph=TRUE. Default is NULL, which means that the entire time window is used.
 #' @param savePlots Boolean indicating whether to save the plots to the current working directory. The plot names will be [agg]_[start_year]_[end_year].pdf. The default is FALSE.
@@ -13,7 +16,7 @@
 #' @param ylim Optional vector of length 2 indicating the y-axis limits of the plot.
 #' This can lead to margin errors on the plot window if the number of time periods is large, in which case it is recommended to specify a smaller number (e.g. <=10).
 #' @export
-DiSCoTEA <- function(disco, agg="ATT", graph=TRUE, time=TRUE, n_per_window=NULL, savePlots=FALSE, xlim=NULL, ylim=NULL) {
+DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_window=NULL, savePlots=FALSE, xlim=NULL, ylim=NULL) {
 
   # reconstruct some parameters
   df <- disco$params$df
@@ -61,69 +64,9 @@ DiSCoTEA <- function(disco, agg="ATT", graph=TRUE, time=TRUE, n_per_window=NULL,
                           function(x) disco$results.periods[[x]]$target$quantiles)
 
   #---------------------------------------------------------------------------
-  ### average treatment on the treated
+  ### difference of cdfs
   #---------------------------------------------------------------------------
-  if (agg == "ATT") {
-
-    grid <- NULL
-
-    avg_treat_time <- lapply(qtiles_centered, mean)
-
-    if (time) { # return at each time point
-      treats <- unlist(avg_treat_time)
-    } else{
-      treats <- as.vector(mean(unlist(avg_treat_time)[(T0+1):T_max]))
-    }
-
-    if (CI) { # get confidence intervals if they were calculated before
-      avg_treat_time_boot <- sapply(qtiles_centered_boot, function(x) apply(x, 2, mean))
-
-      if (time) { # return at each time point
-        sds <- apply(avg_treat_time_boot, 2, sd)
-        ci_lower <- apply(avg_treat_time_boot,2,myQuant, q=(1-cl)/2, qmethod)
-        ci_upper <- apply(avg_treat_time_boot,2,myQuant, q=cl+(1-cl)/2, qmethod)
-      } else {
-        avg_treat_boot <- apply(avg_treat_time_boot[,T0:T_max], 1, mean)
-        sds <- as.vector(sd(avg_treat_boot))
-        ci_lower <- myQuant(avg_treat_boot, q=(1-cl)/2, qmethod=NULL)
-        ci_upper <- myQuant(avg_treat_boot, q=cl+(1-cl)/2, qmethod=NULL)
-      }
-    } else {
-      sds <- list(NA)
-      ci_lower <- NA
-      ci_upper <- NA
-    }
-    if (graph) {
-      if (is.null(ylim)) {
-        miny <- min(c(treats, ci_lower), na.rm = TRUE)
-        maxy <- max(c(treats, ci_upper), na.rm = TRUE)
-        ylim <- c(miny - 1/3*abs(miny), maxy + 1/3*abs(maxy))
-      }
-      if (time) {
-        xlab <- "Time"
-        x <- t_start:t_max
-        dev.new(width = 5, height = 5)
-        plot(x=x, y=treats, ylim=ylim, type="l", xlab=xlab, ylab="ATT", xaxt="n")
-        axis(1, at=x, las=2)
-        if (CI) {
-          lines(x=x, y=ci_lower, col="grey")
-          lines(x=x, y=ci_upper, col="grey")
-        }
-        abline(v=t0, col="red", lty="longdash")
-      } else {
-        xlab <- ""
-        x <- 1
-        # plot point without x axis ticks
-        plot(x=x, y=treats, ylim=ylim, type="p", xlab=xlab, ylab="ATT", xaxt="n")
-        # plot whiskers around point
-        segments(x0=x, y0=ci_lower, x1=x, y1=ci_upper, col="grey")
-      }
-    }
-
-    #---------------------------------------------------------------------------
-    ### difference of cdfs
-    #---------------------------------------------------------------------------
-  } else if (agg == "cdfDiff"){
+  if (agg == "cdfDiff"){
 
     treats <- list()
     treats_boot <- list()
@@ -405,67 +348,36 @@ summary.DiSCoT <- function(object) {
   cband_text1 <- paste0("[", 100*object$cl,"% ")
 
   # header
-  if (object$agg == "ATT") {
-    cat("Average Treatment Effect on the Treated (ATT)\n")
-  } else{
-    if (object$agg == "cdfDiff") {
+  if (object$agg == "cdfDiff") {
       ooi <- "CDF \u0394 \n" # object of interest
-    } else if (object$agg == "quantileDiff") {
-      ooi <- "Quantile \u0394 \n"
+  } else if (object$agg == "quantileDiff") {
+    ooi <- "Quantile \u0394 \n"
+  }
+  cat(paste0("Sample of Distributional Treatment Effects, ", ooi))
+
+
+
+  # for treatment time periods, loop over a sample of the distribution and bind to dataframe that we'll print
+  grid_q <- c(0.1, 0.25, 0.5, 0.75, 0.9) * (length(object$grid)-1) + 1
+  grid_sample <- object$grid[grid_q]
+  for (i in I) {
+    out_temp <- cbind.data.frame(t=t_list[[i]], grid_sample, treats = object$treats[[i]][grid_q], ses = object$ses[[i]][grid_q],
+                                 ci_lower = object$ci_lower[[i]][grid_q], ci_upper = object$ci_upper[[i]][grid_q])
+    if (i == I[1]) {
+      out <- out_temp
+    } else {
+      out <- rbind.data.frame(out, out_temp)
     }
-    cat(paste0("Sample of Distributional Treatment Effects, ", ooi))
   }
 
-  #------------------------------------------------------------
-  # ATT, time=FALSE
-  #------------------------------------------------------------
-  if (object$agg == "ATT" & length(object$treats) == 1) {
-    sig <- (object$ci_lower > 0) | (object$ci_upper < 0)
-    sig_text <- ifelse(sig, "*", "")
-    out <- cbind.data.frame(object$treats[I], object$ses[I], object$ci_lower[I], object$ci_upper[I])
-    out <- round(out, 4)
-    out <- cbind.data.frame(out, sig_text)
-    colnames(out) <- c("ATT", "Std. Error", cband_text1, "Conf. Band]", "")
+  # format the dataframe
+  out <- round(out, 4)
+  sig <- (out$ci_lower > 0) | (out$ci_upper < 0)
+  sig_text <- ifelse(sig, "*", "")
+  out <- cbind.data.frame(out, sig_text)
+  ooi <- gsub(" \n", "", ooi)
+  colnames(out) <- c("Time", "X", ooi, "Std. Error", cband_text1, "Conf. Band]", "")
 
-  #------------------------------------------------------------
-  # ATT, time=TRUE
-  #------------------------------------------------------------
-  } else if (object$agg == "ATT" & length(object$treats) > 1) {
-    out <- cbind.data.frame(t=t_list[I], treats=object$treats[I], ses=object$ses[I], ci_lower=object$ci_lower[I], ci_upper=object$ci_upper[I])
-    out <- round(out, 4)
-    sig <- (out$ci_lower > 0) | (out$ci_upper < 0)
-    sig_text <- ifelse(sig, "*", "")
-    out <- cbind.data.frame(out, sig_text)
-    colnames(out) <- c("Time", "ATT", "Std. Error", cband_text1, "Conf. Band]", "")
-
-
-  #------------------------------------------------------------
-  # Distributional Statistics
-  #------------------------------------------------------------
-  } else if (object$agg != "ATT") {
-
-    # for treatment time periods, loop over a sample of the distribution and bind to dataframe that we'll print
-    grid_q <- c(0.1, 0.25, 0.5, 0.75, 0.9) * (length(object$grid)-1) + 1
-    grid_sample <- object$grid[grid_q]
-    for (i in I) {
-      out_temp <- cbind.data.frame(t=t_list[[i]], grid_sample, treats = object$treats[[i]][grid_q], ses = object$ses[[i]][grid_q],
-                                   ci_lower = object$ci_lower[[i]][grid_q], ci_upper = object$ci_upper[[i]][grid_q])
-      if (i == I[1]) {
-        out <- out_temp
-      } else {
-        out <- rbind.data.frame(out, out_temp)
-      }
-    }
-
-    # format the dataframe
-    out <- round(out, 4)
-    sig <- (out$ci_lower > 0) | (out$ci_upper < 0)
-    sig_text <- ifelse(sig, "*", "")
-    out <- cbind.data.frame(out, sig_text)
-    ooi <- gsub(" \n", "", ooi)
-    colnames(out) <- c("Time", "X", ooi, "Std. Error", cband_text1, "Conf. Band]", "")
-
-  }
 
   print(out, row.names=FALSE)
 
