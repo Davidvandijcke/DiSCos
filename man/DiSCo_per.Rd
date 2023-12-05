@@ -16,7 +16,11 @@ DiSCo_per(
   graph = TRUE,
   num_cores = 1,
   redo_weights = FALSE,
-  weights = NULL
+  weights = NULL,
+  qmethod = NULL,
+  per_q_min = 0,
+  per_q_max = 1,
+  M
 )
 }
 \arguments{
@@ -51,7 +55,8 @@ Function to implement permutation test for Distributional Synthetic Controls
 \details{
 This program iterates through all units and computes the optimal weights on the other units
 for replicating the unit of iteration's outcome variable, assuming that it is the treated unit.
-See Algorithm 1 in \insertCite{gunsilius2023distributional;textual}{DiSCo} for more details.
+See Algorithm 1 in \insertCite{gunsilius2023distributional;textual}{DiSCo} for more details. The only modification is that we take the ratio of post- and pre-treatment
+root mean squared Wasserstein distances to calculate the p-value, rather than the level in each period, following @abadie2010synthetic.
 }
 \references{
 \insertAllCited{}

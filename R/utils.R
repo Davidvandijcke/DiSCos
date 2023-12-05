@@ -36,6 +36,10 @@ myQuant <- function(X,q, qmethod=NULL,...){
   # sort if unsorted
   if (is.unsorted(X)) X <- sort(X)
 
+  # check if method a valid one
+  if (!is.null(qmethod)){
+    if (!qmethod %in% c("qkden", "extreme")) stop("Invalid quantile method")
+  }
   if (is.null(qmethod)) { # use old-fashioned quantiles
     return(stats::quantile(X, probs=q))
   } else if (qmethod=="qkden") {
@@ -278,3 +282,14 @@ mclapply.hack <- function(..., verbose=FALSE, mc.cores=NULL) {
     parallel::mclapply(..., mc.cores=mc.cores)
   }
 }
+
+
+#' @title citation
+#'
+#' @description print the citation for the relevant paper
+#'
+#' @keywords internal
+citation <- function() {
+  cat('Reference: Gunsilius, Florian F. "Distributional synthetic controls." Econometrica 91, no. 3 (2023): 1105-1117. \n')
+}
+

@@ -4,7 +4,16 @@
 \alias{DiSCoTEA}
 \title{DiSCoTEA}
 \usage{
-DiSCoTEA(disco, agg = "ATT", graph = TRUE)
+DiSCoTEA(
+  disco,
+  agg = "ATT",
+  graph = TRUE,
+  time = TRUE,
+  n_per_window = NULL,
+  savePlots = FALSE,
+  xlim = NULL,
+  ylim = NULL
+)
 }
 \arguments{
 \item{disco}{Output of the DiSCo function}
@@ -12,6 +21,15 @@ DiSCoTEA(disco, agg = "ATT", graph = TRUE)
 \item{agg}{String indicating the aggregation statistic to be used. Options are "ATT" (average treatment effect on the treated),}
 
 \item{graph}{Boolean indicating whether to plot graphs. Default is TRUE.}
+
+\item{n_per_window}{Integer indicating the number of periods to include in each plot window, if graph=TRUE. Default is NULL, which means that the entire time window is used.}
+
+\item{savePlots}{Boolean indicating whether to save the plots to the current working directory. The plot names will be \link{agg}\emph{\link{start_year}}\link{end_year}.pdf. The default is FALSE.}
+
+\item{xlim}{Optional vector of length 2 indicating the x-axis limits of the plot. This and the \code{ylim} option can be useful to zoom in on the relevant parts of the distribution for fat-tailed distributions.}
+
+\item{ylim}{Optional vector of length 2 indicating the y-axis limits of the plot.
+This can lead to margin errors on the plot window if the number of time periods is large, in which case it is recommended to specify a smaller number (e.g. <=10).}
 }
 \description{
 Distributional Synthetic Controls Treatment Effect Aggregator (DiSCoTEA)

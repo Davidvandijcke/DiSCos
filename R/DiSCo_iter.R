@@ -72,16 +72,12 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, ..
     grid <- list(grid.min = NA, grid.max = NA, grid.rand = NA, grid.ord = NA)
     grid[c("grid.min", "grid.max", "grid.rand", "grid.ord")] <- getGrid(target, controls, G) # TODO: this can be done just once
 
-    if (yy <= T0) { # only get weights for pre-treatment periods
-      # obtaining the optimal weights for the DiSCo method
-      DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M, qmethod=qmethod)
+    # obtaining the optimal weights for the DiSCo method
+    DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M, qmethod=qmethod)
 
     # obtaining the optimal weights for the mixture of distributions method
-      mixture <- DiSCo_mixture(controls, target, grid$grid.min, grid$grid.max, grid$grid.rand, M)
-    } else {
-      DiSCo_res_weights <- NA
-      mixture <- list(weights.opt = NA, distance.opt = NA, mean = NA)
-    }
+    mixture <- DiSCo_mixture(controls, target, grid$grid.min, grid$grid.max, grid$grid.rand, M)
+
     #computing the target quantile function
     target.q <- myQuant(target, evgrid, qmethod)
 

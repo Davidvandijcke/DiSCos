@@ -4,7 +4,20 @@
 \alias{DiSCo_per_iter}
 \title{DiSCo_per_iter}
 \usage{
-DiSCo_per_iter(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, ww = 0)
+DiSCo_per_iter(
+  c_df,
+  c_df.q,
+  t_df,
+  T0,
+  peridx,
+  evgrid,
+  idx,
+  M = 1000,
+  ww = 0,
+  qmethod = NULL,
+  per_q_min = 0,
+  per_q_max = 1
+)
 }
 \arguments{
 \item{c_df}{List of control units}

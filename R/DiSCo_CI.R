@@ -2,7 +2,7 @@
 
 DiSCo_CI_iter <- function(redraw, controls, bc, weights, cl=0.95,
                           evgrid = seq(from=0, to=1, length.out=1001), qmethod=NULL){
-  set.seed(redraw*1) # for reproducibility
+  # set.seed(redraw*1) # for reproducibility
   # drawing m = 100% of samples from controls
 
   mycon <- list()

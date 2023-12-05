@@ -8,16 +8,26 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: ../inst/REFERENCES.bib
+editor_options:
+  markdown:
+    wrap: 72
 ---
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
+    comment = "#",
+    echo=TRUE,
+  error = FALSE,
+  tidy = FALSE,
+  cache = FALSE,
   collapse = TRUE,
-  comment = "#>"
+  out.width = '100%',
+  dpi = 144
 )
 ```
 
 ```{r, include=FALSE}
+
 # fldr <- here::here("R/")
 # sapply(paste0(fldr,list.files(fldr)), source)# library(CVXR)
 library(pracma)
@@ -33,82 +43,124 @@ library(DiSCo)
 
 # Introduction
 
-This vignette demonstrates how to use the DiSCo package by way of the empirical application in @gunsilius2023distributional, which is based on @dube2019minimum. We illustrate the use of the two main functions: 1) `DiSCo`, which estimates the raw distributional counterfactuals, computes confidence intervals, and optionally performs a permutation test; and 2) `DiSCoTEA`, the "Treatment Effect Aggregator", which takes in the distributional counterfactuals and computes aggregate treatment effects using a user-specified aggregation statistic.
+This vignette demonstrates how to use the DiSCo package by way of the
+empirical application in @gunsilius2023distributional, which is based on
+@dube2019minimum. We illustrate the use of the two main functions: 1)
+`DiSCo`, which estimates the raw distributional counterfactuals,
+computes confidence intervals, and optionally performs a permutation
+test; and 2) `DiSCoTEA`, the "Treatment Effect Aggregator", which takes
+in the distributional counterfactuals and computes aggregate treatment
+effects using a user-specified aggregation statistic.
 
 # Distributional Synthetic Controls
 
-We briefly review the main idea behind Distributional Synthetic Controls. Denote $Y_{jt,N}$ the outcome of group $j$ in time period $t$ in the absence of an intervention. Also denote $Y_{jt,I}$ the outcome in the presence of an intervention at time $t > T_0$. Denote the quantile function, 
-\[
+We briefly review the main idea behind Distributional Synthetic
+Controls. Denote $Y_{jt,N}$ the outcome of group $j$ in time period $t$
+in the absence of an intervention. Also denote $Y_{jt,I}$ the outcome in
+the presence of an intervention at time $t > T_0$. Denote the quantile
+function, $$
 F^{-1}(q):=\inf _{y \in \mathbb{R}}\{F(y) \geq q\}, \quad q \in(0,1),
-\]
-where $F(y)$ is the corresponding cumulative distribution function. One unit $j=1$ has received treatment, while the other units $j=2,\ldots,J$ have not. Then the goal is to estimate the counterfactual quantile function $F_{Y_{1 t}, N}^{-1}$ of the treated unit had it not received treatment by an optimally weighted average of the control units' quantile functions,
-\[
+$$ where $F(y)$ is the corresponding cumulative distribution function.
+One unit $j=1$ has received treatment, while the other units
+$j=2,\ldots,J$ have not. Then the goal is to estimate the counterfactual
+quantile function $F_{Y_{1 t}, N}^{-1}$ of the treated unit had it not
+received treatment by an optimally weighted average of the control
+units' quantile functions, $$
 F_{Y_{1 t}, N}^{-1}(q)=\sum_{j=2}^{J+1} \lambda_j^* F_{Y_{j t}}^{-1}(q) \quad \text { for all } q \in(0,1)
-\]
+$$\
 In practice, we do this by solving the following optimization problem:
-\[
+$$
 \vec{\lambda}_t^*=\underset{\vec{\lambda} \in \Delta^J}{\operatorname{argmin}} \int_0^1\left|\sum_{j=2}^{J+1} \lambda_j F_{Y_{j t}}^{-1}(q)-F_{Y_{1 t}}^{-1}(q)\right|^2 d q
-\]
-which gives optimal weights for each period. This problem can be solved by a simple weighted regression, which is implemented in the `DiSCo_weights_reg` function. To obtain the overall optimal weights $\vec{\lambda}^*$, we take the average of the optimal weights across all periods.
-
+$$ which gives optimal weights for each period. This problem can be
+solved by a simple weighted regression, which is implemented in the
+`DiSCo_weights_reg` function. To obtain the overall optimal weights
+$\vec{\lambda}^*$, we take the average of the optimal weights across all
+periods.
 
 # Illustration
-The data from @dube2019minimum is available in the package. We load it here:
+
+The data from @dube2019minimum is available in the package. We load it
+here:
 
 ```{r}
 data("dube")
 head(dube)
 ```
-To learn more about the data, just type `?dube` in the console. We have already renamed the outcome, id, and time variables to `y_col`, `id_col`, and `time_col`, respectively, which is required before passing the dataframe to the DiSCo command. We also need to set the two following parameters:
+
+To learn more about the data, just type `?dube` in the console. We have
+already renamed the outcome, id, and time variables to `y_col`,
+`id_col`, and `time_col`, respectively, which is required before passing
+the dataframe to the DiSCo command. We also need to set the two
+following parameters:
+
 ```{r}
 id_col.target <- 2
 t0 <- 2003
 ```
-which indicate the id of the treated unit and the time period of the intervention, respectively. We can now run the DiSCo command:
 
-```{r, cache=TRUE}
+which indicate the id of the treated unit and the time period of the
+intervention, respectively. We can now run the DiSCo command:
+
+```{r}
 # if the below gives issues it's the knit cache...
-disco <- DiSCo(dube, id_col.target, t0, M = 1000, G = 1000, num.cores = 5, permutation = FALSE,
+disco <- DiSCo(dube, id_col.target, t0, M = 500, G = 1000, num.cores = 5, permutation = FALSE,
                  CI = TRUE, boots = 1000, cl = 0.95, CI_placebo=TRUE, graph = FALSE, qmethod=NULL)
 ```
 
-where we have chosen grids of 1000 grid points and opted for parallel computation with 5 cores to speed up the permutation test and confidence intervals, which we calculate using 500 resamples.
+where we have chosen grids of 1000 grid points and opted for parallel
+computation with 5 cores to speed up the permutation test and confidence
+intervals, which we calculate using 500 resamples.
 
-We can use the DiSCo Treatment Effect Aggregator (`DiSCoTEA`) function to aggregate the resulting counterfactual quantile functions into various treatment effect measures. For example, we can calculate the average treatment effect (ATE) as follows:
+We can use the DiSCo Treatment Effect Aggregator (`DiSCoTEA`) function
+to aggregate the resulting counterfactual quantile functions into
+various treatment effect measures. For example, we can calculate the
+average treatment effect (ATE) as follows:
 
 ```{r}
 DiSCoTEA(disco,  agg="ATT", graph=TRUE, time=TRUE)
 
 ```
-We can also look at the CDF of the treatment effects, 
+
+We can also look at the CDF of the treatment effects,
+
 ```{r}
 DiSCoTEA(disco,  agg="cdfTreat", graph=TRUE, time=TRUE, n_per_window=NULL)
 
 ```
+
 Or the quantile function:
+
 ```{r}
 DiSCoTEA(disco,  agg="quantileTreat", graph=TRUE, time=TRUE, n_per_window=NULL)
 ```
-To inspect what is happening at the higher quantiles, where we appear to see an increase in family income as a result of the minimum wage policy, we can separately plot the observed and counterfactual functions,
+
+To inspect what is happening at the higher quantiles, where we appear to
+see an increase in family income as a result of the minimum wage policy,
+we can separately plot the observed and counterfactual functions,
+
 ```{r}
 DiSCoTEA(disco,  agg="quantile", graph=TRUE, time=TRUE, n_per_window=NULL)
 
 ```
+
 # Permutation test
 
-Similar to the canonical permutation test in @abadie2010synthetic, we can carry out a distributional permutation test. The idea is entirely analogous: we iteratively reassign the treatment to units in the set of controls and estimate "placebo" quantile functions. Then we calculate the squared Wasserstein error of the entire distribution as,
-\[
+Similar to the canonical permutation test in @abadie2010synthetic, we
+can carry out a distributional permutation test. The idea is entirely
+analogous: we iteratively reassign the treatment to units in the set of
+controls and estimate "placebo" quantile functions. Then we calculate
+the squared Wasserstein error of the entire distribution as, $$
 d_{t t}^2:=\int_0^1\left|F_{Y_{u t, N}}^{-1}(q)-F_{Y_{u t}}^{-1}(q)\right|^2 d q
-\]
-for each time period. The `permutation` option in the `DiSCo` function allows one to plot the time evolution of these terms for all units by setting `graph = TRUE`, to visually inspect the abnormality of the "true" treatment effects. We also calculate the p-value of the test as,
-\[
+$$ for each time period. The `permutation` option in the `DiSCo`
+function allows one to plot the time evolution of these terms for all
+units by setting `graph = TRUE`, to visually inspect the abnormality of
+the "true" treatment effects. We also calculate the p-value of the test
+as, $$
 p_t=\frac{r\left(d_{1 t}\right)}{J+1}
-\]
-where $r(d_{1t})$ is the rank of the true treatment effect in the distribution of placebo effects. 
-
+$$ where $r(d_{1t})$ is the rank of the true treatment effect in the
+distribution of placebo effects.
 
 ```{r}
-dev.new(width = 5, height = 5)
-results <- DiSCo(dube, id_col.target, t0, M = 1000, G = 1000, num.cores = 5, permutation = TRUE,
-                 CI = FALSE, boots = 1000, cl = 0.95, CI_placebo=TRUE, graph = TRUE, qmethod=NULL)
+results <- DiSCo(dube, id_col.target, t0, M = 1000, G = 1000, num.cores = 5, permutation = TRUE, CI = FALSE, boots = 1000, cl = 0.95, CI_placebo=TRUE, graph = TRUE, qmethod=NULL) 
+
 ```

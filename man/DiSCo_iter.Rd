@@ -4,7 +4,7 @@
 \alias{DiSCo_iter}
 \title{DiSCo_iter}
 \usage{
-DiSCo_iter(yy, df, evgrid, id_col.target, M, G, T0, ...)
+DiSCo_iter(yy, df, evgrid, id_col.target, M, G, T0, qmethod = NULL, ...)
 }
 \arguments{
 \item{yy}{Integer indicating the current year being processed.}

@@ -4,8 +4,31 @@
 \alias{DiSCoT}
 \title{DiSCoT}
 \usage{
-DiSCoT()
+DiSCoT(agg, treats, ses, grid, ci_lower, ci_upper, t0, call, cl, N, J)
+}
+\arguments{
+\item{agg}{aggregation method}
+
+\item{treats}{list of treatment effects}
+
+\item{ses}{list of standard errors}
+
+\item{grid}{grid}
+
+\item{ci_lower}{list of lower confidence intervals}
+
+\item{ci_upper}{list of upper confidence intervals}
+
+\item{t0}{start time}
+
+\item{call}{call}
+
+\item{cl}{confidence level}
+
+\item{N}{number of observations}
+
+\item{J}{number of treated units}
 }
 \description{
-D
+DiSCoT object holding aggregated treatment effects
 }

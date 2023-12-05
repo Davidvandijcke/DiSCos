@@ -19,15 +19,22 @@
 #' @param t0 Integer indicating period of treatment.
 #' @param M Integer indicating the number of control quantiles to use in the DiSCo method. Default is 1000.
 #' @param G Integer indicating the number of grid points for the grid on which the estimated functions are evaluated. Default is 1000.
-#' @param num.cores Integer, number of cores to use for parallel computation. Default is 1 (sequential computation). If the `permutation` or `CI` arguments are set to TRUE, this can be very slow!
+#' @param num.cores Integer, number of cores to use for parallel computation. Default is 1 (sequential computation). If the `permutation` or `CI` arguments are set to TRUE, this can be slow!
+#' If you get an error in "all cores" or similar, try setting num.cores=1 to see the precise error value.
 #' @param permutation Logical, indicating whether to use the permutation method for computing the optimal weights. Default is FALSE.
+#' @param per_q_min Numeric, minimum quantile to use for the permutation method. Set this together with `per_q_max` to restrict the range of quantiles used for the permutation method. Default is 0 (all quantiles).
+#' @param per_q_max Numeric, maximum quantile to use for the permutation method. Set this together with `per_q_min` to restrict the range of quantiles used for the permutation method. Default is 1 (all quantiles).
 #' @param CI Logical, indicating whether to compute confidence intervals for the counterfactual quantiles. Default is FALSE.
 #' @param CI_placebo Logical, indicating whether to compute confidence intervals for the pre-treatment periods. Default is TRUE.
 #' If you have a lot of pre-treatment periods, setting this to FALSE can speed up the computation.
 #' @param boots Integer, number of bootstrap samples to use for computing confidence intervals. Default is 500.
 #' @param cl Numeric, confidence level for the (two-sided) confidence intervals.
 #' @param graph Logical, indicating whether to plot the permutation graph as in Figure 3 of the paper. Default is FALSE.
-#' @param qmethod Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the quantile function from the \code{\}
+#' @param qmethod Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
+#' Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremestat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
+#' Both are substantially slower than the default method.
+#' @param seed Integer, seed for the random number generator. This needs to be set explicitly in the function call, since it will invoke \code{\link[parallel]{RNGstreams}} which will set the seed for each core
+#' when using parallel processes. Default is NULL, which does not set a seed.
 #'
 #' @return A list containing, for each time period, the elements described in the return argument of \code{\link{DiSCo_iter}}, as well as the following additional elements:
 #' \itemize{
@@ -49,15 +56,22 @@
 #' @export
 
 
-DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, permutation = FALSE,
+DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, permutation = FALSE, per_q_min = 0, per_q_max = 1,
                   CI = FALSE, CI_placebo=FALSE, boots = 500, cl = 0.95, graph = FALSE,
-                  qmethod=NULL) {
+                  qmethod=NULL, seed=NULL) {
+
 
   # make sure we have a data table
   df <- as.data.table(df)
 
   # check the inputs
   checks(df, id_col.target, t0, M, G, num.cores, permutation)
+
+  if (!is.null(seed)) {
+    RNGkind("L'Ecuyer-CMRG") # to make sure our seeds are the same across parallel processes
+    set.seed(seed)
+  }
+
 
   # create a column for the normalized time period
   t_min <- min(df$time_col)
@@ -69,7 +83,7 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
   # create a list to store the results for each period
   results.periods <- list()
 
-  evgrid = seq(from=0,to=1,length.out=M+1)
+  evgrid = seq(from=0,to=1,length.out=G+1)
 
   # run the main function in parallel for each period
   periods <- sort(unique(df$t_col)) # we call the iter function on all periods, but won't calculate weights for the post-treatment periods
@@ -125,19 +139,31 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
 
   # permutation tests
   if (permutation) {
+
+    # grab the raw control and target data
     controls_per <- lapply(seq(1:T_max), function(x) results.periods[[x]]$controls$data)
     target_per <- lapply(seq(1:T_max), function(x) results.periods[[x]]$target$data)
-    controls.q <- lapply(seq(1:T_max), function(x) results.periods[[x]]$controls$quantiles)
-    target.q <- lapply(seq(1:T_max), function(x) results.periods[[x]]$target$quantiles)
-    perm <- DiSCo_per(c_df=controls_per, t_df=target_per, controls.q=controls.q, target.q=target.q, T0=T0, weights=Weights_DiSCo_avg, num_cores=num.cores, evgrid=evgrid,
-                      graph=graph, qmethod=qmethod)
+
+    # grab the quantiles for the control and target data, for the desired range
+    controls.q <- lapply(seq(1:T_max), function(x) results.periods[[x]]$controls$quantiles) # here it's a matrix hence ,
+    target.q <- lapply(seq(1:T_max), function(x) results.periods[[x]]$target$quantiles) # here it's a vector
+
+    # run the permutation test
+    perm <- DiSCo_per(c_df=controls_per, t_df=target_per, controls.q=controls.q, target.q=target.q, T0=T0,
+                      weights=Weights_DiSCo_avg, num_cores=num.cores, evgrid=evgrid,
+                      graph=graph, qmethod=qmethod, M=M, per_q_min=per_q_min, per_q_max=per_q_max)
+
+    # get the control and target permutation distributions
     distp <- perm$control.dist
     distt <- perm$target.dist
-    perm_values <- DiSCo_per_rank(distt, distp)
-    J_1 <- length(distp) + 1
-    p_overall <- mean(unlist(perm_values$ranks)[((T0+1):T_max)]) / (J_1)
 
-    perm_obj <- permut(distp, distt, perm_values$ranks, perm_values$p_t, p_overall, J_1)
+
+    # calculate the ranks and p-values
+    p_val <- DiSCo_per_rank(distt, distp, T0)
+
+    # create the permutation object for easy summarization
+    J_1 <- length(distp)
+    perm_obj <- permut(distp, distt, p_val, J_1)
   } else {
     perm_obj <- NULL
   }
@@ -150,6 +176,6 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
 
   return(list(results.periods=results.periods, Weights_DiSCo_avg=Weights_DiSCo_avg,
               Weights_mixture_avg=Weights_mixture_avg, perm=perm_obj, params=list(df=df, id_col.target=id_col.target,
-              t0=t0, M=M, G=G, CI=CI, cl=cl, CI_placebo=CI_placebo, qmethod=qmethod)))
+              t0=t0, M=M, G=G, CI=CI, cl=cl, CI_placebo=CI_placebo, qmethod=qmethod, boot=boots)))
 
 }

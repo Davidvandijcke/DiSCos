@@ -4,7 +4,8 @@
 #' @description Function to implement permutation test for Distributional Synthetic Controls
 #' @details This program iterates through all units and computes the optimal weights on the other units
 #' for replicating the unit of iteration's outcome variable, assuming that it is the treated unit.
-#' See Algorithm 1 in \insertCite{gunsilius2023distributional;textual}{DiSCo} for more details.
+#' See Algorithm 1 in \insertCite{gunsilius2023distributional;textual}{DiSCo} for more details. The only modification is that we take the ratio of post- and pre-treatment
+#' root mean squared Wasserstein distances to calculate the p-value, rather than the level in each period, following @abadie2010synthetic.
 #'
 #' @param c_df List with matrices of control distributions
 #' @param t_df Matrix containing the target distribution
@@ -22,7 +23,7 @@
 #' @references
 #' \insertAllCited{}
 DiSCo_per <- function(c_df, t_df, controls.q, target.q, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, length.out=101),
-                 graph=TRUE, num_cores = 1, redo_weights=FALSE, weights=NULL, qmethod=NULL){
+                 graph=TRUE, num_cores = 1, redo_weights=FALSE, weights=NULL, qmethod=NULL, per_q_min=0, per_q_max=1, M){
 
   #----------------------------------------#
   # target
@@ -35,7 +36,7 @@ DiSCo_per <- function(c_df, t_df, controls.q, target.q, T0, ww=0, peridx=0, evgr
 
 
     lambda_t <- parallel::mclapply.hack(seq_len(T0), function(t) {
-      DiSCo_weights_reg(c_df[[t]], as.vector(t_df[[t]]), 1000, qmethod=qmethod)
+      DiSCo_weights_reg(c_df[[t]], as.vector(t_df[[t]]), M, qmethod=qmethod)
     }, mc.cores = num_cores)
 
     #calculate the average optimal lambda
@@ -62,9 +63,12 @@ DiSCo_per <- function(c_df, t_df, controls.q, target.q, T0, ww=0, peridx=0, evgr
 
 
   #squared Wasserstein distance between the target and the corresponding barycenter
+  # find the closest quantile range that includes [per_q_min, per_q_max]
+  per_q_floor <- floor(per_q_min * length(evgrid))
+  per_q_ceil <- ceiling(per_q_max * length(evgrid))
   distt=c()
   for (t in 1:length(c_df)){
-    distt[t]=mean((bc_t[[t]]-target.q[[t]])**2)
+    distt[t]=mean((bc_t[[t]][per_q_floor:per_q_ceil]-target.q[[t]][per_q_floor:per_q_ceil])**2)
   }
 
   #----------------------------------------#
@@ -80,7 +84,8 @@ DiSCo_per <- function(c_df, t_df, controls.q, target.q, T0, ww=0, peridx=0, evgr
 
   cat("Starting permutation test...")
   distp <- mclapply.hack(seq_len(length(peridx)), function(idx) {
-    DiSCo_per_iter(c_df=c_df, c_df.q=controls.q, t_df=t_df, T0=T0, ww=ww, peridx=peridx, evgrid=evgrid, idx=idx, qmethod=qmethod)
+    DiSCo_per_iter(c_df=c_df, c_df.q=controls.q, t_df=t_df, T0=T0, ww=ww, peridx=peridx, evgrid=evgrid, idx=idx, qmethod=qmethod, M=M,
+                   per_q_min=per_q_min, per_q_max=per_q_max)
   }, mc.cores = num_cores)
   cat('Permutation finished!')
 
@@ -92,16 +97,15 @@ DiSCo_per <- function(c_df, t_df, controls.q, target.q, T0, ww=0, peridx=0, evgr
 
   #default plot all squared Wasserstein distances
   if (graph==TRUE){
-    plot(distt, xlab='',ylab='', type='l', lwd=2)
+    plot(distt, xlab='',ylab='', type='l', lwd=2, ylim=c(0, max(c(distt, unlist(distp))) + 0.1*max(c(distt, unlist(distp)))))
     for (i in 1:length(distp)){
       lines(1:length(c_df), distp[[i]], col='grey', lwd=1)
     }
     abline(v=T0, lty = 2)
-    legend("topleft",legend = c("Target", "Control"),
-           col=c("black", "grey"),
-           lty= c(1,1), lwd = c(2,2), cex = 1.5)
     title(ylab="Squared Wasserstein distance", line=2.5, cex.lab=1.5)
     title(xlab="Time periods", line=3, cex.lab=1.5)
+
+
   }
 
 
@@ -118,22 +122,19 @@ DiSCo_per <- function(c_df, t_df, controls.q, target.q, T0, ww=0, peridx=0, evgr
 #' @export
 ## rank the squared Wasserstein distances and get the rank of the target unit
 # combine distt and distp
-DiSCo_per_rank <- function(distt, distp) {
+DiSCo_per_rank <- function(distt, distp, T0) {
   distall <- distp
   distall$target <- distt
   distall <- matrix(unlist(distall), nrow=length(distall), ncol=length(distall[[1]]), byrow = TRUE)
   J_1 <- nrow(distall)
   rnks <- list()
   p_values <- list()
-  for (t in 1:ncol(distall)){
-    # record rank of target unit
-    rnk <- rank(-distall[,t])[J_1]
-    p_values[[t]] <- rnk / J_1
-    rnks[[t]] <- rnk
-  }
-  p_values <- unlist(p_values)
 
-  return(list(p_t = p_values, ranks=rnks))
+  R <- apply(distall, 1, function(x) sqrt(mean(x[1:T0])) / sqrt(mean(x[(T0+1):length(x)])) )
+  p_val <- rank(-R)[1] / (J_1) # minus cause we want the largest to be the smallest rank
+
+
+  return(p_val)
 }
 
 
@@ -149,8 +150,6 @@ DiSCo_per_rank <- function(distt, distp) {
 #' @return A list of class permut, with the following elements
 #' \item{distp}{List of squared Wasserstein distances between the control units}
 #' \item{distt}{List of squared Wasserstein distances between the target unit and the control units}
-#' \item{rank}{Rank of the target unit}
-#' \item{p_values}{List of p-values for each time period}
 #' \item{p_overall}{Overall p-value for post-treatment periods}
 #' \item{J_1}{Number of control units}
 #'
@@ -158,8 +157,8 @@ DiSCo_per_rank <- function(distt, distp) {
 #' @examples
 #' permut(distp, distt, rank, p_values, p_overall, J_1)
 #' @export
-permut <- function(distp, distt, rank, p_values, p_overall, J_1) {
-  out <- list(distp=distp, distt=distt, rank=rank, p_values=p_values, p_overall=p_overall, J_1=J_1)
+permut <- function(distp, distt,p_overall, J_1) {
+  out <- list(distp=distp, distt=distt, p_overall=p_overall, J_1=J_1)
   class(out) <- "permut"
   return(out)
 }
@@ -178,7 +177,7 @@ permut <- function(distp, distt, rank, p_values, p_overall, J_1) {
 #' @export
 print.permut <- function(x, digits = 3) {
   cat("Permutation test results:\n")
-  cat("Overall post-treatment p-value: ", format(x$p_overall, digits=digits), "\n")
+  cat("P-value: ", format(x$p_overall, digits=digits), "\n")
   cat("Number of control units: ", x$J_1, "\n")
 }
 

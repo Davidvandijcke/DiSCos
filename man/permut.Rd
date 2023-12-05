@@ -4,27 +4,25 @@
 \alias{permut}
 \title{permut}
 \usage{
-permut(distp, distt, rank, p_values, p_overall, J_1)
+permut(distp, distt, p_overall, J_1)
 }
 \arguments{
 \item{distp}{List of squared Wasserstein distances between the control units}
 
 \item{distt}{List of squared Wasserstein distances between the target unit and the control units}
 
-\item{rank}{Rank of the target unit}
-
-\item{p_values}{List of p-values for each time period}
-
 \item{p_overall}{Overall p-value}
 
 \item{J_1}{Number of control units}
+
+\item{rank}{Rank of the target unit}
+
+\item{p_values}{List of p-values for each time period}
 }
 \value{
 A list of class permut, with the following elements
 \item{distp}{List of squared Wasserstein distances between the control units}
 \item{distt}{List of squared Wasserstein distances between the target unit and the control units}
-\item{rank}{Rank of the target unit}
-\item{p_values}{List of p-values for each time period}
 \item{p_overall}{Overall p-value for post-treatment periods}
 \item{J_1}{Number of control units}
 }

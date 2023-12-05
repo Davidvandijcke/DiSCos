@@ -12,11 +12,15 @@ DiSCo(
   G = 1000,
   num.cores = 1,
   permutation = FALSE,
+  per_q_min = 0,
+  per_q_max = 1,
   CI = FALSE,
+  CI_placebo = FALSE,
   boots = 500,
   cl = 0.95,
-  CI_periods = NULL,
-  graph = FALSE
+  graph = FALSE,
+  qmethod = NULL,
+  seed = NULL
 )
 }
 \arguments{
@@ -36,19 +40,32 @@ This variable can be any type, as long as it is the same type as the id_col colu
 
 \item{G}{Integer indicating the number of grid points for the grid on which the estimated functions are evaluated. Default is 1000.}
 
-\item{num.cores}{Integer, number of cores to use for parallel computation. Default is 1 (sequential computation). If the \code{permutation} or \code{CI} arguments are set to TRUE, this can be very slow!}
+\item{num.cores}{Integer, number of cores to use for parallel computation. Default is 1 (sequential computation). If the \code{permutation} or \code{CI} arguments are set to TRUE, this can be slow!
+If you get an error in "all cores" or similar, try setting num.cores=1 to see the precise error value.}
 
 \item{permutation}{Logical, indicating whether to use the permutation method for computing the optimal weights. Default is FALSE.}
 
+\item{per_q_min}{Numeric, minimum quantile to use for the permutation method. Set this together with \code{per_q_max} to restrict the range of quantiles used for the permutation method. Default is 0 (all quantiles).}
+
+\item{per_q_max}{Numeric, maximum quantile to use for the permutation method. Set this together with \code{per_q_min} to restrict the range of quantiles used for the permutation method. Default is 1 (all quantiles).}
+
 \item{CI}{Logical, indicating whether to compute confidence intervals for the counterfactual quantiles. Default is FALSE.}
+
+\item{CI_placebo}{Logical, indicating whether to compute confidence intervals for the pre-treatment periods. Default is TRUE.
+If you have a lot of pre-treatment periods, setting this to FALSE can speed up the computation.}
 
 \item{boots}{Integer, number of bootstrap samples to use for computing confidence intervals. Default is 500.}
 
 \item{cl}{Numeric, confidence level for the (two-sided) confidence intervals.}
 
-\item{CI_periods}{Vector indicating the time periods for which to compute confidence intervals. Default is NULL which means confidence intervals are computed for all time periods if \code{CI} is TRUE.}
-
 \item{graph}{Logical, indicating whether to plot the permutation graph as in Figure 3 of the paper. Default is FALSE.}
+
+\item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
+Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremestat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
+Both are substantially slower than the default method.}
+
+\item{seed}{Integer, seed for the random number generator. This needs to be set explicitly in the function call, since it will invoke \code{\link[parallel]{RNGstreams}} which will set the seed for each core
+when using parallel processes. Default is NULL, which does not set a seed.}
 }
 \value{
 A list containing, for each time period, the elements described in the return argument of \code{\link{DiSCo_iter}}, as well as the following additional elements:

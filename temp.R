@@ -21,7 +21,9 @@ fips.target <- 2 # target state is AK
 #####
 # loading the data-set on minimum wage from Dube (2019) to obtain states that did not have a
 # change of the minimum wage between 1998-2014
-df <- read_dta(file.path("data", "mw_annual_lagsleads_1974_2014.dta"))
+
+df <- read_dta(file.path("data", "mw_annual_lagsleads_19
+                         74_2014.dta"))
 
 years.aff <- list()
 for (ii in unique(df$state_fips)){
@@ -34,6 +36,7 @@ for (ii in unique(df$state_fips)){
 
 # AK is our treated unit. We want states that did not have a change between 1998 and 2003/2004
 states.aff <- list()
+
 for (ii in 1:length(years.aff)){
   dummyvec <- c(1998,1999,2000,2001,2002,2003,2004)
   test <- intersect(dummyvec,years.aff[[ii]])
@@ -99,10 +102,13 @@ permutation = FALSE
 
 set.seed(1860)
 data("dube")
-results <- DiSCo::DiSCo(dube, id_col.target, t0, M = 1000, G = 1000, num.cores = 5, permutation = FALSE,
-                 CI = TRUE, boots = 1000, cl = 0.95,  CI_placebo=TRUE, graph = TRUE, qmethod=NULL)
+df <- dube
+results <- DiSCo::DiSCo(dube, id_col.target, t0, M = 100, G = 1000, num.cores = 5, permutation = FALSE,
+                 CI = TRUE, boots = 1000, cl = 0.95,  CI_placebo=TRUE, graph = TRUE, qmethod="qkden", per_q_min = 0.9)
 
 disco <- results
+
+summary(results$perm)
 
 DiSCoTEA(disco,  agg="ATT", graph=TRUE, time=TRUE, n_per_window=NULL)
 

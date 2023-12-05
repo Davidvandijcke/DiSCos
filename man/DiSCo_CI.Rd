@@ -11,7 +11,8 @@ DiSCo_CI(
   mc.cores = 1,
   cl = 0.95,
   num.redraws = 500,
-  evgrid = seq(from = 0, to = 1, length.out = 1001)
+  evgrid = seq(from = 0, to = 1, length.out = 1001),
+  qmethod = NULL
 )
 }
 \arguments{

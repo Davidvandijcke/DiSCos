@@ -4,7 +4,7 @@
 \alias{DiSCo_weights_reg}
 \title{DiSCo_weights_reg}
 \usage{
-DiSCo_weights_reg(controls, target, M = 500)
+DiSCo_weights_reg(controls, target, M = 500, qmethod = NULL, simplex = FALSE)
 }
 \arguments{
 \item{controls}{List with matrices of control distributions}

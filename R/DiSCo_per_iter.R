@@ -10,7 +10,7 @@
 #' @param ww Optional vector of weights. Default is uniform weights.
 #' @return List of squared Wasserstein distances between the target unit and the control units
 #' @export
-DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, ww=0, qmethod=NULL){
+DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, M=1000, ww=0, qmethod=NULL, per_q_min=0, per_q_max=1){
     # One iteration of the permutation test
 
     #create new control and target
@@ -52,7 +52,7 @@ DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, ww=0, qm
     lambda_tp=list()
 
     for (t in 1:T0){
-      lambda_tp[[t]] <- DiSCo_weights_reg(perc[[t]],as.vector(pert[[t]]), 1000, qmethod=qmethod)
+      lambda_tp[[t]] <- DiSCo_weights_reg(perc[[t]],as.vector(pert[[t]]), M, qmethod=qmethod)
     }
 
 
@@ -81,11 +81,14 @@ DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, ww=0, qm
       target_q[[t]] <- myQuant(pert[[t]], evgrid, qmethod)
     }
 
+    # find the closest quantile range that includes [per_q_min, per_q_max]
+    per_q_floor <- floor(per_q_min * length(evgrid))
+    per_q_ceil <- ceiling(per_q_max * length(evgrid))
 
     #squared Wasserstein distance between the target and the corresponding barycenter
     dist=c()
     for (t in 1:length(perc)){
-      dist[t]=mean((bc_t[[t]]-target_q[[t]])**2)
+      dist[t]=mean((bc_t[[t]][per_q_floor:per_q_ceil] -target_q[[t]][per_q_floor:per_q_ceil])**2)
     }
     #setTxtProgressBar(pb, i)
 

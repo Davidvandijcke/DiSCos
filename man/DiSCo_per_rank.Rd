@@ -4,7 +4,7 @@
 \alias{DiSCo_per_rank}
 \title{DiSCo_per_rank}
 \usage{
-DiSCo_per_rank(distt, distp)
+DiSCo_per_rank(distt, distp, T0)
 }
 \arguments{
 \item{distt}{List of squared Wasserstein distances between the target unit and the control units}

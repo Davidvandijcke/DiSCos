@@ -22,7 +22,8 @@ This variable can be any type, as long as it is the same type as the id_col colu
 
 \item{G}{Integer indicating the number of grid points for the grid on which the estimated functions are evaluated. Default is 1000.}
 
-\item{num.cores}{Integer, number of cores to use for parallel computation. Default is 1 (sequential computation). If the \code{permutation} or \code{CI} arguments are set to TRUE, this can be very slow!}
+\item{num.cores}{Integer, number of cores to use for parallel computation. Default is 1 (sequential computation). If the \code{permutation} or \code{CI} arguments are set to TRUE, this can be slow!
+If you get an error in "all cores" or similar, try setting num.cores=1 to see the precise error value.}
 
 \item{permutation}{logical, whether to use permutation or not}
 }
