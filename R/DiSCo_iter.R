@@ -42,7 +42,7 @@
 #'   \item{\code{controls.q} }{Quantiles for the control units, evaluated on the specified grid.}
 #' }
 #' @export
-DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, ...) {
+DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_min=0, q_max=1, ...) {
 
     # target
     target <- df[(id_col == id_col.target) & (t_col == yy)]$y_col
@@ -73,9 +73,9 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, ..
     grid[c("grid.min", "grid.max", "grid.rand", "grid.ord")] <- getGrid(target, controls, G) # TODO: this can be done just once
 
     # obtaining the optimal weights for the DiSCo method
-    DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M, qmethod=qmethod)
+    DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M, qmethod=qmethod, q_min=q_min, q_max=q_max)
 
-    # obtaining the optimal weights for the mixture of distributions method
+    # obtaining the optimal weights for the mixture of distributions method, note that this one is not restricted to q_min, q_max
     mixture <- DiSCo_mixture(controls, target, grid$grid.min, grid$grid.max, grid$grid.rand, M)
 
     #computing the target quantile function

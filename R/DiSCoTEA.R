@@ -16,7 +16,8 @@
 #' @param ylim Optional vector of length 2 indicating the y-axis limits of the plot.
 #' This can lead to margin errors on the plot window if the number of time periods is large, in which case it is recommended to specify a smaller number (e.g. <=10).
 #' @export
-DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_window=NULL, savePlots=FALSE, xlim=NULL, ylim=NULL) {
+DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_window=NULL, savePlots=FALSE,
+                     xlim=NULL, ylim=NULL, samples=c(0.25, 0.5, 0.75)) {
 
   # reconstruct some parameters
   df <- disco$params$df
@@ -30,6 +31,8 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_win
   placebo <- disco$params$CI_placebo
   evgrid = seq(from=0,to=1,length.out=disco$params$G+1)
   qmethod <- disco$params$qmethod
+  q_min <- disco$params$q_min
+  q_max <- disco$params$q_max
 
 
   #
@@ -102,8 +105,8 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_win
         ylim <- c(ymin, ymax)
       }
       if (is.null(xlim)) {
-        xmin <- quantile(unlist(grid_temp), 0.01)
-        xmax <- quantile(unlist(grid_temp), 0.99)
+        xmin <- quantile(unlist(grid), 0.01)
+        xmax <- quantile(unlist(grid), 0.99)
         xlim <- c(xmin, xmax)
       }
       plotDistOverTime(treats, grid, t_start, t_max, n_per_window, CI, ci_lower, ci_upper, savePlots=savePlots,
@@ -125,17 +128,17 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_win
       target_cdf[[i]] <- stats::ecdf(disco$results.periods[[i]]$target$quantiles)(grid)
     }
     if (CI) {
-      cdf_boot <- list()
+      treats_boot <- list()
       sds <- list()
       ci_lower <- list()
       ci_upper <- list()
 
       for (i in 1:length(qtiles_centered)) {
         # apply ecdf to each column of qtiles_centered_boot[[i]]
-        cdf_boot[[i]] <- apply(qtiles_boot[[i]], 2, function(x) stats::ecdf(x)(grid))
-        sds[[i]] <- apply(cdf_boot[[i]], 1, sd)
-        ci_lower[[i]] <- apply(cdf_boot[[i]],1,stats::quantile, probs=(1-cl)/2)
-        ci_upper[[i]] <- apply(cdf_boot[[i]],1,stats::quantile, probs=cl+(1-cl)/2)
+        treats_boot[[i]] <- apply(qtiles_boot[[i]], 2, function(x) stats::ecdf(x)(grid))
+        sds[[i]] <- apply(treats_boot[[i]], 1, sd)
+        ci_lower[[i]] <- apply(treats_boot[[i]],1,stats::quantile, probs=(1-cl)/2)
+        ci_upper[[i]] <- apply(treats_boot[[i]],1,stats::quantile, probs=cl+(1-cl)/2)
       }
     } else {
       sds <- NA
@@ -153,12 +156,13 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_win
   } else if (agg == "quantileDiff") {
 
     treats <-  qtiles_centered
+    treats_boot <- qtiles_centered_boot
     grid <- evgrid
 
     if (CI) {
-      sds <- lapply(qtiles_centered_boot, function(x) apply(x, 1, sd))
-      ci_lower <- lapply(qtiles_centered_boot, function(x) apply(x,1,stats::quantile, probs=(1-cl)/2))
-      ci_upper <- lapply(qtiles_centered_boot, function(x) apply(x,1,stats::quantile, probs=cl+(1-cl)/2))
+      sds <- lapply(treats_boot, function(x) apply(x, 1, sd))
+      ci_lower <- lapply(treats_boot, function(x) apply(x,1,stats::quantile, probs=(1-cl)/2))
+      ci_upper <- lapply(treats_boot, function(x) apply(x,1,stats::quantile, probs=cl+(1-cl)/2))
     } else {
       sds <- NA
       ci_lower <- NA
@@ -185,12 +189,13 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_win
   } else if (agg == "quantile") {
 
     treats <-  qtiles
+    treats_boot <- qtiles_boot
     grid <- evgrid
 
     if (CI) {
-      sds <- lapply(qtiles_boot, function(x) apply(x, 1, sd))
-      ci_lower <- lapply(qtiles_boot, function(x) apply(x,1,stats::quantile, probs=(1-cl)/2))
-      ci_upper <- lapply(qtiles_boot, function(x) apply(x,1,stats::quantile, probs=cl+(1-cl)/2))
+      sds <- lapply(treats_boot, function(x) apply(x, 1, sd))
+      ci_lower <- lapply(treats_boot, function(x) apply(x,1,stats::quantile, probs=(1-cl)/2))
+      ci_upper <- lapply(treats_boot, function(x) apply(x,1,stats::quantile, probs=cl+(1-cl)/2))
     } else {
       sds <- NA
       ci_lower <- NA
@@ -220,9 +225,82 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_win
     names(ci_lower) <- nams
     names(ci_upper) <- nams
   }
+
+  if (agg %in% c("cdfDiff", "quantileDiff")){
+
+  #---------------------------------------------------------------------------
+  ## calculate the aggregated treatment effect at the sample points
+  #---------------------------------------------------------------------------
+    if (min(samples) >0) samples <- c(0, samples)
+    if (max(samples) < 1) samples <- c(samples, 1)
+
+    if (q_min != 0 | q_max != 1) {
+      samples <- c(0, 1)
+    }
+
+    # get treatment periods
+    t_list <- as.numeric(nams)
+    # get treatment time periods
+    I <- which(t_list >= t0)
+
+    # for treatment time periods, loop over a sample of the distribution and bind to dataframe that we'll print
+    grid_q <- samples * (length(grid)-1) + 1
+    for (i in I) {
+      for (j in 1:(length(grid_q)-1)){
+        f <- grid_q[j]
+        t <- grid_q[j+1]
+        treats_agg <- mean(treats[[i]][f:t])
+        treats_boot_agg <- apply(treats_boot[[i]][f:t,], 2, mean)
+        sd_agg <- sd(treats_boot_agg)
+        ci_lower_agg <- stats::quantile(treats_boot_agg, probs=(1-cl)/2)
+        ci_upper_agg <- stats::quantile(treats_boot_agg, probs=cl+(1-cl)/2)
+
+        out_temp <- cbind.data.frame(t=t_list[[i]], grid_lower=grid[f], grid_upper=grid[t], treats = treats_agg, ses = sd_agg,
+                                     ci_lower = ci_lower_agg, ci_upper = ci_upper_agg)
+        if ((i == I[1]) & (j==1)) {
+          out <- out_temp
+        } else {
+          out <- rbind.data.frame(out, out_temp)
+        }
+      }
+    }
+    # header
+    if (agg == "cdfDiff") {
+      ooi <- "CDF \u0394" # object of interest
+    } else if (agg == "quantileDiff") {
+      ooi <- "Quantile \u0394"
+    }
+    # confidence band text
+    cband_text1 <- paste0("[", 100*cl,"% ")
+
+    # format the dataframe
+    out <- round(out, 4)
+    sig <- (out$ci_lower > 0) | (out$ci_upper < 0)
+    sig_text <- ifelse(sig, "*", "")
+    out <- cbind.data.frame(out, sig_text)
+    ooi <- gsub(" \n", "", ooi)
+    colnames(out) <- c("Time", "X_from", "X_to",  ooi, "Std. Error", cband_text1, "Conf. Band]", "")
+
+    if (q_min != 0 | q_max != 1) { # if we have a subset of the distribution, we only calculate the effect there
+      out$X_from <- q_min
+      out$X_to <- q_max
+    }
+
+
+    ## redo permutation for samples
+    if (!is.null(disco$perm)) { # if they asked for permutation test in main function
+
+    }
+
+  } else {
+    out <- NULL # if they didn't ask for treatment effects
+  }
+
+
   call <- match.call()
   return(DiSCoT(agg=agg, treats=treats, grid=grid, ses=sds, ci_lower=ci_lower, ci_upper=ci_upper,
-                t0=t0, call=call, cl=cl, N=nrow(disco$params$df), J=uniqueN(disco$params$df$id_col)-1))
+                t0=t0, call=call, cl=cl, N=nrow(disco$params$df), J=uniqueN(disco$params$df$id_col)-1, agg_df=out,
+                perm=disco$perm))
 
 }
 
@@ -240,10 +318,12 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_win
 #' @param N number of observations
 #' @param J number of treated units
 #' @param grid grid
+#' @param agg_df dataframe of aggregated treatment effects and their confidence intervals
+#' @param perm list of permutation results
 #' @export
-DiSCoT <- function(agg, treats, ses, grid, ci_lower, ci_upper, t0, call, cl, N, J) {
+DiSCoT <- function(agg, treats, ses, grid, ci_lower, ci_upper, t0, call, cl, N, J, agg_df, perm) {
   out <- list(agg=agg, treats=treats, ses=ses, ci_lower=ci_lower, ci_upper=ci_upper, t0=t0, call=call, cl=cl,
-              grid=grid, N=N, J=J)
+              grid=grid, N=N, J=J, agg_df=agg_df, perm=perm)
   class(out) <- "DiSCoT"
   out
 }
@@ -315,11 +395,12 @@ plotDistOverTime <- function(cdf_centered, grid_cdf, t_start, t_max, n_per_windo
 #' @export
 summary.DiSCoT <- function(object) {
 
-  ## store some useful objects
+  # get results dataframe
+  out <- object$agg_df
+  # get treatment periods
   t_list <- as.numeric(names(object$treats))
   # get treatment time periods
   I <- which(t_list >= object$t0)
-
 
   #------------------------------------------------------------
   # print header
@@ -335,8 +416,8 @@ summary.DiSCoT <- function(object) {
   cat("\n")
 
   if (object$agg %in% c("quantile", "cdf")) {
-    cat("No treatment effects to summarize, set graph=TRUE in function call or specify a treatment effect option in `agg`. \n")
-    return()
+    cat("No treatment effects to summarize, set graph=TRUE in function call or specify a treatment effect option in `agg`.")
+    return(invisible(NULL))
   }
 
 
@@ -344,46 +425,24 @@ summary.DiSCoT <- function(object) {
   # print treatment effects
   #------------------------------------------------------------
 
-  # confidence band text
-  cband_text1 <- paste0("[", 100*object$cl,"% ")
-
   # header
   if (object$agg == "cdfDiff") {
       ooi <- "CDF \u0394 \n" # object of interest
   } else if (object$agg == "quantileDiff") {
     ooi <- "Quantile \u0394 \n"
   }
-  cat(paste0("Sample of Distributional Treatment Effects, ", ooi))
+  cat(paste0("Aggregated Distribution Differences, ", ooi))
 
 
-
-  # for treatment time periods, loop over a sample of the distribution and bind to dataframe that we'll print
-  grid_q <- c(0.1, 0.25, 0.5, 0.75, 0.9) * (length(object$grid)-1) + 1
-  grid_sample <- object$grid[grid_q]
-  for (i in I) {
-    out_temp <- cbind.data.frame(t=t_list[[i]], grid_sample, treats = object$treats[[i]][grid_q], ses = object$ses[[i]][grid_q],
-                                 ci_lower = object$ci_lower[[i]][grid_q], ci_upper = object$ci_upper[[i]][grid_q])
-    if (i == I[1]) {
-      out <- out_temp
-    } else {
-      out <- rbind.data.frame(out, out_temp)
-    }
-  }
-
-  # format the dataframe
-  out <- round(out, 4)
-  sig <- (out$ci_lower > 0) | (out$ci_upper < 0)
-  sig_text <- ifelse(sig, "*", "")
-  out <- cbind.data.frame(out, sig_text)
-  ooi <- gsub(" \n", "", ooi)
-  colnames(out) <- c("Time", "X", ooi, "Std. Error", cband_text1, "Conf. Band]", "")
 
 
   print(out, row.names=FALSE)
 
   cat("---\n")
-  cat("Signif. codes: `*' confidence band does not cover 0")
+  cat("Signif. codes: `*' Confidence band for distribution differences does not cover 0")
   cat("\n\n")
+
+  cat(paste(summary(object$perm), collapse="\n"))
 
   cat(paste0("Number of pre-treatment periods: ", length(t_list) - length(I)))
   cat("\n")
@@ -391,8 +450,6 @@ summary.DiSCoT <- function(object) {
   cat(paste0("Number of post-treatment periods: ", length(I)))
   cat("\n")
 
-  cat(paste0("Number of controls: ", object$J))
-  cat("\n")
 
   cat(paste0("N=", formatC(object$N, big.mark=",")))
   cat("\n")

@@ -10,7 +10,7 @@
 #' @param ww Optional vector of weights. Default is uniform weights.
 #' @return List of squared Wasserstein distances between the target unit and the control units
 #' @export
-DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, M=1000, ww=0, qmethod=NULL, per_q_min=0, per_q_max=1){
+DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, M=1000, ww=0, qmethod=NULL, q_min=0, q_max=1){
     # One iteration of the permutation test
 
     #create new control and target
@@ -52,7 +52,7 @@ DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, M=1000, 
     lambda_tp=list()
 
     for (t in 1:T0){
-      lambda_tp[[t]] <- DiSCo_weights_reg(perc[[t]],as.vector(pert[[t]]), M, qmethod=qmethod)
+      lambda_tp[[t]] <- DiSCo_weights_reg(perc[[t]],as.vector(pert[[t]]), M, qmethod=qmethod, q_min=q_min, q_max=q_max)
     }
 
 
@@ -60,7 +60,7 @@ DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, M=1000, 
     if (length(ww)==1){
       w_t=rep(1/T0, T0)
       lambda.opt=matrix(unlist(lambda_tp),ncol=T0)%*%w_t
-    }else{
+    } else{
       lambda.opt=matrix(unlist(lambda_tp),ncol=T0)%*%ww
     }
 
@@ -69,7 +69,7 @@ DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, M=1000, 
     bc_t=list()
 
     for (t in 1:length(perc)){
-      bc_t[[t]]=DiSCo_bc(perc[[t]], perc.q[[t]], lambda.opt,evgrid)
+      bc_t[[t]]=DiSCo_bc(perc.q[[t]], lambda.opt,evgrid)
     }
 
 
@@ -81,14 +81,10 @@ DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, M=1000, 
       target_q[[t]] <- myQuant(pert[[t]], evgrid, qmethod)
     }
 
-    # find the closest quantile range that includes [per_q_min, per_q_max]
-    per_q_floor <- floor(per_q_min * length(evgrid))
-    per_q_ceil <- ceiling(per_q_max * length(evgrid))
-
     #squared Wasserstein distance between the target and the corresponding barycenter
     dist=c()
     for (t in 1:length(perc)){
-      dist[t]=mean((bc_t[[t]][per_q_floor:per_q_ceil] -target_q[[t]][per_q_floor:per_q_ceil])**2)
+      dist[t]=mean((bc_t[[t]] -target_q[[t]])**2)
     }
     #setTxtProgressBar(pb, i)
 

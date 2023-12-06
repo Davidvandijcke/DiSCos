@@ -14,11 +14,15 @@
 #' @param controls List with matrices of control distributions
 #' @param target Matrix containing the target distribution
 #' @param M Optional integer, number of draws from the uniform distribution for approximating the integral. See section 3.1 in the paper.
+#' @param qmethod Optional string, method for computing the quantile function. See section 3.1 in the paper.
+#' @param simplex Optional boolean, if TRUE the weights are constrained to be non-negative and sum to one.
+#' @param q_min Optional numeric, lower bound for the uniform distribution from which the quantile draws are taken.
+#' @param q_max Optional numeric, upper bound for the uniform distribution from which the quantile draws are taken.
 #'
 #' @return Vector of optimal synthetic control weights
 #' @references
 #' \insertAllCited{}
-DiSCo_weights_reg <- function(controls,target, M = 500, qmethod=NULL, simplex=FALSE){
+DiSCo_weights_reg <- function(controls,target, M = 500, qmethod=NULL, simplex=FALSE, q_min=0, q_max=1){
 
   if (!is.null(qmethod)){
     if (qmethod=="extreme"){
@@ -43,7 +47,7 @@ DiSCo_weights_reg <- function(controls,target, M = 500, qmethod=NULL, simplex=FA
   # M is the number of draws from the uniform distribution for approximating the integral
 
   ## Sampling from this quantile function M times
-  Mvec <- stats::runif(M, min = 0, max = 1)
+  Mvec <- stats::runif(M, min = q_min, max = q_max)
   controls.s <- matrix(0,nrow = M, ncol = length(controls))
   for (jj in 1:length(controls)){
     # controls.s[,jj] <- mapply(myquant, Mvec, MoreArgs=list(X=controls[[jj]]))

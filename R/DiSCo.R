@@ -22,8 +22,8 @@
 #' @param num.cores Integer, number of cores to use for parallel computation. Default is 1 (sequential computation). If the `permutation` or `CI` arguments are set to TRUE, this can be slow!
 #' If you get an error in "all cores" or similar, try setting num.cores=1 to see the precise error value.
 #' @param permutation Logical, indicating whether to use the permutation method for computing the optimal weights. Default is FALSE.
-#' @param per_q_min Numeric, minimum quantile to use for the permutation method. Set this together with `per_q_max` to restrict the range of quantiles used for the permutation method. Default is 0 (all quantiles).
-#' @param per_q_max Numeric, maximum quantile to use for the permutation method. Set this together with `per_q_min` to restrict the range of quantiles used for the permutation method. Default is 1 (all quantiles).
+#' @param q_min Numeric, minimum quantile to use. Set this together with `q_max` to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).
+#' @param q_max Numeric, maximum quantile to use. Set this together with `q_min` to restrict the range of quantiles used to construct the synthetic control. Default is 1 (all quantiles).
 #' @param CI Logical, indicating whether to compute confidence intervals for the counterfactual quantiles. Default is FALSE.
 #' @param CI_placebo Logical, indicating whether to compute confidence intervals for the pre-treatment periods. Default is TRUE.
 #' If you have a lot of pre-treatment periods, setting this to FALSE can speed up the computation.
@@ -56,7 +56,7 @@
 #' @export
 
 
-DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, permutation = FALSE, per_q_min = 0, per_q_max = 1,
+DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, permutation = FALSE, q_min = 0, q_max = 1,
                   CI = FALSE, CI_placebo=FALSE, boots = 500, cl = 0.95, graph = FALSE,
                   qmethod=NULL, seed=NULL) {
 
@@ -83,12 +83,12 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
   # create a list to store the results for each period
   results.periods <- list()
 
-  evgrid = seq(from=0,to=1,length.out=G+1)
+  evgrid = seq(from=q_min,to=q_max,length.out=G+1)
 
   # run the main function in parallel for each period
   periods <- sort(unique(df$t_col)) # we call the iter function on all periods, but won't calculate weights for the post-treatment periods
   results.periods <- mclapply.hack(periods, DiSCo_iter, df, evgrid, id_col.target = id_col.target, M = M,
-                                   G = G, T0 = T0, mc.cores = num.cores, qmethod=qmethod)
+                                   G = G, T0 = T0, mc.cores = num.cores, qmethod=qmethod, q_min=q_min, q_max=q_max)
   # turn results.periods into a named list where the name is the period
   names(results.periods) <- as.character(periods)
 
@@ -104,7 +104,7 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
   Weights_DiSCo_avg <- (1/T0) * Weights_DiSCo_avg
   Weights_mixture_avg <- (1/T0) * Weights_mixture_avg
 
-  bc <- lapply(seq(1:T_max), function(x) DiSCo_bc(controls=results.periods[[x]]$controls$data, controls.q=results.periods[[x]]$controls$quantiles, Weights_DiSCo_avg, evgrid))
+  bc <- lapply(seq(1:T_max), function(x) DiSCo_bc(controls.q=results.periods[[x]]$controls$quantiles, Weights_DiSCo_avg, evgrid))
   # calculating the counterfactual target quantiles and CDF
   for (x in seq(1:T_max)) {
     bc_x <- bc[[x]]
@@ -140,30 +140,12 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
   # permutation tests
   if (permutation) {
 
-    # grab the raw control and target data
-    controls_per <- lapply(seq(1:T_max), function(x) results.periods[[x]]$controls$data)
-    target_per <- lapply(seq(1:T_max), function(x) results.periods[[x]]$target$data)
-
-    # grab the quantiles for the control and target data, for the desired range
-    controls.q <- lapply(seq(1:T_max), function(x) results.periods[[x]]$controls$quantiles) # here it's a matrix hence ,
-    target.q <- lapply(seq(1:T_max), function(x) results.periods[[x]]$target$quantiles) # here it's a vector
-
     # run the permutation test
-    perm <- DiSCo_per(c_df=controls_per, t_df=target_per, controls.q=controls.q, target.q=target.q, T0=T0,
-                      weights=Weights_DiSCo_avg, num_cores=num.cores, evgrid=evgrid,
-                      graph=graph, qmethod=qmethod, M=M, per_q_min=per_q_min, per_q_max=per_q_max)
-
-    # get the control and target permutation distributions
-    distp <- perm$control.dist
-    distt <- perm$target.dist
+    perm_obj <- DiSCo_per(results.periods=results.periods, evgrid=evgrid, T0=T0,
+                      weights=Weights_DiSCo_avg, num_cores=num.cores,
+                      graph=graph, qmethod=qmethod, M=M, q_min=q_min, q_max=q_max)
 
 
-    # calculate the ranks and p-values
-    p_val <- DiSCo_per_rank(distt, distp, T0)
-
-    # create the permutation object for easy summarization
-    J_1 <- length(distp)
-    perm_obj <- permut(distp, distt, p_val, J_1)
   } else {
     perm_obj <- NULL
   }
@@ -175,7 +157,7 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
 
 
   return(list(results.periods=results.periods, Weights_DiSCo_avg=Weights_DiSCo_avg,
-              Weights_mixture_avg=Weights_mixture_avg, perm=perm_obj, params=list(df=df, id_col.target=id_col.target,
-              t0=t0, M=M, G=G, CI=CI, cl=cl, CI_placebo=CI_placebo, qmethod=qmethod, boot=boots)))
+              Weights_mixture_avg=Weights_mixture_avg, perm=perm_obj, evgrid=evgrid, params=list(df=df, id_col.target=id_col.target,
+              t0=t0, M=M, G=G, CI=CI, cl=cl, CI_placebo=CI_placebo, qmethod=qmethod, boot=boots, q_min=q_min, q_max=q_max)))
 
 }

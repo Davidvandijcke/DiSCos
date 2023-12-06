@@ -7,8 +7,8 @@
 #' See Algorithm 1 in \insertCite{gunsilius2023distributional;textual}{DiSCo} for more details. The only modification is that we take the ratio of post- and pre-treatment
 #' root mean squared Wasserstein distances to calculate the p-value, rather than the level in each period, following @abadie2010synthetic.
 #'
-#' @param c_df List with matrices of control distributions
-#' @param t_df Matrix containing the target distribution
+#' @param results.periods List of period-specific results from DiSCo
+#' @param evgrid Vector of evaluation grid points for quantiles
 #' @param T0 Integer indicating first year of treatment as counted from 1 (e.g, if treatment year 2002 was the 5th year in the sample, this parameter should be 5).
 #' @param ww Optional vector of weights indicating the relative importance of each time period. If not specified, each time period is weighted equally.
 #' @param peridx Optional integer indicating number of permutations. If not specified, by default equal to the number of units in the sample.
@@ -18,12 +18,28 @@
 #' @param y_name Y axis label of the graph
 #' @param x_name X axis label of the graph
 #' @param num_cores Integer, number of cores to use for parallel computation. Set to 1 by default (sequential computation), this can be very slow!
+#' @param redo_weights Boolean indicating whether to recompute the weights for the "true" treated unit. Set to FALSE by default.
+#' @param weights Optional vector of weights to use for the "true" treated unit. `redo_weights` has to be set to FALSE for these weights to be used.
+#' @param qmethod Quantile method, see `DiSCo` function.
+#' @param q_min Minimum quantile to use for the permutation test. Default is 0.
+#' @param q_max Maximum quantile to use for the permutation test. Default is 1.
+#' @param M Number of samples from uniform distribution to use for the permutation test. Default is 1000.
 #' @return List of matrices containing synthetic time path of the outcome variable
 #' for the target unit together with the time paths of the control units
 #' @references
 #' \insertAllCited{}
-DiSCo_per <- function(c_df, t_df, controls.q, target.q, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, length.out=101),
-                 graph=TRUE, num_cores = 1, redo_weights=FALSE, weights=NULL, qmethod=NULL, per_q_min=0, per_q_max=1, M){
+DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, length.out=101),
+                 graph=TRUE, num_cores = 1, redo_weights=FALSE, weights=NULL, qmethod=NULL, q_min=0, q_max=1, M){
+
+  ## prep
+  # grab the raw control and target data
+  c_df <- lapply(seq(1:length(results.periods)), function(x) results.periods[[x]]$controls$data)
+  t_df <- lapply(seq(1:length(results.periods)), function(x) results.periods[[x]]$target$data)
+
+
+  # grab the quantiles for the control and target data, for the desired range
+  controls.q <- lapply(seq(1:length(results.periods)), function(x) results.periods[[x]]$controls$quantiles) # here it's a matrix hence ,
+  target.q <- lapply(seq(1:length(results.periods)), function(x) results.periods[[x]]$target$quantiles) # here it's a vector
 
   #----------------------------------------#
   # target
@@ -36,7 +52,7 @@ DiSCo_per <- function(c_df, t_df, controls.q, target.q, T0, ww=0, peridx=0, evgr
 
 
     lambda_t <- parallel::mclapply.hack(seq_len(T0), function(t) {
-      DiSCo_weights_reg(c_df[[t]], as.vector(t_df[[t]]), M, qmethod=qmethod)
+      DiSCo_weights_reg(c_df[[t]], as.vector(t_df[[t]]), M, qmethod=qmethod, q_min=q_min, q_max=q_max)
     }, mc.cores = num_cores)
 
     #calculate the average optimal lambda
@@ -57,18 +73,15 @@ DiSCo_per <- function(c_df, t_df, controls.q, target.q, T0, ww=0, peridx=0, evgr
 
 
   bc_t <- mclapply.hack(1:length(c_df), function(x) {
-    DiSCo_bc(c_df[[x]], controls.q[[x]], lambda.opt, evgrid)
+    DiSCo_bc(controls.q[[x]], lambda.opt, evgrid)
   }, mc.cores = num_cores)
 
 
 
-  #squared Wasserstein distance between the target and the corresponding barycenter
-  # find the closest quantile range that includes [per_q_min, per_q_max]
-  per_q_floor <- floor(per_q_min * length(evgrid))
-  per_q_ceil <- ceiling(per_q_max * length(evgrid))
+
   distt=c()
   for (t in 1:length(c_df)){
-    distt[t]=mean((bc_t[[t]][per_q_floor:per_q_ceil]-target.q[[t]][per_q_floor:per_q_ceil])**2)
+    distt[t]=mean((bc_t[[t]]-target.q[[t]])**2)
   }
 
   #----------------------------------------#
@@ -85,7 +98,7 @@ DiSCo_per <- function(c_df, t_df, controls.q, target.q, T0, ww=0, peridx=0, evgr
   cat("Starting permutation test...")
   distp <- mclapply.hack(seq_len(length(peridx)), function(idx) {
     DiSCo_per_iter(c_df=c_df, c_df.q=controls.q, t_df=t_df, T0=T0, ww=ww, peridx=peridx, evgrid=evgrid, idx=idx, qmethod=qmethod, M=M,
-                   per_q_min=per_q_min, per_q_max=per_q_max)
+                   q_min=q_min, q_max=q_max)
   }, mc.cores = num_cores)
   cat('Permutation finished!')
 
@@ -109,9 +122,18 @@ DiSCo_per <- function(c_df, t_df, controls.q, target.q, T0, ww=0, peridx=0, evgr
   }
 
 
-  return(list(target.dist=distt, control.dist=distp))
+  # calculate the ranks and p-values
+  p_val <- DiSCo_per_rank(distt, distp, T0)
+
+  # create the permutation object for easy summarization
+  J_1 <- length(distp)
+  perm_obj <- permut(distp, distt, p_val, J_1, q_min=q_min, q_max=q_max)
+
+
+  return(perm_obj)
 
 }
+
 
 
 #' @title DiSCo_per_rank
@@ -147,6 +169,8 @@ DiSCo_per_rank <- function(distt, distp, T0) {
 #' @param p_values List of p-values for each time period
 #' @param p_overall Overall p-value
 #' @param J_1 Number of control units
+#' @param q_min Minimum quantile
+#' @param q_max Maximum quantile
 #' @return A list of class permut, with the following elements
 #' \item{distp}{List of squared Wasserstein distances between the control units}
 #' \item{distt}{List of squared Wasserstein distances between the target unit and the control units}
@@ -157,8 +181,8 @@ DiSCo_per_rank <- function(distt, distp, T0) {
 #' @examples
 #' permut(distp, distt, rank, p_values, p_overall, J_1)
 #' @export
-permut <- function(distp, distt,p_overall, J_1) {
-  out <- list(distp=distp, distt=distt, p_overall=p_overall, J_1=J_1)
+permut <- function(distp, distt,p_overall, J_1, q_min, q_max) {
+  out <- list(distp=distp, distt=distt, p_overall=p_overall, J_1=J_1, q_min=q_min, q_max=q_max)
   class(out) <- "permut"
   return(out)
 }
@@ -176,7 +200,7 @@ permut <- function(distp, distt,p_overall, J_1) {
 #' print(x, digits=3)
 #' @export
 print.permut <- function(x, digits = 3) {
-  cat("Permutation test results:\n")
+  cat(paste0("Permutation test for quantile range: [", x$q_min, ", ", x$q_max, "] \n"))
   cat("P-value: ", format(x$p_overall, digits=digits), "\n")
   cat("Number of control units: ", x$J_1, "\n")
 }

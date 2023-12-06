@@ -18,7 +18,7 @@ DiSCo_CI_iter <- function(redraw, controls, bc, weights, cl=0.95,
   }
 
 
-  return(DiSCo_bc(mycon,mycon.q,weights,evgrid))
+  return(DiSCo_bc(mycon.q,weights,evgrid))
 }
 
 
@@ -35,6 +35,7 @@ DiSCo_CI <- function(controls, bc, weights, mc.cores=1, cl=0.95, num.redraws=500
   #' @param cl The confidence level for the confidence interval
   #' @param num.redraws The number of bootstrap samples to draw
   #' @param evgrid The grid of quantiles to evaluate the counterfactual quantile function
+  #' @param qmethod The method for computing the quantile function
   #' @return \code{DSC_CI} returns a list containing the following components:
   #' \itemize{
   #' \item{\code{upper} }{a vector of the upper bound.}
