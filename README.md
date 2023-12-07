@@ -17,6 +17,9 @@ The **DiSCo** package contains tools for computing counterfactual
 quantile functions in a Distributional Synthetic Controls (DiSco)
 setting, following the method proposed in Gunsilius (2023).
 
+**warning** This package is currently under developed. A first version
+will be released soon.
+
 ## Getting Started
 
 Have a look at the vignette replicating the [empirical
