@@ -72,7 +72,7 @@ $$\
 In practice, we do this by solving the following optimization problem:
 $$
 \vec{\lambda}_t^*=\underset{\vec{\lambda} \in \Delta^J}{\operatorname{argmin}} \int_0^1\left|\sum_{j=2}^{J+1} \lambda_j F_{Y_{j t}}^{-1}(q)-F_{Y_{1 t}}^{-1}(q)\right|^2 d q
-$$ which gives optimal weights for each period. This problem can be
+$$ which gives an optimal weight for each unit-period combination. This problem can be
 solved by a simple weighted regression, which is implemented in the
 `DiSCo_weights_reg` function. To obtain the overall optimal weights
 $\vec{\lambda}^*$, we take the average of the optimal weights across all
@@ -105,13 +105,42 @@ intervention, respectively. We can now run the DiSCo command:
 ```{r}
 # if the below gives issues it's the knit cache...
 
-disco <- DiSCo(dube, id_col.target, t0, M = 500, G = 1000, num.cores = 2, permutation = FALSE,
-                 CI = FALSE, boots = 1, cl = 0.95, CI_placebo=TRUE, graph = FALSE, qmethod=NULL)
+disco <- DiSCo(dube, id_col.target, t0, G = 1000, num.cores = 2, permutation = FALSE,
+                 CI = TRUE, boots = 500, graph = TRUE)
 ```
 
-where we have chosen grids of 1000 grid points and opted for parallel
-computation with 5 cores to speed up the permutation test and confidence
-intervals, which we calculate using 500 resamples.
+where we have chosen a grid (`G`) of 1000 quantile and opted for parallel
+computation with 2 cores to speed up the permutation test and confidence
+intervals (`CI` is set to `TRUE`), which we calculate using 500 resamples (`boots`). 
+
+We also set `permutation` to `TRUE`, which runs the permutation test described in the paper (see `?DiSCo_per` for more details). 
+This will allow us to inspect the permutation inference results below. Already, by setting `graph` to `TRUE`,
+the function displayed a plot of the full distribution of permutation tests. The black solid line shows the
+fit of the "true" synthetic control. The fact that it does not diverge stronger than the other lines in gray after 
+treatment suggests that the treatment had no effect. 
+
+
+For context, the y-axis is the squared Wasserstein distance between the counterfactual and observed quantile functions,
+$$
+d_{t t}^2:=\int_0^1\left|F_{Y_{u t, N}}^{-1}(q)-F_{Y_{u t}}^{-1}(q)\right|^2 d q
+$$
+and, as in @abadie2010synthetic we take the ratio of post- to pre-intervention Wasserstein distance to account for variation in the pre-treatment fit across placebo tests,
+\[
+r_j=\frac{R_j\left(T_0+1, T\right)}{R_j\left(1, T_0\right)}
+\]
+and calculate the p-value for the permutation test as,
+\[
+p=\frac{1}{J+1} \sum_{j=1}^{J+1} H\left(r_j-r_1\right),
+\]
+where $H(x) $ is the Heaviside function which is 1 if $x\geq 0$ and 0 otherwise. 
+This p-value gives the probability of observing a placebo test with a larger ratio than the true treatment effect.
+It can be retrieved by calling
+```{r}
+summary(disco$perm)
+```
+
+
+
 
 We can use the DiSCo Treatment Effect Aggregator (`DiSCoTEA`) function
 to aggregate the resulting counterfactual quantile functions into

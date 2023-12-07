@@ -57,7 +57,7 @@
 
 
 DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 2, permutation = FALSE, q_min = 0, q_max = 1,
-                  CI = FALSE, CI_placebo=FALSE, boots = 500, cl = 0.95, graph = FALSE,
+                  CI = FALSE, CI_placebo=TRUE, boots = 500, cl = 0.95, graph = FALSE,
                   qmethod=NULL, seed=NULL) {
 
   #---------------------------------------------------------------------------

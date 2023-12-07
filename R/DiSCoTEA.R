@@ -386,7 +386,7 @@ plotDistOverTime <- function(cdf_centered, grid_cdf, t_start, t_max, n_per_windo
 
   # Create a ggplot
   p <- ggplot(df, aes(x = x)) +
-    geom_line(aes(y = y), colour = "black", linetype = lty) +
+    geom_line(aes(y = y), colour = "black", linetype = lty)
 
   if (!is.null(obsLine)) p <- p + geom_line(aes(y = obsLine), colour = "blue", linetype = lty_obs, show.legend = !is.null(obsLine))
 
