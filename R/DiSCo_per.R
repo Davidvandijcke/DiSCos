@@ -110,13 +110,22 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
 
   #default plot all squared Wasserstein distances
   if (graph==TRUE){
-    plot(distt, xlab='',ylab='', type='l', lwd=2, ylim=c(0, max(c(distt, unlist(distp))) + 0.1*max(c(distt, unlist(distp)))))
-    for (i in 1:length(distp)){
-      lines(1:length(c_df), distp[[i]], col='grey', lwd=1)
-    }
-    abline(v=T0, lty = 2)
-    title(ylab="Squared Wasserstein distance", line=2.5, cex.lab=1.5)
-    title(xlab="Time periods", line=3, cex.lab=1.5)
+    # Prepare the data for ggplot
+    df_distt <- data.frame(x = 1:length(distt), y = distt)
+    df_distp <- do.call(rbind, lapply(1:length(distp), function(i) data.frame(x = 1:length(c_df), y = distp[[i]], group = i)))
+
+    # Create the base plot
+    p <- ggplot() +
+      geom_line(data = df_distt, aes(x = x, y = y), size = 1) +
+      geom_line(data = df_distp, aes(x = x, y = y, group = group), color = "grey", size = 0.5) +
+      geom_vline(xintercept = T0, linetype = "dashed") +
+      labs(x = "Time periods", y = "Squared Wasserstein distance") +
+      scale_x_continuous(breaks = seq(1, length(distt), 1)) + # single tick for each time period
+      ylim(0, max(c(distt, unlist(distp))) + 0.1*max(c(distt, unlist(distp)))) +
+      theme_minimal()
+
+    # Print the plot
+    print(p)
 
 
   }
@@ -127,7 +136,7 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
 
   # create the permutation object for easy summarization
   J_1 <- length(distp)
-  perm_obj <- permut(distp, distt, p_val, J_1, q_min=q_min, q_max=q_max)
+  perm_obj <- permut(distp, distt, p_val, J_1, q_min=q_min, q_max=q_max, plot=p)
 
 
   return(perm_obj)
@@ -165,24 +174,16 @@ DiSCo_per_rank <- function(distt, distp, T0) {
 #'
 #' @param distp List of squared Wasserstein distances between the control units
 #' @param distt List of squared Wasserstein distances between the target unit and the control units
-#' @param rank Rank of the target unit
-#' @param p_values List of p-values for each time period
 #' @param p_overall Overall p-value
 #' @param J_1 Number of control units
 #' @param q_min Minimum quantile
 #' @param q_max Maximum quantile
-#' @return A list of class permut, with the following elements
-#' \item{distp}{List of squared Wasserstein distances between the control units}
-#' \item{distt}{List of squared Wasserstein distances between the target unit and the control units}
-#' \item{p_overall}{Overall p-value for post-treatment periods}
-#' \item{J_1}{Number of control units}
+#' @param plot ggplot object containing plot of squared Wasserstein distances over time for all permutations.
+#' @return A list of class permut, with the same elements as the input arguments.
 #'
 #' @export
-#' @examples
-#' permut(distp, distt, rank, p_values, p_overall, J_1)
-#' @export
-permut <- function(distp, distt,p_overall, J_1, q_min, q_max) {
-  out <- list(distp=distp, distt=distt, p_overall=p_overall, J_1=J_1, q_min=q_min, q_max=q_max)
+permut <- function(distp, distt,p_overall, J_1, q_min, q_max, plot) {
+  out <- list(distp=distp, distt=distt, p_overall=p_overall, J_1=J_1, q_min=q_min, q_max=q_max, plot=plot)
   class(out) <- "permut"
   return(out)
 }

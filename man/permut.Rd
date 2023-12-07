@@ -4,7 +4,7 @@
 \alias{permut}
 \title{permut}
 \usage{
-permut(distp, distt, p_overall, J_1)
+permut(distp, distt, p_overall, J_1, q_min, q_max, plot)
 }
 \arguments{
 \item{distp}{List of squared Wasserstein distances between the control units}
@@ -15,20 +15,19 @@ permut(distp, distt, p_overall, J_1)
 
 \item{J_1}{Number of control units}
 
+\item{q_min}{Minimum quantile}
+
+\item{q_max}{Maximum quantile}
+
+\item{plot}{ggplot object containing plot of squared Wasserstein distances over time for all permutations.}
+
 \item{rank}{Rank of the target unit}
 
 \item{p_values}{List of p-values for each time period}
 }
 \value{
-A list of class permut, with the following elements
-\item{distp}{List of squared Wasserstein distances between the control units}
-\item{distt}{List of squared Wasserstein distances between the target unit and the control units}
-\item{p_overall}{Overall p-value for post-treatment periods}
-\item{J_1}{Number of control units}
+A list of class permut, with the same elements as the input arguments.
 }
 \description{
 Object to hold results of permutation test
-}
-\examples{
-permut(distp, distt, rank, p_values, p_overall, J_1)
 }

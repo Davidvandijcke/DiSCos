@@ -4,15 +4,10 @@
 \alias{DiSCo_bc}
 \title{Function for computing barycenters in the DiSCo method at every time period}
 \usage{
-DiSCo_bc(
-  controls,
-  controls.q,
-  weights,
-  evgrid = seq(from = 0, to = 1, length.out = 101)
-)
+DiSCo_bc(controls.q, weights, evgrid = seq(from = 0, to = 1, length.out = 101))
 }
 \arguments{
-\item{controls}{List with matrices of control distributions.}
+\item{controls.q}{List with matrices of control quantile functions}
 
 \item{weights}{Vector of optimal synthetic control weights, computed using the DiSCo_weights_reg function.}
 
@@ -24,13 +19,7 @@ The quantile function of the barycenter associated with the "weights" evaluated 
 }
 \description{
 Compute barycenters in the DiSCo method at every time period, as in Definition 1,
-Step 4 in
-This program takes in samples from the distributions of the controls and puts out
-the associated barycenters and control group quantile functions.
-The control distributions can be given in list form, where each list element contains a
-vector of observations for the given control unit, in matrix form;
-in matrix- each column corresponds to one unit and each row is one observation.
-The list-form is useful, because the number of draws for each control group can be different.
+Step 4 in \insertCite{gunsilius2023distributional;textual}{DiSCo}.
 }
 \references{
 \insertAllCited{}

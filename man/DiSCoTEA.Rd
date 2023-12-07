@@ -6,34 +6,62 @@
 \usage{
 DiSCoTEA(
   disco,
-  agg = "ATT",
+  agg = "quantileDiff",
   graph = TRUE,
-  time = TRUE,
-  n_per_window = NULL,
+  t_plot = NULL,
   savePlots = FALSE,
   xlim = NULL,
-  ylim = NULL
+  ylim = NULL,
+  samples = c(0.25, 0.5, 0.75)
 )
 }
 \arguments{
 \item{disco}{Output of the DiSCo function}
 
-\item{agg}{String indicating the aggregation statistic to be used. Options are "ATT" (average treatment effect on the treated),}
+\item{agg}{String indicating the aggregation statistic to be used. Options are
+\itemize{
+\item{\code{quantileDiff} }{Difference in quantiles between the target and the weighted average of the controls.}
+\item{\code{quantile} }{.}
+}}
 
 \item{graph}{Boolean indicating whether to plot graphs. Default is TRUE.}
 
-\item{n_per_window}{Integer indicating the number of periods to include in each plot window, if graph=TRUE. Default is NULL, which means that the entire time window is used.}
+\item{t_plot}{Optional vector of time periods (\code{t_col} values in the original dataframe) to be plotted. Default is NULL, which plots all time periods.}
 
 \item{savePlots}{Boolean indicating whether to save the plots to the current working directory. The plot names will be \link{agg}\emph{\link{start_year}}\link{end_year}.pdf. The default is FALSE.}
 
 \item{xlim}{Optional vector of length 2 indicating the x-axis limits of the plot. This and the \code{ylim} option can be useful to zoom in on the relevant parts of the distribution for fat-tailed distributions.}
 
-\item{ylim}{Optional vector of length 2 indicating the y-axis limits of the plot.
-This can lead to margin errors on the plot window if the number of time periods is large, in which case it is recommended to specify a smaller number (e.g. <=10).}
+\item{ylim}{Optional vector of length 2 indicating the y-axis limits of the plot.}
+
+\item{samples}{Numeric vector indicating the range of quantiles of the aggregation statistic (\code{agg}) to be summarized in the \code{summary} property of the S3 class returned by the function.
+For example, if \code{samples} = c(0.25, 0.5, 0.75) (the default), the summary table will include the average effect for the 0-25th, 25-50th, 50-75th and 75-100th quantiles of the distribution of the aggregation statistic over time.}
+}
+\value{
+A \code{\link[DiSCo]{DiSCoT}} object.
 }
 \description{
-Distributional Synthetic Controls Treatment Effect Aggregator (DiSCoTEA)
+Distributional Synthetic Controls Treatment Effect Aggregator (DiSCoTEA).
 }
 \details{
-This function takes in the output of the DiSCo_per function and computes aggregate treatment effect using a user-specified aggregation statistic. The default is the average treatment effect (ATE).
+This function takes in the output of the DiSCo_per function and computes aggregate treatment effect using a user-specified aggregation statistic.
+The default is the differences between the counterfactual and the observed quantile functions (\code{quantileDiff}). If \code{graph} is set to TRUE,
+the function will plot the distribution of the aggregation statistic over time. The S3 class returned by the function
+has a \code{summary} property that will print a selection of aggregated effects (specified by the \code{samples} parameter) for the chosen \code{agg} method, by post-treatment year (see examples below).
+This \code{summary} call will only print effects if the \code{agg} parameter requested a distribution difference (\code{quantileDiff} or \code{cdfDiff}). The other aggregations are meant to be inspected visually.
+If the \code{permutation} parameter was set to TRUE in the original \code{DiSCo} call, the summary table will include the results of the permutation test.
+If the original \code{DiSCo} call was restricted to a range of quantiles smaller than \link{0,1} (i.e. \code{q_min} > 0 or \code{q_max} < 1), the \code{samples} parameter is ignored
+and only the aggregated differences for the quantile range specified in the original call are returned.
+}
+\examples{
+\dontrun{
+# load data
+data("dube")
+# run DiSCo
+disco <- DiSCo(dube, id_col.target = 2, t0 = 2003, M = 1000, G = 1000, num.cores = 4, permutation = TRUE,
+                     CI = TRUE, boots = 1000, cl = 0.95,  CI_placebo=TRUE, graph = TRUE, qmethod=NULL, q_min=0, q_max=1)
+discot <- DiSCoTEA(disco, agg = "quantileDiff", graph = TRUE, n_per_window = NULL, savePlots = FALSE, samples = c(0.2, 0.4, 0.6, 0.8))
+# print summary table
+summary(discot)
+}
 }

@@ -1,22 +1,45 @@
 
 #' @title DiSCoTEA
-#' @description Distributional Synthetic Controls Treatment Effect Aggregator (DiSCoTEA)
+#' @description Distributional Synthetic Controls Treatment Effect Aggregator (DiSCoTEA).
 #'
-#' @details This function takes in the output of the DiSCo_per function and computes aggregate treatment effect using a user-specified aggregation statistic. The default is the average treatment effect (ATE).
+#' @details This function takes in the output of the DiSCo_per function and computes aggregate treatment effect using a user-specified aggregation statistic.
+#' The default is the differences between the counterfactual and the observed quantile functions (`quantileDiff`). If `graph` is set to TRUE,
+#' the function will plot the distribution of the aggregation statistic over time. The S3 class returned by the function
+#' has a `summary` property that will print a selection of aggregated effects (specified by the `samples` parameter) for the chosen `agg` method, by post-treatment year (see examples below).
+#' This `summary` call will only print effects if the `agg` parameter requested a distribution difference (`quantileDiff` or `cdfDiff`). The other aggregations are meant to be inspected visually.
+#' If the `permutation` parameter was set to TRUE in the original `DiSCo` call, the summary table will include the results of the permutation test.
+#' If the original `DiSCo` call was restricted to a range of quantiles smaller than [0,1] (i.e. `q_min` > 0 or `q_max` < 1), the `samples` parameter is ignored
+#' and only the aggregated differences for the quantile range specified in the original call are returned.
 #'
 #' @param disco Output of the DiSCo function
 #' @param agg String indicating the aggregation statistic to be used. Options are
 #' \itemize{
 #'  \item{\code{quantileDiff} }{Difference in quantiles between the target and the weighted average of the controls.}
 #'  \item{\code{quantile} }{.}
+#'  }
 #' @param graph Boolean indicating whether to plot graphs. Default is TRUE.
-#' @param n_per_window Integer indicating the number of periods to include in each plot window, if graph=TRUE. Default is NULL, which means that the entire time window is used.
+#' @param t_plot Optional vector of time periods (`t_col` values in the original dataframe) to be plotted. Default is NULL, which plots all time periods.
 #' @param savePlots Boolean indicating whether to save the plots to the current working directory. The plot names will be [agg]_[start_year]_[end_year].pdf. The default is FALSE.
 #' @param xlim Optional vector of length 2 indicating the x-axis limits of the plot. This and the `ylim` option can be useful to zoom in on the relevant parts of the distribution for fat-tailed distributions.
 #' @param ylim Optional vector of length 2 indicating the y-axis limits of the plot.
-#' This can lead to margin errors on the plot window if the number of time periods is large, in which case it is recommended to specify a smaller number (e.g. <=10).
+#' @param samples Numeric vector indicating the range of quantiles of the aggregation statistic (`agg`) to be summarized in the `summary` property of the S3 class returned by the function.
+#' For example, if `samples` = c(0.25, 0.5, 0.75) (the default), the summary table will include the average effect for the 0-25th, 25-50th, 50-75th and 75-100th quantiles of the distribution of the aggregation statistic over time.
+#' @examples \dontrun{
+#' # load data
+#' data("dube")
+#' # run DiSCo
+#' disco <- DiSCo(dube, id_col.target = 2, t0 = 2003, M = 1000, G = 1000, num.cores = 4, permutation = TRUE,
+#'                      CI = TRUE, boots = 1000, cl = 0.95,  CI_placebo=TRUE, graph = TRUE, qmethod=NULL, q_min=0, q_max=1)
+#' discot <- DiSCoTEA(disco, agg = "quantileDiff", graph = TRUE, n_per_window = NULL, savePlots = FALSE, samples = c(0.2, 0.4, 0.6, 0.8))
+#' # print summary table
+#' summary(discot)
+#' }
+#' @return A \code{\link[DiSCo]{DiSCoT}} object.
+#'
+#'
+
 #' @export
-DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_window=NULL, savePlots=FALSE,
+DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlots=FALSE,
                      xlim=NULL, ylim=NULL, samples=c(0.25, 0.5, 0.75)) {
 
   # reconstruct some parameters
@@ -35,17 +58,14 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_win
   q_max <- disco$params$q_max
 
 
-  #
-  if (is.null(n_per_window)) n_per_window <- T_max
 
 
-  if (!placebo) {
-    t_start <- t0
-    T_start <- T0+1
-  } else{
-    t_start <- t_min
-    T_start <- 1
-  }
+  t_start <- t_min
+  T_start <- 1
+
+
+  if (is.null(t_plot)) t_plot <- t_start:t_max
+
 
 
   ##  calculate quantile treatment effects
@@ -72,15 +92,17 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_win
   if (agg == "cdfDiff"){
 
     treats <- list()
-    treats_boot <- list()
+    if (CI) treats_boot <- list()
     grid <- disco$results.periods[[1]]$target$grid ## TODO: in future probably wanna address this at root by always taking same grid in DiSco, and don't calculate CDFs
 
     for (i in 1:length(disco$results.periods)) {
       c_cdf <- stats::ecdf(disco$results.periods[[i]]$DiSCo$quantile)(grid)
       t_cdf <- stats::ecdf(disco$results.periods[[i]]$target$quantile)(grid)
       treats[[i]] <- c_cdf - t_cdf
-      boot_cdf <- apply(disco$results.periods[[i]]$DiSCo$CI$bootmat, 2, function(x) stats::ecdf(x)(grid))
-      treats_boot[[i]] <- sweep(boot_cdf, 1, t_cdf, "-")
+      if (CI) {
+        boot_cdf <- apply(disco$results.periods[[i]]$DiSCo$CI$bootmat, 2, function(x) stats::ecdf(x)(grid))
+        treats_boot[[i]] <- sweep(boot_cdf, 1, t_cdf, "-")
+      }
     }
 
     if (CI){
@@ -109,8 +131,8 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_win
         xmax <- quantile(unlist(grid), 0.99)
         xlim <- c(xmin, xmax)
       }
-      plotDistOverTime(treats, grid, t_start, t_max, n_per_window, CI, ci_lower, ci_upper, savePlots=savePlots,
-                       plotName=agg, ylim=ylim, xlim=xlim, xlab="Y", ylab="CDF Change")
+      p <- plotDistOverTime(treats, grid, t_start, t_max, n_per_window, CI, ci_lower, ci_upper, savePlots=savePlots,
+                       plotName=agg, ylim=ylim, xlim=xlim, xlab="Y", ylab="CDF Change", t_plot=t_plot)
     }
     #---------------------------------------------------------------------------
     ### cdfs
@@ -147,8 +169,8 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_win
     }
     if (is.null(xlim)) xlim <- c(min(grid), max(grid))
     if (graph) {
-      plotDistOverTime(treats, grid, t_start, t_max, n_per_window, CI, ci_lower, ci_upper, savePlots=savePlots, plotName=agg,
-                       obsLine = target_cdf, xlab="Y", ylab="CDF", lty=1, lty_obs=2, xlim=xlim)
+      p <- plotDistOverTime(treats, grid, t_start, t_max, n_per_window, CI, ci_lower, ci_upper, savePlots=savePlots, plotName=agg,
+                       obsLine = target_cdf, xlab="Y", ylab="CDF", lty=1, lty_obs=2, xlim=xlim, t_plot=t_plot)
     }
     #---------------------------------------------------------------------------
     ### quantiles of treatment effects
@@ -156,7 +178,7 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_win
   } else if (agg == "quantileDiff") {
 
     treats <-  qtiles_centered
-    treats_boot <- qtiles_centered_boot
+    if (CI) treats_boot <- qtiles_centered_boot
     grid <- evgrid
 
     if (CI) {
@@ -180,8 +202,8 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_win
         xmax <- max(unlist(evgrid))
         xlim <- c(xmin, xmax)
       }
-      plotDistOverTime(treats, grid, t_start, t_max, n_per_window, CI, ci_lower, ci_upper, ylim=ylim,
-                       xlab="Quantile", ylab="Treatment Effect", cdf=FALSE, savePlots=savePlots, plotName=agg)
+      p <- plotDistOverTime(treats, grid, t_start, t_max, n_per_window, CI, ci_lower, ci_upper, ylim=ylim,
+                       xlab="Quantile", ylab="Treatment Effect", cdf=FALSE, savePlots=savePlots, plotName=agg, t_plot=t_plot)
     }
     #---------------------------------------------------------------------------
     ### counterfactual and observed quantiles
@@ -189,7 +211,7 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_win
   } else if (agg == "quantile") {
 
     treats <-  qtiles
-    treats_boot <- qtiles_boot
+    if (CI) treats_boot <- qtiles_boot
     grid <- evgrid
 
     if (CI) {
@@ -213,17 +235,19 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_win
         xmax <- quantile(unlist(grid), 0.99)
         xlim <- c(xmin, xmax)
       }
-      plotDistOverTime(treats, grid, t_start, t_max, n_per_window, CI, ci_lower, ci_upper, ylim=ylim, xlab="Quantile",
-                       ylab="Treatment Effect", cdf=FALSE, obsLine = target_qtiles, savePlots=savePlots, plotName=agg)
+      p <- plotDistOverTime(treats, grid, t_start, t_max, n_per_window, CI, ci_lower, ci_upper, ylim=ylim, xlab="Quantile",
+                       ylab="Treatment Effect", cdf=FALSE, obsLine = target_qtiles, savePlots=savePlots, plotName=agg, t_plot=t_plot)
     }
 
   }
   nams <- names(disco$results.periods)
   if (length(treats) == length(nams)) { # if we have time effects
     names(treats) <- nams
-    names(sds) <- nams
-    names(ci_lower) <- nams
-    names(ci_upper) <- nams
+    if (CI) {
+      names(sds) <- nams
+      names(ci_lower) <- nams
+      names(ci_upper) <- nams
+    }
   }
 
   if (agg %in% c("cdfDiff", "quantileDiff")){
@@ -250,10 +274,17 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_win
         f <- grid_q[j]
         t <- grid_q[j+1]
         treats_agg <- mean(treats[[i]][f:t])
-        treats_boot_agg <- apply(treats_boot[[i]][f:t,], 2, mean)
-        sd_agg <- sd(treats_boot_agg)
-        ci_lower_agg <- stats::quantile(treats_boot_agg, probs=(1-cl)/2)
-        ci_upper_agg <- stats::quantile(treats_boot_agg, probs=cl+(1-cl)/2)
+
+        if (CI) {
+          treats_boot_agg <- apply(treats_boot[[i]][f:t,], 2, mean)
+          sd_agg <- sd(treats_boot_agg)
+          ci_lower_agg <- stats::quantile(treats_boot_agg, probs=(1-cl)/2)
+          ci_upper_agg <- stats::quantile(treats_boot_agg, probs=cl+(1-cl)/2)
+        } else {
+          sd_agg <- NA
+          ci_lower_agg <- NA
+          ci_upper_agg <- NA
+        }
 
         out_temp <- cbind.data.frame(t=t_list[[i]], grid_lower=grid[f], grid_upper=grid[t], treats = treats_agg, ses = sd_agg,
                                      ci_lower = ci_lower_agg, ci_upper = ci_upper_agg)
@@ -300,7 +331,7 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_win
   call <- match.call()
   return(DiSCoT(agg=agg, treats=treats, grid=grid, ses=sds, ci_lower=ci_lower, ci_upper=ci_upper,
                 t0=t0, call=call, cl=cl, N=nrow(disco$params$df), J=uniqueN(disco$params$df$id_col)-1, agg_df=out,
-                perm=disco$perm))
+                perm=disco$perm, plot=p))
 
 }
 
@@ -321,9 +352,9 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, time=TRUE, n_per_win
 #' @param agg_df dataframe of aggregated treatment effects and their confidence intervals
 #' @param perm list of permutation results
 #' @export
-DiSCoT <- function(agg, treats, ses, grid, ci_lower, ci_upper, t0, call, cl, N, J, agg_df, perm) {
+DiSCoT <- function(agg, treats, ses, grid, ci_lower, ci_upper, t0, call, cl, N, J, agg_df, perm, plot) {
   out <- list(agg=agg, treats=treats, ses=ses, ci_lower=ci_lower, ci_upper=ci_upper, t0=t0, call=call, cl=cl,
-              grid=grid, N=N, J=J, agg_df=agg_df, perm=perm)
+              grid=grid, N=N, J=J, agg_df=agg_df, perm=perm, plot=plot)
   class(out) <- "DiSCoT"
   out
 }
@@ -340,48 +371,53 @@ DiSCoT <- function(agg, treats, ses, grid, ci_lower, ci_upper, t0, call, cl, N, 
 #' @param ci_upper upper confidence interval
 #' @return plot of distribution of treatment effects over time
 plotDistOverTime <- function(cdf_centered, grid_cdf, t_start, t_max, n_per_window, CI, ci_lower, ci_upper, ylim=c(0,1), xlim=NULL,
-                             cdf=TRUE, xlab="Treatment Effect", ylab="CDF",
-                             obsLine = NULL, savePlots=FALSE, plotName=NULL, lty=1, lty_obs=1) {
-  time_list <- t_start:t_max
-  for (i in 1:length(cdf_centered)) {
-    if (i %% n_per_window == 1) {
-      # Adjust window dimensions as needed
-      if (i > 1 & savePlots) {
-        dev.off()
-      }
-      if (savePlots) {
-        pdf(paste0(plotName, time_list[i], "_", time_list[i] + n_per_window-1, ".pdf"), width = 5, height = 5)
-      } else {
-        dev.new(width = 5, height = 5)
-      }
-      par(mfrow=c(length(i:min(i+n_per_window-1, length(cdf_centered))),1))
-      par(mar=c(2, 2, 2, 2))
-      par(oma = c(4, 4, 1, 1))
-    }
-    if (is.null(xlim)) {
-      xlim <- c(min(grid_cdf), max(grid_cdf))
-    }
-    plot(x=grid_cdf, y=cdf_centered[[i]], type="l", ylim=ylim, xlim=xlim, col="black", xlab="", ylab="", lty=lty)
-    if (CI) {
-      lines(x=grid_cdf, y=ci_lower[[i]], col="grey", lty=lty)
-      lines(x=grid_cdf, y=ci_upper[[i]], col="grey", lty=lty)
-    }
-    if (!is.null(obsLine)) {
-      lines(x=grid_cdf, y=obsLine[[i]], col="blue", lty=lty_obs)
-      if (i %% n_per_window == 1) {
-        legend("topleft", legend = c("Counterfactual", "Observed"), col = c("black", "blue"), cex = 0.6, lty=1, bty="n")
-      }
-    }
-    abline(h=0, col="grey")
-    if (cdf) {
-      abline(h=1, col="grey")
-    }
-    t <- time_list[i]
-    if (t >=t0) { title(paste("t =", t, sep=" "), col.main = "red") } else { title(paste("t =", t, sep=" "), col.main="blue") }
-    mtext(xlab, side=1, padj=2, outer=TRUE)
-    mtext(ylab, side=2, padj=-2, outer=TRUE)
+                             cdf=TRUE, xlab="Distribution Difference", ylab="CDF",
+                             obsLine = NULL, savePlots=FALSE, plotName=NULL, lty=1, lty_obs=1, t_plot = NULL) {
+
+  # Create a data frame for all data points
+  df <- data.frame(time = rep(t_start:t_max, each = length(grid_cdf)),
+                   x = rep(grid_cdf, times = length(cdf_centered)),
+                   y = unlist(cdf_centered),
+                   ci_lower = if (CI) unlist(ci_lower) else NA,
+                   ci_upper = if (CI) unlist(ci_upper) else NA,
+                   obsLine = if (!is.null(obsLine)) unlist(obsLine) else NA)
+
+  if (!is.null(t_plot)) df <- df[df$time %in% t_plot,]
+
+  # Create a ggplot
+  p <- ggplot(df, aes(x = x)) +
+    geom_line(aes(y = y), colour = "black", linetype = lty) +
+
+  if (!is.null(obsLine)) p <- p + geom_line(aes(y = obsLine), colour = "blue", linetype = lty_obs, show.legend = !is.null(obsLine))
+
+  p <- p +
+    geom_hline(yintercept = 0, colour = "grey") +
+    labs(title = "Distribution of Treatment Effects Over Time", x = xlab, y = ylab) +
+    theme_minimal() +
+    coord_cartesian(xlim = xlim, ylim = ylim)
+    # # turn grid off
+    # theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+    #       panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+
+  if (CI) p <- p + geom_line(aes(y = ci_lower), colour = "grey", linetype = lty, show.legend = CI) +
+    geom_line(aes(y = ci_upper), colour = "grey", linetype = lty, show.legend = CI)
+
+  if (cdf) {
+    p <- p + geom_hline(yintercept = 1, colour = "grey")
   }
 
+  nrow <- uniqueN(df$time)
+  p <- p + facet_wrap(~time, ncol = 1, nrow = nrow)
+
+
+  # Save or return the plot
+  if (savePlots && !is.null(plotName)) {
+    ggsave(paste0(plotName, ".pdf"), plot = p, width = 5 * n_row, height = 5)
+  } else {
+    print(p)
+  }
+  return(p)
 }
 
 
@@ -442,7 +478,7 @@ summary.DiSCoT <- function(object) {
   cat("Signif. codes: `*' Confidence band for distribution differences does not cover 0")
   cat("\n\n")
 
-  cat(paste(summary(object$perm), collapse="\n"))
+  if (!is.null(object$perm))  cat(paste(summary(object$perm), collapse="\n")) else cat("No permutation test performed. \n")
 
   cat(paste0("Number of pre-treatment periods: ", length(t_list) - length(I)))
   cat("\n")

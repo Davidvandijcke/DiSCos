@@ -16,13 +16,14 @@ plotDistOverTime(
   ylim = c(0, 1),
   xlim = NULL,
   cdf = TRUE,
-  xlab = "Treatment Effect",
+  xlab = "Distribution Difference",
   ylab = "CDF",
   obsLine = NULL,
   savePlots = FALSE,
   plotName = NULL,
   lty = 1,
-  lty_obs = 1
+  lty_obs = 1,
+  t_plot = NULL
 )
 }
 \arguments{

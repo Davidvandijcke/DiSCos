@@ -4,7 +4,22 @@
 \alias{DiSCoT}
 \title{DiSCoT}
 \usage{
-DiSCoT(agg, treats, ses, grid, ci_lower, ci_upper, t0, call, cl, N, J)
+DiSCoT(
+  agg,
+  treats,
+  ses,
+  grid,
+  ci_lower,
+  ci_upper,
+  t0,
+  call,
+  cl,
+  N,
+  J,
+  agg_df,
+  perm,
+  plot
+)
 }
 \arguments{
 \item{agg}{aggregation method}
@@ -28,7 +43,11 @@ DiSCoT(agg, treats, ses, grid, ci_lower, ci_upper, t0, call, cl, N, J)
 \item{N}{number of observations}
 
 \item{J}{number of treated units}
+
+\item{agg_df}{dataframe of aggregated treatment effects and their confidence intervals}
+
+\item{perm}{list of permutation results}
 }
 \description{
-DiSCoT object holding aggregated treatment effects
+S3 object holding aggregated treatment effects
 }

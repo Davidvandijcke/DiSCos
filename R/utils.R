@@ -104,16 +104,10 @@ getGrid <- function(target, controls, G) {
 #' @return NULL
 #' @export
 #' @keywords internal
-#' @examples
-#' df <- data.frame(id_col = c(1,1,1,2,2,2,3,3,3), t_col = c(1,2,3,1,2,3,1,2,3), y_col = c(1,1,0,1,1,0,1,1,0))
-#' id_col.target <- 1
-#' T0 <- 1
-#' M <- 1000
-#' G <- 1000
-#' num.cores <- 1
-#' permutation <- FALSE
-#' checks(df, id_col.target, T0, M, G, num.cores, permutation)
-checks <- function(df, id_col.target, T0, M, G, num.cores, permutation) {
+
+checks <- function(df, id_col.target, t0, M, G, num.cores, permutation, q_min, q_max,
+                   CI, CI_placebo, boots, cl, graph,
+                   qmethod, seed) {
       # checks on the input data
   if (!id_col.target %in% df$id_col) {
     stop("There is no row in the column `id_col` with the name specified in id_col.target!")
@@ -138,8 +132,8 @@ checks <- function(df, id_col.target, T0, M, G, num.cores, permutation) {
   if (!is.numeric(df$y_col)) {
     stop("y_col must be numeric")
   }
-  if (!is.numeric(T0)) {
-    stop("T0 must be integer")
+  if (!is.numeric(t0)) {
+    stop("t0 must be numeric")
   }
   if (!is.numeric(M)) {
     stop("M must be numeric")
@@ -155,8 +149,8 @@ checks <- function(df, id_col.target, T0, M, G, num.cores, permutation) {
   }
 
   # checks on the input data values
-  if ((T0 < min(df$time_col)) | (T0 > max(df$time_col))) {
-    stop("T0 must be between 1 and the maximum value of year_col")
+  if ((t0 < min(df$time_col)) | (t0 > max(df$time_col))) {
+    stop("T0 must be between minimum and the maximum value of year_col")
   }
   if (M < 1) {
     stop("M must be greater than or equal to 1")
@@ -169,6 +163,67 @@ checks <- function(df, id_col.target, T0, M, G, num.cores, permutation) {
   if (num.cores > parallel::detectCores()) {
     stop("num.cores cannot be greater than the number of available cores")
   }
+
+  if (!is.logical(CI)) {
+    stop("CI must be logical")
+  }
+
+  if (!is.integer(boots)) {
+    stop("boot must be integer")
+  }
+
+  if ((CI) & (boots < 2)) {
+    stop("IF CI=TRUE, boot must be greater than or equal to 2 (and ideally greater than 100)")
+  }
+
+  # check if cl is decimal number between 0 and 1
+  if (!is.numeric(cl)) {
+    stop("cl must be numeric")
+  }
+  if ((cl < 0) | (cl > 1)) {
+    stop("cl must be between 0 and 1")
+  }
+
+  if (!is.logical(graph)) {
+    stop("graph must be logical")
+  }
+
+  if (!is.numeric(q_min)) {
+    stop("q_min must be numeric")
+  }
+
+  if (!is.numeric(q_max)) {
+    stop("q_max must be numeric")
+  }
+
+  if (q_min < 0) {
+    stop("q_min must be greater than or equal to 0")
+  }
+
+  if (q_max > 1) {
+    stop("q_max must be less than or equal to 1")
+  }
+
+  if (q_min > q_max) {
+    stop("q_min must be less than or equal to q_max")
+  }
+
+  if (!is.logical(CI_placebo)) {
+    stop("CI_placebo must be logical")
+  }
+
+  if (!is.null(qmethod)) {
+    if (!qmethod %in% c("smooth", "extreme")) {
+      stop("qmethod must be either NULL, 'smooth' or 'extre,e'")
+    }
+  }
+
+  if (!is.null(seed)) {
+    if (!is.integer(seed)) {
+      stop("seed must be NULL or integer")
+    }
+  }
+
 
 
 }

@@ -12,14 +12,14 @@
 #' \itemize{
 #' \item{\code{y_col} }{A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)}
 #' \item{\code{id_col} }{A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals}
-#' \item{\code{time_col} }{A vector containing the time period of the observation for each unit. This should be an increasing integer, and the first period should be equal to 1.}
+#' \item{\code{time_col} }{A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.}
 #' }
 #' @param id_col.target Variable indicating the name of the target unit, as specified in the id_col column of the data table.
 #' This variable can be any type, as long as it is the same type as the id_col column of the data table.
 #' @param t0 Integer indicating period of treatment.
 #' @param M Integer indicating the number of control quantiles to use in the DiSCo method. Default is 1000.
 #' @param G Integer indicating the number of grid points for the grid on which the estimated functions are evaluated. Default is 1000.
-#' @param num.cores Integer, number of cores to use for parallel computation. Default is 1 (sequential computation). If the `permutation` or `CI` arguments are set to TRUE, this can be slow!
+#' @param num.cores Integer, number of cores to use for parallel computation. Default is 2. If the `permutation` or `CI` arguments are set to TRUE, this can be slow and it is recommended to set this to 4 or more, if possible.
 #' If you get an error in "all cores" or similar, try setting num.cores=1 to see the precise error value.
 #' @param permutation Logical, indicating whether to use the permutation method for computing the optimal weights. Default is FALSE.
 #' @param q_min Numeric, minimum quantile to use. Set this together with `q_max` to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).
@@ -56,16 +56,22 @@
 #' @export
 
 
-DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, permutation = FALSE, q_min = 0, q_max = 1,
+DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 2, permutation = FALSE, q_min = 0, q_max = 1,
                   CI = FALSE, CI_placebo=FALSE, boots = 500, cl = 0.95, graph = FALSE,
                   qmethod=NULL, seed=NULL) {
 
-
+  #---------------------------------------------------------------------------
+  ### process inputs
+  #---------------------------------------------------------------------------
   # make sure we have a data table
   df <- as.data.table(df)
 
   # check the inputs
-  checks(df, id_col.target, t0, M, G, num.cores, permutation)
+  checks(df, id_col.target, t0, M, G, num.cores, permutation, q_min, q_max,
+         CI, CI_placebo, boots, cl, graph,
+         qmethod, seed)
+
+
 
   if (!is.null(seed)) {
     RNGkind("L'Ecuyer-CMRG") # to make sure our seeds are the same across parallel processes
@@ -80,12 +86,15 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
   T_max <- max(df$t_col)
 
 
+
   # create a list to store the results for each period
   results.periods <- list()
 
   evgrid = seq(from=q_min,to=q_max,length.out=G+1)
 
-  # run the main function in parallel for each period
+  #---------------------------------------------------------------------------
+  ###  run the main function in parallel for each period
+  #---------------------------------------------------------------------------
   periods <- sort(unique(df$t_col)) # we call the iter function on all periods, but won't calculate weights for the post-treatment periods
   results.periods <- mclapply.hack(periods, DiSCo_iter, df, evgrid, id_col.target = id_col.target, M = M,
                                    G = G, T0 = T0, mc.cores = num.cores, qmethod=qmethod, q_min=q_min, q_max=q_max)
@@ -93,8 +102,9 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
   names(results.periods) <- as.character(periods)
 
 
-  ###############################
-  #obtaining the weights as a uniform mean over all time periods
+  #---------------------------------------------------------------------------
+  ### calculate average weights across pre-periods
+  #---------------------------------------------------------------------------
   Weights_DiSCo_avg <- results.periods$`1`$DiSCo$weights
   Weights_mixture_avg <- results.periods$`1`$mixture$weights
   for (yy in 2:T0){
@@ -104,6 +114,10 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
   Weights_DiSCo_avg <- (1/T0) * Weights_DiSCo_avg
   Weights_mixture_avg <- (1/T0) * Weights_mixture_avg
 
+
+  #---------------------------------------------------------------------------
+  ### calculate average weights across pre-periods
+  #---------------------------------------------------------------------------
   bc <- lapply(seq(1:T_max), function(x) DiSCo_bc(controls.q=results.periods[[x]]$controls$quantiles, Weights_DiSCo_avg, evgrid))
   # calculating the counterfactual target quantiles and CDF
   for (x in seq(1:T_max)) {
@@ -124,7 +138,7 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
     CI_periods <- seq(1, T_max)
   }
   for (x in CI_periods) {
-    cat(paste0("Computing confidence intervals for period: ", x + t_min - 1, "\n"))
+    if (CI) cat(paste0("Computing confidence intervals for period: ", x + t_min - 1, "\n"))
     controls <- results.periods[[x]]$controls$data
     bc_x <- bc[[x]]
 

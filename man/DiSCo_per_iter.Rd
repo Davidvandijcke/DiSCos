@@ -15,8 +15,8 @@ DiSCo_per_iter(
   M = 1000,
   ww = 0,
   qmethod = NULL,
-  per_q_min = 0,
-  per_q_max = 1
+  q_min = 0,
+  q_max = 1
 )
 }
 \arguments{

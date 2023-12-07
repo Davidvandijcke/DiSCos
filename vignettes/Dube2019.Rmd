@@ -37,6 +37,7 @@ library(stats)
 library(data.table)
 library(CVXR)
 library(DiSCo)
+library(ggplot2)
 # fldr <- here::here("R/")
 # sapply(paste0(fldr,list.files(fldr)), source)
 ```
@@ -103,8 +104,9 @@ intervention, respectively. We can now run the DiSCo command:
 
 ```{r}
 # if the below gives issues it's the knit cache...
-disco <- DiSCo(dube, id_col.target, t0, M = 500, G = 1000, num.cores = 5, permutation = FALSE,
-                 CI = TRUE, boots = 1000, cl = 0.95, CI_placebo=TRUE, graph = FALSE, qmethod=NULL)
+
+disco <- DiSCo(dube, id_col.target, t0, M = 500, G = 1000, num.cores = 2, permutation = FALSE,
+                 CI = FALSE, boots = 1, cl = 0.95, CI_placebo=TRUE, graph = FALSE, qmethod=NULL)
 ```
 
 where we have chosen grids of 1000 grid points and opted for parallel
@@ -117,31 +119,11 @@ various treatment effect measures. For example, we can calculate the
 average treatment effect (ATE) as follows:
 
 ```{r}
-DiSCoTEA(disco,  agg="ATT", graph=TRUE, time=TRUE)
+discot <- DiSCoTEA(disco,  agg="quantileDiff", graph=TRUE)
+summary(discot)
 
 ```
 
-We can also look at the CDF of the treatment effects,
-
-```{r}
-DiSCoTEA(disco,  agg="cdfTreat", graph=TRUE, time=TRUE, n_per_window=NULL)
-
-```
-
-Or the quantile function:
-
-```{r}
-DiSCoTEA(disco,  agg="quantileTreat", graph=TRUE, time=TRUE, n_per_window=NULL)
-```
-
-To inspect what is happening at the higher quantiles, where we appear to
-see an increase in family income as a result of the minimum wage policy,
-we can separately plot the observed and counterfactual functions,
-
-```{r}
-DiSCoTEA(disco,  agg="quantile", graph=TRUE, time=TRUE, n_per_window=NULL)
-
-```
 
 # Permutation test
 
@@ -160,7 +142,3 @@ p_t=\frac{r\left(d_{1 t}\right)}{J+1}
 $$ where $r(d_{1t})$ is the rank of the true treatment effect in the
 distribution of placebo effects.
 
-```{r}
-results <- DiSCo(dube, id_col.target, t0, M = 1000, G = 1000, num.cores = 5, permutation = TRUE, CI = FALSE, boots = 1000, cl = 0.95, CI_placebo=TRUE, graph = TRUE, qmethod=NULL) 
-
-```

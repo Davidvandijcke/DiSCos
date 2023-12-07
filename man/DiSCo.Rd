@@ -10,10 +10,10 @@ DiSCo(
   t0,
   M = 1000,
   G = 1000,
-  num.cores = 1,
+  num.cores = 2,
   permutation = FALSE,
-  per_q_min = 0,
-  per_q_max = 1,
+  q_min = 0,
+  q_max = 1,
   CI = FALSE,
   CI_placebo = FALSE,
   boots = 500,
@@ -28,7 +28,7 @@ DiSCo(
 \itemize{
 \item{\code{y_col} }{A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)}
 \item{\code{id_col} }{A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals}
-\item{\code{time_col} }{A vector containing the time period of the observation for each unit. This should be an increasing integer, and the first period should be equal to 1.}
+\item{\code{time_col} }{A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.}
 }}
 
 \item{id_col.target}{Variable indicating the name of the target unit, as specified in the id_col column of the data table.
@@ -40,14 +40,14 @@ This variable can be any type, as long as it is the same type as the id_col colu
 
 \item{G}{Integer indicating the number of grid points for the grid on which the estimated functions are evaluated. Default is 1000.}
 
-\item{num.cores}{Integer, number of cores to use for parallel computation. Default is 1 (sequential computation). If the \code{permutation} or \code{CI} arguments are set to TRUE, this can be slow!
+\item{num.cores}{Integer, number of cores to use for parallel computation. Default is 2. If the \code{permutation} or \code{CI} arguments are set to TRUE, this can be slow and it is recommended to set this to 4 or more, if possible.
 If you get an error in "all cores" or similar, try setting num.cores=1 to see the precise error value.}
 
 \item{permutation}{Logical, indicating whether to use the permutation method for computing the optimal weights. Default is FALSE.}
 
-\item{per_q_min}{Numeric, minimum quantile to use for the permutation method. Set this together with \code{per_q_max} to restrict the range of quantiles used for the permutation method. Default is 0 (all quantiles).}
+\item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).}
 
-\item{per_q_max}{Numeric, maximum quantile to use for the permutation method. Set this together with \code{per_q_min} to restrict the range of quantiles used for the permutation method. Default is 1 (all quantiles).}
+\item{q_max}{Numeric, maximum quantile to use. Set this together with \code{q_min} to restrict the range of quantiles used to construct the synthetic control. Default is 1 (all quantiles).}
 
 \item{CI}{Logical, indicating whether to compute confidence intervals for the counterfactual quantiles. Default is FALSE.}
 

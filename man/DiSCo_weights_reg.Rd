@@ -4,7 +4,15 @@
 \alias{DiSCo_weights_reg}
 \title{DiSCo_weights_reg}
 \usage{
-DiSCo_weights_reg(controls, target, M = 500, qmethod = NULL, simplex = FALSE)
+DiSCo_weights_reg(
+  controls,
+  target,
+  M = 500,
+  qmethod = NULL,
+  simplex = FALSE,
+  q_min = 0,
+  q_max = 1
+)
 }
 \arguments{
 \item{controls}{List with matrices of control distributions}
@@ -12,6 +20,14 @@ DiSCo_weights_reg(controls, target, M = 500, qmethod = NULL, simplex = FALSE)
 \item{target}{Matrix containing the target distribution}
 
 \item{M}{Optional integer, number of draws from the uniform distribution for approximating the integral. See section 3.1 in the paper.}
+
+\item{qmethod}{Optional string, method for computing the quantile function. See section 3.1 in the paper.}
+
+\item{simplex}{Optional boolean, if TRUE the weights are constrained to be non-negative and sum to one.}
+
+\item{q_min}{Optional numeric, lower bound for the uniform distribution from which the quantile draws are taken.}
+
+\item{q_max}{Optional numeric, upper bound for the uniform distribution from which the quantile draws are taken.}
 }
 \value{
 Vector of optimal synthetic control weights

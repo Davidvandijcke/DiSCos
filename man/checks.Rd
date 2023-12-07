@@ -5,40 +5,71 @@
 \title{checks
 Carry out checks on the inputs}
 \usage{
-checks(df, id_col.target, T0, M, G, num.cores, permutation)
+checks(
+  df,
+  id_col.target,
+  t0,
+  M,
+  G,
+  num.cores,
+  permutation,
+  q_min,
+  q_max,
+  CI,
+  CI_placebo,
+  boots,
+  cl,
+  graph,
+  qmethod,
+  seed
+)
 }
 \arguments{
 \item{df}{Data frame or data table containing the distributional data for the target and control units. The data table should contain the following columns:
 \itemize{
 \item{\code{y_col} }{A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)}
 \item{\code{id_col} }{A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals}
-\item{\code{time_col} }{A vector containing the time period of the observation for each unit. This should be an increasing integer, and the first period should be equal to 1.}
+\item{\code{time_col} }{A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.}
 }}
 
 \item{id_col.target}{Variable indicating the name of the target unit, as specified in the id_col column of the data table.
 This variable can be any type, as long as it is the same type as the id_col column of the data table.}
 
+\item{t0}{Integer indicating period of treatment.}
+
 \item{M}{Integer indicating the number of control quantiles to use in the DiSCo method. Default is 1000.}
 
 \item{G}{Integer indicating the number of grid points for the grid on which the estimated functions are evaluated. Default is 1000.}
 
-\item{num.cores}{Integer, number of cores to use for parallel computation. Default is 1 (sequential computation). If the \code{permutation} or \code{CI} arguments are set to TRUE, this can be slow!
+\item{num.cores}{Integer, number of cores to use for parallel computation. Default is 2. If the \code{permutation} or \code{CI} arguments are set to TRUE, this can be slow and it is recommended to set this to 4 or more, if possible.
 If you get an error in "all cores" or similar, try setting num.cores=1 to see the precise error value.}
 
 \item{permutation}{logical, whether to use permutation or not}
+
+\item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).}
+
+\item{q_max}{Numeric, maximum quantile to use. Set this together with \code{q_min} to restrict the range of quantiles used to construct the synthetic control. Default is 1 (all quantiles).}
+
+\item{CI}{Logical, indicating whether to compute confidence intervals for the counterfactual quantiles. Default is FALSE.}
+
+\item{CI_placebo}{Logical, indicating whether to compute confidence intervals for the pre-treatment periods. Default is TRUE.
+If you have a lot of pre-treatment periods, setting this to FALSE can speed up the computation.}
+
+\item{boots}{Integer, number of bootstrap samples to use for computing confidence intervals. Default is 500.}
+
+\item{cl}{Numeric, confidence level for the (two-sided) confidence intervals.}
+
+\item{graph}{Logical, indicating whether to plot the permutation graph as in Figure 3 of the paper. Default is FALSE.}
+
+\item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
+Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremestat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
+Both are substantially slower than the default method.}
+
+\item{seed}{Integer, seed for the random number generator. This needs to be set explicitly in the function call, since it will invoke \code{\link[parallel]{RNGstreams}} which will set the seed for each core
+when using parallel processes. Default is NULL, which does not set a seed.}
 }
 \description{
 checks
 Carry out checks on the inputs
-}
-\examples{
-df <- data.frame(id_col = c(1,1,1,2,2,2,3,3,3), t_col = c(1,2,3,1,2,3,1,2,3), y_col = c(1,1,0,1,1,0,1,1,0))
-id_col.target <- 1
-T0 <- 1
-M <- 1000
-G <- 1000
-num.cores <- 1
-permutation <- FALSE
-checks(df, id_col.target, T0, M, G, num.cores, permutation)
 }
 \keyword{internal}

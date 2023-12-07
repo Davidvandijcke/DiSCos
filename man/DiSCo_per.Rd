@@ -5,10 +5,7 @@
 \title{DiSCo_per}
 \usage{
 DiSCo_per(
-  c_df,
-  t_df,
-  controls.q,
-  target.q,
+  results.periods,
   T0,
   ww = 0,
   peridx = 0,
@@ -18,15 +15,13 @@ DiSCo_per(
   redo_weights = FALSE,
   weights = NULL,
   qmethod = NULL,
-  per_q_min = 0,
-  per_q_max = 1,
+  q_min = 0,
+  q_max = 1,
   M
 )
 }
 \arguments{
-\item{c_df}{List with matrices of control distributions}
-
-\item{t_df}{Matrix containing the target distribution}
+\item{results.periods}{List of period-specific results from DiSCo}
 
 \item{T0}{Integer indicating first year of treatment as counted from 1 (e.g, if treatment year 2002 was the 5th year in the sample, this parameter should be 5).}
 
@@ -40,6 +35,18 @@ By default, a grid of 100 points is used.}
 \item{graph}{Boolean indicating whether to plot graphs}
 
 \item{num_cores}{Integer, number of cores to use for parallel computation. Set to 1 by default (sequential computation), this can be very slow!}
+
+\item{redo_weights}{Boolean indicating whether to recompute the weights for the "true" treated unit. Set to FALSE by default.}
+
+\item{weights}{Optional vector of weights to use for the "true" treated unit. \code{redo_weights} has to be set to FALSE for these weights to be used.}
+
+\item{qmethod}{Quantile method, see \code{DiSCo} function.}
+
+\item{q_min}{Minimum quantile to use for the permutation test. Default is 0.}
+
+\item{q_max}{Maximum quantile to use for the permutation test. Default is 1.}
+
+\item{M}{Number of samples from uniform distribution to use for the permutation test. Default is 1000.}
 
 \item{y_name}{Y axis label of the graph}
 

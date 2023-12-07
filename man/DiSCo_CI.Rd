@@ -29,6 +29,8 @@ DiSCo_CI(
 \item{num.redraws}{The number of bootstrap samples to draw}
 
 \item{evgrid}{The grid of quantiles to evaluate the counterfactual quantile function}
+
+\item{qmethod}{The method for computing the quantile function}
 }
 \value{
 \code{DSC_CI} returns a list containing the following components:
