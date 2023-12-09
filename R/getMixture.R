@@ -14,6 +14,7 @@
 #' \item{\code{target.order} }{The target unit, ordered.}
 #' \item{\code{weights.opt} }{The optimal weights.}
 #' }
+#' @keywords internal
 getMixture <- function(controls1, target, grid.min, grid.max, grid.rand) {
 
   ###### The mixture of distributions approach

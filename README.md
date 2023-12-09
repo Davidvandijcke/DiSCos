@@ -23,8 +23,8 @@ will be released soon.
 ## Getting Started
 
 Have a look at the vignette replicating the [empirical
-application](https://davidvandijcke.com/files/Dube2019.html) in the
-paper to get started.
+application](https://www.davidvandijcke.com/DiSCo/articles/Dube2019.html)
+in the paper to get started.
 
 ## Installation
 

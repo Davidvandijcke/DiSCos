@@ -40,7 +40,7 @@ The **DiSCo** package contains tools for computing counterfactual quantile funct
 
 ## Getting Started
 
-Have a look at the vignette replicating the [empirical application](https://davidvandijcke.com/files/Dube2019.html) in the paper to get started.
+Have a look at the vignette replicating the [empirical application](https://www.davidvandijcke.com/DiSCo/articles/Dube2019.html) in the paper to get started.
 
 ## Installation
 

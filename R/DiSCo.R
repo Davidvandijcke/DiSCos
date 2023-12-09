@@ -35,6 +35,7 @@
 #' Both are substantially slower than the default method.
 #' @param seed Integer, seed for the random number generator. This needs to be set explicitly in the function call, since it will invoke \code{\link[parallel]{RNGstreams}} which will set the seed for each core
 #' when using parallel processes. Default is NULL, which does not set a seed.
+#' @param simplex Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.
 #'
 #' @return A list containing, for each time period, the elements described in the return argument of \code{\link{DiSCo_iter}}, as well as the following additional elements:
 #' \itemize{
@@ -58,7 +59,7 @@
 
 DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 2, permutation = FALSE, q_min = 0, q_max = 1,
                   CI = FALSE, CI_placebo=TRUE, boots = 500, cl = 0.95, graph = FALSE,
-                  qmethod=NULL, seed=NULL) {
+                  qmethod=NULL, seed=NULL, simplex=FALSE,...) {
 
   #---------------------------------------------------------------------------
   ### process inputs
@@ -70,6 +71,15 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 2, perm
   checks(df, id_col.target, t0, M, G, num.cores, permutation, q_min, q_max,
          CI, CI_placebo, boots, cl, graph,
          qmethod, seed)
+
+  df_pres <- copy(df)
+
+  # if restricted quantile range, subset the data
+  # I am passing q_min = 0, q_min = 1 to the other functions below, which is a legacy feature but it's useful to have
+  if ((q_min >0) | (q_max < 1)) {
+    df[, quantile := data.table::frank(y_col, ties.method = "average") / .N, by = id_col]
+    df <- df[(quantile >= q_min) & (quantile <= q_max)]
+  }
 
 
 
@@ -90,14 +100,17 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 2, perm
   # create a list to store the results for each period
   results.periods <- list()
 
-  evgrid = seq(from=q_min,to=q_max,length.out=G+1)
+  evgrid = seq(from=0,to=1,length.out=G+1)
 
   #---------------------------------------------------------------------------
   ###  run the main function in parallel for each period
   #---------------------------------------------------------------------------
   periods <- sort(unique(df$t_col)) # we call the iter function on all periods, but won't calculate weights for the post-treatment periods
+  controls.id <- unique(df[id_col != id_col.target]$id_col) # list of control ids
   results.periods <- mclapply.hack(periods, DiSCo_iter, df, evgrid, id_col.target = id_col.target, M = M,
-                                   G = G, T0 = T0, mc.cores = num.cores, qmethod=qmethod, q_min=q_min, q_max=q_max)
+                                   G = G, T0 = T0, mc.cores = num.cores, qmethod=qmethod, q_min=0, q_max=1,
+                                   controls.id=controls.id, simplex=simplex, Mvec=Mvec)
+
   # turn results.periods into a named list where the name is the period
   names(results.periods) <- as.character(periods)
 
@@ -140,10 +153,8 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 2, perm
   for (x in CI_periods) {
     if (CI) cat(paste0("Computing confidence intervals for period: ", x + t_min - 1, "\n"))
     controls <- results.periods[[x]]$controls$data
-    bc_x <- bc[[x]]
-
     if (CI) {
-      CI_temp <- DiSCo_CI(controls=controls, bc=bc_x, weights=Weights_DiSCo_avg,
+      CI_temp <- DiSCo_CI(controls=controls, weights=Weights_DiSCo_avg,
                           mc.cores=num.cores, cl=cl, num.redraws=boots, evgrid = evgrid, qmethod=qmethod)
     } else {
       CI_temp <- NULL
@@ -171,7 +182,7 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 2, perm
 
 
   return(list(results.periods=results.periods, Weights_DiSCo_avg=Weights_DiSCo_avg,
-              Weights_mixture_avg=Weights_mixture_avg, perm=perm_obj, evgrid=evgrid, params=list(df=df, id_col.target=id_col.target,
+              Weights_mixture_avg=Weights_mixture_avg, control_ids=controls.id, perm=perm_obj, evgrid=evgrid, params=list(df=df_pres, id_col.target=id_col.target,
               t0=t0, M=M, G=G, CI=CI, cl=cl, CI_placebo=CI_placebo, qmethod=qmethod, boot=boots, q_min=q_min, q_max=q_max)))
 
 }

@@ -11,6 +11,11 @@
 #' @param M Integer specifying the number of iterations for optimization.
 #' @param G Integer indicating the grid size for evaluation.
 #' @param T0 Integer indicating the first year of treatment as counted from 1.
+#' @param qmethod String specifying the quantile method to be used.
+#' @param q_min Numeric specifying the minimum quantile to be used.
+#' @param q_max Numeric specifying the maximum quantile to be used.
+#' @param simplex Logical indicating whether to constrain the weights to the unit simplex.
+#' @param controls.id List of strings specifying the column names for the control units' identifiers.
 #' @param ... Additional arguments passed to the function.
 #'
 #' @return A list with the following elements:
@@ -35,14 +40,15 @@
 #'     \itemize{
 #'       \item{\code{data} }{Original data for the control units.}
 #'       \item{\code{cdf} }{Empirical CDFs of the control units.}
-#'       \item{\code{id} }{IDs of the control units.}
 #'       \item{\code{quantiles} }{Quantiles for the control units, evaluated on the specified grid.}
 #'     }
 #'   }
 #'   \item{\code{controls.q} }{Quantiles for the control units, evaluated on the specified grid.}
 #' }
 #' @export
-DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_min=0, q_max=1, ...) {
+DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_min=0, q_max=1, simplex=FALSE, controls.id, Mvec, ...) {
+
+
 
     # target
     target <- df[(id_col == id_col.target) & (t_col == yy)]$y_col
@@ -50,7 +56,6 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_
     # generate list where each element contains a list of all micro-level outcomes for a control unit
     controls <- list()
     j <- 1
-    controls.id <- unique(df[id_col != id_col.target]$id_col)
     for (id in controls.id) {
       controls[[j]] <- df[(id_col == id) & (t_col == yy)]$y_col
       j <- j + 1
@@ -73,7 +78,7 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_
     grid[c("grid.min", "grid.max", "grid.rand", "grid.ord")] <- getGrid(target, controls, G) # TODO: this can be done just once
 
     # obtaining the optimal weights for the DiSCo method
-    DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M, qmethod=qmethod, q_min=q_min, q_max=q_max)
+    DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M=M, qmethod=qmethod, simplex=simplex, q_min=q_min, q_max=q_max)
 
     # obtaining the optimal weights for the mixture of distributions method, note that this one is not restricted to q_min, q_max
     mixture <- DiSCo_mixture(controls, target, grid$grid.min, grid$grid.max, grid$grid.rand, M)
@@ -86,7 +91,7 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_
     results[["DiSCo"]] <- list("weights" = DiSCo_res_weights) # DiSCo estimator
     results[["mixture"]] <- list("weights" = mixture$weights.opt, "distance" = mixture$distance.opt, "mean" = mixture$mean) # mixture of distributions estimator
     results[["target"]] <- list("cdf" = mixture$target.order, "grid" = grid$grid.ord, "data" = as.vector(target), "quantiles" = target.q)
-    results[["controls"]] <- list("cdf" = mixture$CDF.matrix, "data" = controls, "id" = controls.id, "quantiles" = controls.q)
+    results[["controls"]] <- list("cdf" = mixture$CDF.matrix, "data" = controls, "quantiles" = controls.q)
     return(results)
 }
 

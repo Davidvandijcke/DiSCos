@@ -68,3 +68,4 @@ root mean squared Wasserstein distances to calculate the p-value, rather than th
 \references{
 \insertAllCited{}
 }
+\keyword{internal}

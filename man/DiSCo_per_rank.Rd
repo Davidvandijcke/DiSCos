@@ -17,3 +17,4 @@ List of p-values for each time period
 \description{
 This function ranks the squared Wasserstein distances and returns the p-values for each time period
 }
+\keyword{internal}

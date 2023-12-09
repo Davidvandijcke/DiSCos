@@ -23,3 +23,4 @@ X <- rnorm(100)
 q <- 0.1
 myquant(X,q)
 }
+\keyword{internal}

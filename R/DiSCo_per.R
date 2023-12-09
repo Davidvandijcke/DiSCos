@@ -24,12 +24,21 @@
 #' @param q_min Minimum quantile to use for the permutation test. Default is 0.
 #' @param q_max Maximum quantile to use for the permutation test. Default is 1.
 #' @param M Number of samples from uniform distribution to use for the permutation test. Default is 1000.
+#' @param simplex Boolean indicating whether to constrain the weights to the unit simplex.
 #' @return List of matrices containing synthetic time path of the outcome variable
 #' for the target unit together with the time paths of the control units
 #' @references
 #' \insertAllCited{}
+#' @keywords internal
 DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, length.out=101),
-                 graph=TRUE, num_cores = 1, redo_weights=FALSE, weights=NULL, qmethod=NULL, q_min=0, q_max=1, M){
+                 graph=TRUE, num_cores = 1, redo_weights=FALSE, weights=NULL, qmethod=NULL, q_min=0, q_max=1, M=1000, simplex=FALSE){
+
+  # slightly hacky way to fix reporting of q_min and q_max
+  q_min_report <- q_min
+  q_max_report <- q_max
+
+  q_min <- 0
+  q_max <- 1
 
   ## prep
   # grab the raw control and target data
@@ -52,7 +61,7 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
 
 
     lambda_t <- parallel::mclapply.hack(seq_len(T0), function(t) {
-      DiSCo_weights_reg(c_df[[t]], as.vector(t_df[[t]]), M, qmethod=qmethod, q_min=q_min, q_max=q_max)
+      DiSCo_weights_reg(c_df[[t]], as.vector(t_df[[t]]), M, qmethod=qmethod, q_min=q_min, q_max=q_max, simplex=simplex)
     }, mc.cores = num_cores)
 
     #calculate the average optimal lambda
@@ -98,7 +107,7 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
   cat("Starting permutation test...")
   distp <- mclapply.hack(seq_len(length(peridx)), function(idx) {
     DiSCo_per_iter(c_df=c_df, c_df.q=controls.q, t_df=t_df, T0=T0, ww=ww, peridx=peridx, evgrid=evgrid, idx=idx, qmethod=qmethod, M=M,
-                   q_min=q_min, q_max=q_max)
+                   q_min=q_min, q_max=q_max, simplex=simplex)
   }, mc.cores = num_cores)
   cat('Permutation finished!')
 
@@ -116,8 +125,8 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
 
     # Create the base plot
     p <- ggplot() +
-      geom_line(data = df_distt, aes(x = x, y = y), size = 1) +
       geom_line(data = df_distp, aes(x = x, y = y, group = group), color = "grey", size = 0.5) +
+      geom_line(data = df_distt, aes(x = x, y = y), size = 1) +
       geom_vline(xintercept = T0, linetype = "dashed") +
       labs(x = "Time periods", y = "Squared Wasserstein distance") +
       scale_x_continuous(breaks = seq(1, length(distt), 1)) + # single tick for each time period
@@ -128,6 +137,8 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
     print(p)
 
 
+  } else {
+    p <- NULL
   }
 
 
@@ -136,7 +147,7 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
 
   # create the permutation object for easy summarization
   J_1 <- length(distp)
-  perm_obj <- permut(distp, distt, p_val, J_1, q_min=q_min, q_max=q_max, plot=p)
+  perm_obj <- permut(distp, distt, p_val, J_1, q_min=q_min_report, q_max=q_max_report, plot=p)
 
 
   return(perm_obj)
@@ -150,7 +161,7 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
 #' @param distt List of squared Wasserstein distances between the target unit and the control units
 #' @param distp List of squared Wasserstein distances between the control units
 #' @return List of p-values for each time period
-#' @export
+#' @keywords internal
 ## rank the squared Wasserstein distances and get the rank of the target unit
 # combine distt and distp
 DiSCo_per_rank <- function(distt, distp, T0) {
@@ -199,7 +210,7 @@ permut <- function(distp, distt,p_overall, J_1, q_min, q_max, plot) {
 #' @export
 #' @examples
 #' print(x, digits=3)
-#' @export
+#' @keywords internal
 print.permut <- function(x, digits = 3) {
   cat(paste0("Permutation test for quantile range: [", x$q_min, ", ", x$q_max, "] \n"))
   cat("P-value: ", format(x$p_overall, digits=digits), "\n")

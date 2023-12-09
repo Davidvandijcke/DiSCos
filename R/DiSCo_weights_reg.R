@@ -22,7 +22,9 @@
 #' @return Vector of optimal synthetic control weights
 #' @references
 #' \insertAllCited{}
+#' @keywords internal
 DiSCo_weights_reg <- function(controls,target, M = 500, qmethod=NULL, simplex=FALSE, q_min=0, q_max=1){
+
 
   if (!is.null(qmethod)){
     if (qmethod=="extreme"){
@@ -50,12 +52,11 @@ DiSCo_weights_reg <- function(controls,target, M = 500, qmethod=NULL, simplex=FA
   Mvec <- stats::runif(M, min = q_min, max = q_max)
   controls.s <- matrix(0,nrow = M, ncol = length(controls))
   for (jj in 1:length(controls)){
-    # controls.s[,jj] <- mapply(myquant, Mvec, MoreArgs=list(X=controls[[jj]]))
     controls.s[,jj] <- myQuant(controls[[jj]], Mvec, qmethod)
+    #controls.s[,jj] <- mapply(myquant, Mvec, MoreArgs = list(X=controls[[jj]]))
   }
 
   target.s <- matrix(0, nrow = M, ncol=1)
-  # target.s[,1] <- mapply(myquant, Mvec, MoreArgs=list(X=target))
   target.s[,1] <- myQuant(target, Mvec, qmethod)
 
   ## Solving the optimization using constrained linear regression

@@ -1,4 +1,21 @@
 
+#' @title DiSCo_mixture
+#' @description The alternative mixture of distributions approach in the paper
+#' @param controls1 A list of controls
+#' @param target The target unit
+#' @param grid.min Minimal value of the grid on which the CDFs are evaluated.
+#' @param grid.max Maximal value of the grid on which the CDFs are evaluated.
+#' @param grid.rand Random grid on which the CDFs are evaluated.
+#' @param M Number of samples from the uniform distribution for the regression
+#' @return A list containing the following elements:
+#' \itemize{
+#' \item{\code{cdf} }{A matrix containing the CDFs of the target and control units evaluated on the grid.}
+#' \item{\code{distance.opt} }{The optimal value of the Wasserstein distance.}
+#' \item{\code{mean} }{The optimal value of the Wasserstein barycenter.}
+#' \item{\code{target.order} }{The target unit, ordered.}
+#' \item{\code{weights.opt} }{The optimal weights.}
+#' }
+#' @keywords internal
 DiSCo_mixture <- function(controls1, target, grid.min, grid.max, grid.rand, M) {
 
   ###### The mixture of distributions approach

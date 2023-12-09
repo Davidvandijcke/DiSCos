@@ -25,7 +25,8 @@ Suggests:
     latex2exp,
     knitr,
     rmarkdown,
-    CVXR
+    CVXR,
+    Maps
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.2

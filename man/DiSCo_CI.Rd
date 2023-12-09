@@ -2,7 +2,7 @@
 % Please edit documentation in R/DiSCo_CI.R
 \name{DiSCo_CI}
 \alias{DiSCo_CI}
-\title{Confidence Intervals for the DiSCo quantile}
+\title{DiSCo_CI}
 \usage{
 DiSCo_CI(
   controls,
@@ -44,3 +44,4 @@ DiSCo_CI(
 \description{
 Function for computing the confidence intervals in the DiSCo method
 }
+\keyword{internal}

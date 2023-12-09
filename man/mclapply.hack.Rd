@@ -42,10 +42,6 @@ https://github.com/nathanvan/mcmc-in-irt/blob/master/post-10-mclapply-hack.R
 \subsection{parallel:mclapply() on Windows machines.}{
 }
 }
-\examples{
-mclapply.hack()
-
-}
 \seealso{
 mclapply
 }

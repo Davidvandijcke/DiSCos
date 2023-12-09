@@ -42,3 +42,4 @@ List of squared Wasserstein distances between the target unit and the control un
 \description{
 This function performs one iteration of the permutation test
 }
+\keyword{internal}

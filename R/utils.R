@@ -3,30 +3,7 @@
 #' @param X A vector containing the data
 #' @param q A vector containing the quantiles
 #' @return A vector containing the empirical quantile function
-#' @export
-#' @examples
-#' set.seed(123)
-#' X <- rnorm(100)
-#' q <- 0.1
-#' myquant(X,q)
-myquant <- function(X,q, qmethod=NULL){
-  # sort if unsorted
-  if (is.unsorted(X)) X <- sort(X)
-
-  if (is.null(qmethod)) { # use old-fashioned quantiles
-    stats::quantile(X, probs=q)
-  } else if (qmethod=="qkden") {
-    evmix::qkden(p=c(0.1, 0.2), kerncentres=X)
-  }
-}
-
-
-#' Compute the empirical quantile function
-#'
-#' @param X A vector containing the data
-#' @param q A vector containing the quantiles
-#' @return A vector containing the empirical quantile function
-#' @export
+#' @keywords internal
 #' @examples
 #' set.seed(123)
 #' X <- rnorm(100)
@@ -34,13 +11,15 @@ myquant <- function(X,q, qmethod=NULL){
 #' myquant(X,q)
 myQuant <- function(X,q, qmethod=NULL,...){
   # sort if unsorted
-  if (is.unsorted(X)) X <- sort(X)
+  # if (is.unsorted(X)) X <- sort(X)
 
   # check if method a valid one
   if (!is.null(qmethod)){
     if (!qmethod %in% c("qkden", "extreme")) stop("Invalid quantile method")
   }
   if (is.null(qmethod)) { # use old-fashioned quantiles
+    # obtain the corresponding empirical quantile
+    # return(mapply(myquant, q, MoreArgs = list(X=X)))
     return(stats::quantile(X, probs=q))
   } else if (qmethod=="qkden") {
     temp <- evmix::qkden(p=q, kerncentres=X,...)
@@ -55,6 +34,15 @@ myQuant <- function(X,q, qmethod=NULL,...){
   }
 }
 
+## Creating a function for the empirical quantile function
+myquant <- function(X,q){
+  # sort if unsorted
+  if (is.unsorted(X)) X <- sort(X)
+  # compute empirical CDF
+  X.cdf <- 1:length(X) / length(X)
+  # obtain the corresponding empirical quantile
+  return(X[which(X.cdf >= q)[1]])
+}
 
 
 #' @title getGrid
@@ -71,7 +59,6 @@ myQuant <- function(X,q, qmethod=NULL,...){
 #' \item{grid.ord}{A vector containing the grid points, ordered}
 #' }
 #' @keywords internal
-#' @export
 #' @examples
 #' set.seed(123)
 #' target <- rnorm(100)
@@ -102,9 +89,7 @@ getGrid <- function(target, controls, G) {
 #' @inheritParams DiSCo
 #' @param permutation logical, whether to use permutation or not
 #' @return NULL
-#' @export
 #' @keywords internal
-
 checks <- function(df, id_col.target, t0, M, G, num.cores, permutation, q_min, q_max,
                    CI, CI_placebo, boots, cl, graph,
                    qmethod, seed) {
@@ -234,7 +219,6 @@ checks <- function(df, id_col.target, t0, M, G, num.cores, permutation, q_min, q
 #'
 #' @param x a vector
 #' @return TRUE if x is integer, FALSE otherwise
-#' @export
 #' @keywords internal
 is.integer <- function(x) {
   is.numeric(x) && all(x == as.integer(x))
@@ -262,12 +246,12 @@ is.integer <- function(x) {
 
 #' @param verbose Should users be warned this is hack-y? Defaults to FALSE.
 #' @seealso mclapply
-#' @export
 #' @keywords internal
-#' @examples
-#' mclapply.hack()
-#'
 mclapply.hack <- function(..., verbose=FALSE, mc.cores=NULL) {
+
+  if (mc.cores == 1) {
+    return(lapply(...))
+  }
 
   if( Sys.info()[['sysname']] == 'Windows') {
 

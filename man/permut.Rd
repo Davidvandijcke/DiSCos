@@ -20,10 +20,6 @@ permut(distp, distt, p_overall, J_1, q_min, q_max, plot)
 \item{q_max}{Maximum quantile}
 
 \item{plot}{ggplot object containing plot of squared Wasserstein distances over time for all permutations.}
-
-\item{rank}{Rank of the target unit}
-
-\item{p_values}{List of p-values for each time period}
 }
 \value{
 A list of class permut, with the same elements as the input arguments.

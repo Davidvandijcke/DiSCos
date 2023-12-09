@@ -10,6 +10,7 @@
 #' @return The quantile function of the barycenter associated with the "weights" evaluated at the vector "evgrid"
 #' @references
 #' \insertAllCited{}
+#' @keywords internal
 DiSCo_bc <- function(controls.q, weights, evgrid = seq(from=0, to=1, length.out=101)){
 
   # Obtaining the Wasserstein barycenter as the average of the quantile functions

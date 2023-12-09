@@ -15,7 +15,7 @@ DiSCo(
   q_min = 0,
   q_max = 1,
   CI = FALSE,
-  CI_placebo = FALSE,
+  CI_placebo = TRUE,
   boots = 500,
   cl = 0.95,
   graph = FALSE,

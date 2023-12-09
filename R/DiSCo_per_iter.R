@@ -8,9 +8,14 @@
 #' @param evgrid Vector of evaluation grid points
 #' @param idx Index of permuted target unit
 #' @param ww Optional vector of weights. Default is uniform weights.
+#' @param qmethod Method for quantile calculation
+#' @param M Number of samples for quantile calculation
+#' @param q_min Minimum quantile to use for the permutation test. Default is 0.
+#' @param q_max Maximum quantile to use for the permutation test. Default is 1.
+#' @param simplex Boolean indicating whether to constrain the weights to the unit simplex.
 #' @return List of squared Wasserstein distances between the target unit and the control units
-#' @export
-DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, M=1000, ww=0, qmethod=NULL, q_min=0, q_max=1){
+#' @keywords internal
+DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, M=1000, ww=0, qmethod=NULL, q_min=0, q_max=1, simplex=FALSE){
     # One iteration of the permutation test
 
     #create new control and target
@@ -52,7 +57,7 @@ DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, M=1000, 
     lambda_tp=list()
 
     for (t in 1:T0){
-      lambda_tp[[t]] <- DiSCo_weights_reg(perc[[t]],as.vector(pert[[t]]), M, qmethod=qmethod, q_min=q_min, q_max=q_max)
+      lambda_tp[[t]] <- DiSCo_weights_reg(perc[[t]],as.vector(pert[[t]]),  M=M, qmethod=qmethod, simplex=simplex, q_min=q_min, q_max=q_max)
     }
 
 

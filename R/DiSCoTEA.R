@@ -47,8 +47,8 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
   t_max <- max(df$time_col)
   t_min <- min(df$time_col)
   t0 <- disco$params$t0
-  T0 <- unique(df[time_col == t0]$t_col)  - 1
-  T_max <- max(df$t_col)
+  T0 <- unique(df[time_col == t0]$time_col)  - t_min
+  T_max <- max(df$time_col) - t_min + 1
   CI <- disco$params$CI
   cl <- disco$params$cl
   placebo <- disco$params$CI_placebo
@@ -328,6 +328,7 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
   }
 
 
+
   call <- match.call()
   return(DiSCoT(agg=agg, treats=treats, grid=grid, ses=sds, ci_lower=ci_lower, ci_upper=ci_upper,
                 t0=t0, call=call, cl=cl, N=nrow(disco$params$df), J=uniqueN(disco$params$df$id_col)-1, agg_df=out,
@@ -350,7 +351,8 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
 #' @param J number of treated units
 #' @param grid grid
 #' @param agg_df dataframe of aggregated treatment effects and their confidence intervals
-#' @param perm list of permutation results
+#' @param perm list of per mutation results
+#' @param plot a ggplot object containing the plot for the aggregated treatment effects using the `agg` parameter
 #' @export
 DiSCoT <- function(agg, treats, ses, grid, ci_lower, ci_upper, t0, call, cl, N, J, agg_df, perm, plot) {
   out <- list(agg=agg, treats=treats, ses=ses, ci_lower=ci_lower, ci_upper=ci_upper, t0=t0, call=call, cl=cl,

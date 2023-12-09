@@ -20,3 +20,4 @@ Print permutation test results
 \examples{
 print(x, digits=3)
 }
+\keyword{internal}
