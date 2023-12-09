@@ -102,7 +102,7 @@ intervention, respectively. We can now run the DiSCo command:
 
 ```{r, fig.width=8,fig.height=5}
 df <- copy(dube)
-disco <- DiSCo(df, id_col.target, t0, G = 1000, num.cores = 5, permutation = TRUE, CI = TRUE, boots = 1000, graph = TRUE, simplex=TRUE, seed=1)
+disco <- DiSCo(df, id_col.target, t0, G = 1000, num.cores = 2, permutation = TRUE, CI = TRUE, boots = 1000, graph = TRUE, simplex=TRUE, seed=1)
 ```
 
 where we have chosen a grid (`G`) of 1000 quantile and opted for
@@ -210,7 +210,7 @@ where $\text{q_min} < \text{q_max}$ are the bounds of the quantile range
 we're interested in. Doing this in R is as simple as,
 
 ```{r}
-disco <- DiSCo(dube, id_col.target=id_col.target, t0=t0, G = 250, num.cores = 5, permutation = TRUE, CI = TRUE, boots = 1000, graph = FALSE, q_min = 0.7, q_max=0.95, seed=1, simplex=TRUE)
+disco <- DiSCo(dube, id_col.target=id_col.target, t0=t0, G = 250, num.cores = 2, permutation = TRUE, CI = TRUE, boots = 1000, graph = FALSE, q_min = 0.7, q_max=0.95, seed=1, simplex=TRUE)
 ```
 
 where we set the lower bound to 0.75 since that where the effects start
