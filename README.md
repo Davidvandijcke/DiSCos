@@ -22,7 +22,7 @@ will be released soon.
 
 ## Getting Started
 
-Have a look at the vignette replicating the [empirical
+Reference documentation can be found [here](https://www.davidvandijcke.com/DiSCo/reference/index.html). Have a look at the vignette replicating the [empirical
 application](https://www.davidvandijcke.com/DiSCo/articles/Dube2019.html)
 in the paper to get started.
 
