@@ -25,12 +25,4 @@ A list containing the following elements:
 \description{
 Set up a grid for the estimation of the quantile functions and CDFs
 }
-\examples{
-set.seed(123)
-target <- rnorm(100)
-controls <- list(rnorm(100),rnorm(100),rnorm(100))
-grid <- list(grid.min = NA, grid.max = NA, grid.rand = NA, grid.ord = NA)
-grid[c("grid.min", "grid.max", "grid.rand", "grid.ord")] <- getGrid(target, controls, G)
-plot(grid$grid.ord, type="l")
-}
 \keyword{internal}

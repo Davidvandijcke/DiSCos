@@ -46,7 +46,9 @@ DiSCoT(
 
 \item{agg_df}{dataframe of aggregated treatment effects and their confidence intervals}
 
-\item{perm}{list of permutation results}
+\item{perm}{list of per mutation results}
+
+\item{plot}{a ggplot object containing the plot for the aggregated treatment effects using the \code{agg} parameter}
 }
 \description{
 S3 object holding aggregated treatment effects

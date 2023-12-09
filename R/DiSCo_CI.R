@@ -6,10 +6,7 @@
 #' @param controls List of control units
 #' @param bc List of barycenters
 #' @param weights Vector of optimal synthetic control weights, computed using the DiSCo_weights_reg function.
-#' @param cl Confidence level for the confidence interval
-#' @param evgrid Optional vector containing an evenly spaced grid on [0,1] on which the quantile function for the control units will be evaluated
-#' By default, a grid of 1000 points is used.
-#' @param qmethod Method for computing quantiles.
+#' @inheritParams DiSCo_CI
 #' @return The resampled counterfactual barycenter of the target unit
 #' @keywords internal
 DiSCo_CI_iter <- function(redraw, controls, weights, cl=0.95,
@@ -42,10 +39,8 @@ DiSCo_CI_iter <- function(redraw, controls, weights, cl=0.95,
 #' @param bc A list of barycenters for the control group
 #' @param weights A vector of optimal weights
 #' @param mc.cores Number of cores to use for parallelization
-#' @param cl The confidence level for the confidence interval
 #' @param num.redraws The number of bootstrap samples to draw
-#' @param evgrid The grid of quantiles to evaluate the counterfactual quantile function
-#' @param qmethod The method for computing the quantile function
+#' @inheritParams DiSCo
 #' @return \code{DSC_CI} returns a list containing the following components:
 #' \itemize{
 #' \item{\code{upper} }{a vector of the upper bound.}

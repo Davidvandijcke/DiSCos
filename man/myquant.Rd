@@ -17,10 +17,4 @@ A vector containing the empirical quantile function
 \description{
 Compute the empirical quantile function
 }
-\examples{
-set.seed(123)
-X <- rnorm(100)
-q <- 0.1
-myquant(X,q)
-}
 \keyword{internal}

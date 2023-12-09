@@ -5,18 +5,10 @@
 #' @details This function is part of the DiSCo method, called for each time period. It calculates the optimal weights for the DiSCo method and the mixture of distributions approach for a single time period. The function processes data for both the target and control units, computes the quantile functions, and evaluates these on a specified grid. The function is designed to be used within the broader context of the DiSCo function, which aggregates results across multiple time periods.
 #'
 #' @param yy Integer indicating the current year being processed.
-#' @param df Data frame containing the data for both target and control units.
-#' @param evgrid Vector containing an evenly spaced grid on [0,1] for evaluating quantile functions.
-#' @param id_col.target String specifying the column name for the target unit's identifier.
-#' @param M Integer specifying the number of iterations for optimization.
-#' @param G Integer indicating the grid size for evaluation.
-#' @param T0 Integer indicating the first year of treatment as counted from 1.
-#' @param qmethod String specifying the quantile method to be used.
-#' @param q_min Numeric specifying the minimum quantile to be used.
-#' @param q_max Numeric specifying the maximum quantile to be used.
-#' @param simplex Logical indicating whether to constrain the weights to the unit simplex.
+#' @inheritParams DiSCo
 #' @param controls.id List of strings specifying the column names for the control units' identifiers.
-#' @param ... Additional arguments passed to the function.
+#' @param evgrid A vector of grid points on which to evaluate the quantile functions.
+#' @param T0 Integer indicating the last pre-treatment period starting from 1.
 #'
 #' @return A list with the following elements:
 #' \itemize{
@@ -46,7 +38,7 @@
 #'   \item{\code{controls.q} }{Quantiles for the control units, evaluated on the specified grid.}
 #' }
 #' @export
-DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_min=0, q_max=1, simplex=FALSE, controls.id, Mvec, ...) {
+DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_min=0, q_max=1, simplex=FALSE, controls.id) {
 
 
 

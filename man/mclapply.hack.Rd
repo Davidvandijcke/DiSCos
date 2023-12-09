@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{mclapply.hack}
 \alias{mclapply.hack}
-\title{mclapply.hack: forking for Windows}
+\title{mclapply.hack}
 \usage{
 mclapply.hack(..., verbose = FALSE, mc.cores = NULL)
 }
@@ -13,34 +13,6 @@ mclapply.hack(..., verbose = FALSE, mc.cores = NULL)
 This function mimics forking (done with mclapply in Mac or Linux) for the
 Windows environment.  Designed to be used just like mclapply.  Credit goes to
 Nathan VanHoudnos.
-(Extremely) lightly adapted from:
-https://github.com/nathanvan/mcmc-in-irt/blob/master/post-10-mclapply-hack.R
-\subsection{post-10-mclapply.hack.R}{
-}
-
-\subsection{}{
-}
-
-\subsection{Nathan VanHoudnos}{
-}
-
-\subsection{nathanvan AT northwestern FULL STOP edu}{
-}
-
-\subsection{July 14, 2014}{
-}
-
-\subsection{Last Edit:  August 26, 2014}{
-}
-
-\subsection{}{
-}
-
-\subsection{A script to implement a hackish version of}{
-}
-
-\subsection{parallel:mclapply() on Windows machines.}{
-}
 }
 \seealso{
 mclapply

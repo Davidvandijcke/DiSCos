@@ -13,11 +13,7 @@
 #'
 #' @param controls List with matrices of control distributions
 #' @param target Matrix containing the target distribution
-#' @param M Optional integer, number of draws from the uniform distribution for approximating the integral. See section 3.1 in the paper.
-#' @param qmethod Optional string, method for computing the quantile function. See section 3.1 in the paper.
-#' @param simplex Optional boolean, if TRUE the weights are constrained to be non-negative and sum to one.
-#' @param q_min Optional numeric, lower bound for the uniform distribution from which the quantile draws are taken.
-#' @param q_max Optional numeric, upper bound for the uniform distribution from which the quantile draws are taken.
+#' @inheritParams DiSCo
 #'
 #' @return Vector of optimal synthetic control weights
 #' @references

@@ -7,7 +7,6 @@
 DiSCo_CI_iter(
   redraw,
   controls,
-  bc,
   weights,
   cl = 0.95,
   evgrid = seq(from = 0, to = 1, length.out = 1001),
@@ -19,16 +18,15 @@ DiSCo_CI_iter(
 
 \item{controls}{List of control units}
 
-\item{bc}{List of barycenters}
-
 \item{weights}{Vector of optimal synthetic control weights, computed using the DiSCo_weights_reg function.}
 
-\item{cl}{Confidence level for the confidence interval}
+\item{cl}{Numeric, confidence level for the (two-sided) confidence intervals.}
 
-\item{evgrid}{Optional vector containing an evenly spaced grid on \link{0,1} on which the quantile function for the control units will be evaluated
-By default, a grid of 1000 points is used.}
+\item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
+Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
+Both are substantially slower than the default method.}
 
-\item{qmethod}{Method for computing quantiles.}
+\item{bc}{List of barycenters}
 }
 \value{
 The resampled counterfactual barycenter of the target unit

@@ -6,7 +6,7 @@
 #' @param grid.min Minimal value of the grid on which the CDFs are evaluated.
 #' @param grid.max Maximal value of the grid on which the CDFs are evaluated.
 #' @param grid.rand Random grid on which the CDFs are evaluated.
-#' @param M Number of samples from the uniform distribution for the regression
+#' @inheritParams DiSCo
 #' @return A list containing the following elements:
 #' \itemize{
 #' \item{\code{cdf} }{A matrix containing the CDFs of the target and control units evaluated on the grid.}
@@ -26,7 +26,7 @@ DiSCo_mixture <- function(controls1, target, grid.min, grid.max, grid.rand, M) {
 
 
   # Estimating the empirical CDFs
-  CDF.control <- lapply(controls1,ecdf)
+  CDF.control <- lapply(controls1,stats::ecdf)
   CDF.target <- stats::ecdf(target)
 
 

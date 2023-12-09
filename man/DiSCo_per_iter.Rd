@@ -16,7 +16,8 @@ DiSCo_per_iter(
   ww = 0,
   qmethod = NULL,
   q_min = 0,
-  q_max = 1
+  q_max = 1,
+  simplex = FALSE
 )
 }
 \arguments{
@@ -26,15 +27,19 @@ DiSCo_per_iter(
 
 \item{t_df}{List of target unit}
 
-\item{T0}{Index of last pre-treatment period}
-
-\item{peridx}{Vector of indices of control units}
-
-\item{evgrid}{Vector of evaluation grid points}
-
 \item{idx}{Index of permuted target unit}
 
-\item{ww}{Optional vector of weights. Default is uniform weights.}
+\item{M}{Integer indicating the number of control quantiles to use in the DiSCo method. Default is 1000.}
+
+\item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
+Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
+Both are substantially slower than the default method.}
+
+\item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).}
+
+\item{q_max}{Numeric, maximum quantile to use. Set this together with \code{q_min} to restrict the range of quantiles used to construct the synthetic control. Default is 1 (all quantiles).}
+
+\item{simplex}{Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.}
 }
 \value{
 List of squared Wasserstein distances between the target unit and the control units

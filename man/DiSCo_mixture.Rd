@@ -17,7 +17,7 @@ DiSCo_mixture(controls1, target, grid.min, grid.max, grid.rand, M)
 
 \item{grid.rand}{Random grid on which the CDFs are evaluated.}
 
-\item{M}{Number of samples from the uniform distribution for the regression}
+\item{M}{Integer indicating the number of control quantiles to use in the DiSCo method. Default is 1000.}
 }
 \value{
 A list containing the following elements:

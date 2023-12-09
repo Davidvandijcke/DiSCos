@@ -11,13 +11,14 @@ DiSCo_per(
   peridx = 0,
   evgrid = seq(from = 0, to = 1, length.out = 101),
   graph = TRUE,
-  num_cores = 1,
+  num.cores = 1,
   redo_weights = FALSE,
   weights = NULL,
   qmethod = NULL,
   q_min = 0,
   q_max = 1,
-  M
+  M = 1000,
+  simplex = FALSE
 )
 }
 \arguments{
@@ -29,28 +30,26 @@ DiSCo_per(
 
 \item{peridx}{Optional integer indicating number of permutations. If not specified, by default equal to the number of units in the sample.}
 
-\item{evgrid}{Optional vector containing an evenly spaced grid on \link{0,1} on which the quantile function for the control units will be evaulated.
-By default, a grid of 100 points is used.}
+\item{graph}{Logical, indicating whether to plot the permutation graph as in Figure 3 of the paper. Default is FALSE.}
 
-\item{graph}{Boolean indicating whether to plot graphs}
-
-\item{num_cores}{Integer, number of cores to use for parallel computation. Set to 1 by default (sequential computation), this can be very slow!}
+\item{num.cores}{Integer, number of cores to use for parallel computation. Default is 2. If the \code{permutation} or \code{CI} arguments are set to TRUE, this can be slow and it is recommended to set this to 4 or more, if possible.
+If you get an error in "all cores" or similar, try setting num.cores=1 to see the precise error value.}
 
 \item{redo_weights}{Boolean indicating whether to recompute the weights for the "true" treated unit. Set to FALSE by default.}
 
 \item{weights}{Optional vector of weights to use for the "true" treated unit. \code{redo_weights} has to be set to FALSE for these weights to be used.}
 
-\item{qmethod}{Quantile method, see \code{DiSCo} function.}
+\item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
+Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
+Both are substantially slower than the default method.}
 
-\item{q_min}{Minimum quantile to use for the permutation test. Default is 0.}
+\item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).}
 
-\item{q_max}{Maximum quantile to use for the permutation test. Default is 1.}
+\item{q_max}{Numeric, maximum quantile to use. Set this together with \code{q_min} to restrict the range of quantiles used to construct the synthetic control. Default is 1 (all quantiles).}
 
-\item{M}{Number of samples from uniform distribution to use for the permutation test. Default is 1000.}
+\item{M}{Integer indicating the number of control quantiles to use in the DiSCo method. Default is 1000.}
 
-\item{y_name}{Y axis label of the graph}
-
-\item{x_name}{X axis label of the graph}
+\item{simplex}{Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.}
 }
 \value{
 List of matrices containing synthetic time path of the outcome variable

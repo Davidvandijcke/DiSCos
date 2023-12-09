@@ -8,7 +8,7 @@
 #' has a `summary` property that will print a selection of aggregated effects (specified by the `samples` parameter) for the chosen `agg` method, by post-treatment year (see examples below).
 #' This `summary` call will only print effects if the `agg` parameter requested a distribution difference (`quantileDiff` or `cdfDiff`). The other aggregations are meant to be inspected visually.
 #' If the `permutation` parameter was set to TRUE in the original `DiSCo` call, the summary table will include the results of the permutation test.
-#' If the original `DiSCo` call was restricted to a range of quantiles smaller than [0,1] (i.e. `q_min` > 0 or `q_max` < 1), the `samples` parameter is ignored
+#' If the original `DiSCo` call was restricted to a range of quantiles smaller than `[0,1]` (i.e. `q_min` > 0 or `q_max` < 1), the `samples` parameter is ignored
 #' and only the aggregated differences for the quantile range specified in the original call are returned.
 #'
 #' @param disco Output of the DiSCo function
@@ -19,7 +19,7 @@
 #'  }
 #' @param graph Boolean indicating whether to plot graphs. Default is TRUE.
 #' @param t_plot Optional vector of time periods (`t_col` values in the original dataframe) to be plotted. Default is NULL, which plots all time periods.
-#' @param savePlots Boolean indicating whether to save the plots to the current working directory. The plot names will be [agg]_[start_year]_[end_year].pdf. The default is FALSE.
+#' @param savePlots Boolean indicating whether to save the plots to the current working directory. The plot names will be `[agg]_[start_year]_[end_year].pdf`. The default is FALSE.
 #' @param xlim Optional vector of length 2 indicating the x-axis limits of the plot. This and the `ylim` option can be useful to zoom in on the relevant parts of the distribution for fat-tailed distributions.
 #' @param ylim Optional vector of length 2 indicating the y-axis limits of the plot.
 #' @param samples Numeric vector indicating the range of quantiles of the aggregation statistic (`agg`) to be summarized in the `summary` property of the S3 class returned by the function.
@@ -28,16 +28,18 @@
 #' # load data
 #' data("dube")
 #' # run DiSCo
-#' disco <- DiSCo(dube, id_col.target = 2, t0 = 2003, M = 1000, G = 1000, num.cores = 4, permutation = TRUE,
-#'                      CI = TRUE, boots = 1000, cl = 0.95,  CI_placebo=TRUE, graph = TRUE, qmethod=NULL, q_min=0, q_max=1)
-#' discot <- DiSCoTEA(disco, agg = "quantileDiff", graph = TRUE, n_per_window = NULL, savePlots = FALSE, samples = c(0.2, 0.4, 0.6, 0.8))
+#' disco <- DiSCo(dube, id_col.target = 2, t0 = 2003, M = 1000, G = 1000,
+#' num.cores = 4, permutation = TRUE, CI = TRUE, boots = 1000, cl = 0.95,
+#' CI_placebo=TRUE, graph = TRUE, qmethod=NULL, q_min=0, q_max=1)
+#' discot <- DiSCoTEA(disco, agg = "quantileDiff", graph = TRUE,
+#' savePlots = FALSE, samples = c(0.2, 0.4, 0.6, 0.8))
 #' # print summary table
 #' summary(discot)
 #' }
 #' @return A \code{\link[DiSCo]{DiSCoT}} object.
 #'
 #'
-
+#' @importFrom stats sd
 #' @export
 DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlots=FALSE,
                      xlim=NULL, ylim=NULL, samples=c(0.25, 0.5, 0.75)) {
@@ -131,7 +133,7 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
         xmax <- quantile(unlist(grid), 0.99)
         xlim <- c(xmin, xmax)
       }
-      p <- plotDistOverTime(treats, grid, t_start, t_max, n_per_window, CI, ci_lower, ci_upper, savePlots=savePlots,
+      p <- plotDistOverTime(treats, grid, t_start, t_max, CI, ci_lower, ci_upper, savePlots=savePlots,
                        plotName=agg, ylim=ylim, xlim=xlim, xlab="Y", ylab="CDF Change", t_plot=t_plot)
     }
     #---------------------------------------------------------------------------
@@ -169,7 +171,7 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
     }
     if (is.null(xlim)) xlim <- c(min(grid), max(grid))
     if (graph) {
-      p <- plotDistOverTime(treats, grid, t_start, t_max, n_per_window, CI, ci_lower, ci_upper, savePlots=savePlots, plotName=agg,
+      p <- plotDistOverTime(treats, grid, t_start, t_max, CI, ci_lower, ci_upper, savePlots=savePlots, plotName=agg,
                        obsLine = target_cdf, xlab="Y", ylab="CDF", lty=1, lty_obs=2, xlim=xlim, t_plot=t_plot)
     }
     #---------------------------------------------------------------------------
@@ -202,7 +204,7 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
         xmax <- max(unlist(evgrid))
         xlim <- c(xmin, xmax)
       }
-      p <- plotDistOverTime(treats, grid, t_start, t_max, n_per_window, CI, ci_lower, ci_upper, ylim=ylim,
+      p <- plotDistOverTime(treats, grid, t_start, t_max, CI, ci_lower, ci_upper, ylim=ylim,
                        xlab="Quantile", ylab="Treatment Effect", cdf=FALSE, savePlots=savePlots, plotName=agg, t_plot=t_plot)
     }
     #---------------------------------------------------------------------------
@@ -235,7 +237,7 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
         xmax <- quantile(unlist(grid), 0.99)
         xlim <- c(xmin, xmax)
       }
-      p <- plotDistOverTime(treats, grid, t_start, t_max, n_per_window, CI, ci_lower, ci_upper, ylim=ylim, xlab="Quantile",
+      p <- plotDistOverTime(treats, grid, t_start, t_max, CI, ci_lower, ci_upper, ylim=ylim, xlab="Quantile",
                        ylab="Treatment Effect", cdf=FALSE, obsLine = target_qtiles, savePlots=savePlots, plotName=agg, t_plot=t_plot)
     }
 
@@ -331,7 +333,7 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
 
   call <- match.call()
   return(DiSCoT(agg=agg, treats=treats, grid=grid, ses=sds, ci_lower=ci_lower, ci_upper=ci_upper,
-                t0=t0, call=call, cl=cl, N=nrow(disco$params$df), J=uniqueN(disco$params$df$id_col)-1, agg_df=out,
+                t0=t0, call=call, cl=cl, N=nrow(disco$params$df), J=data.table::uniqueN(disco$params$df$id_col)-1, agg_df=out,
                 perm=disco$perm, plot=p))
 
 }
@@ -367,12 +369,23 @@ DiSCoT <- function(agg, treats, ses, grid, ci_lower, ci_upper, t0, call, cl, N, 
 #' @param grid_cdf grid
 #' @param t_start start time
 #' @param t_max maximum time
-#' @param n_per_window number of windows per plot
 #' @param CI logical indicating whether to plot confidence intervals
 #' @param ci_lower lower confidence interval
 #' @param ci_upper upper confidence interval
+#' @param ylim y limits
+#' @param xlim x limits
+#' @param cdf logical indicating whether to plot CDF or quantile difference
+#' @param xlab x label
+#' @param ylab y label
+#' @param obsLine optional additional line to plot. Default is NULL which means no line is plotted.
+#' @param savePlots logical indicating whether to save plots
+#' @param plotName name of plot to save
+#' @param lty line type for the main line passed as cdf_centered
+#' @param lty_obs line type for the optional additional line passed as obsLine
+#' @param t_plot optional vector of times to plot. Default is NULL which means all times are plotted.
+#' @keywords internal
 #' @return plot of distribution of treatment effects over time
-plotDistOverTime <- function(cdf_centered, grid_cdf, t_start, t_max, n_per_window, CI, ci_lower, ci_upper, ylim=c(0,1), xlim=NULL,
+plotDistOverTime <- function(cdf_centered, grid_cdf, t_start, t_max, CI, ci_lower, ci_upper, ylim=c(0,1), xlim=NULL,
                              cdf=TRUE, xlab="Distribution Difference", ylab="CDF",
                              obsLine = NULL, savePlots=FALSE, plotName=NULL, lty=1, lty_obs=1, t_plot = NULL) {
 
@@ -409,8 +422,8 @@ plotDistOverTime <- function(cdf_centered, grid_cdf, t_start, t_max, n_per_windo
     p <- p + geom_hline(yintercept = 1, colour = "grey")
   }
 
-  nrow <- uniqueN(df$time)
-  p <- p + facet_wrap(~time, ncol = 1, nrow = nrow)
+  n_row <- data.table::uniqueN(df$time)
+  p <- p + facet_wrap(~time, ncol = 1, nrow = n_row)
 
 
   # Save or return the plot
@@ -429,9 +442,10 @@ plotDistOverTime <- function(cdf_centered, grid_cdf, t_start, t_max, n_per_windo
 #' @title summary.DiSCoT
 #' @description Summary of DiSCoT object
 #' @param object DiSCoT object
+#' @param ... Additional arguments
 #' @return summary of DiSCoT object
 #' @export
-summary.DiSCoT <- function(object) {
+summary.DiSCoT <- function(object, ...) {
 
   # get results dataframe
   out <- object$agg_df

@@ -28,8 +28,6 @@ knitr::opts_chunk$set(
 
 ```{r, include=FALSE}
 
-# fldr <- here::here("R/")
-# sapply(paste0(fldr,list.files(fldr)), source)# library(CVXR)
 library(pracma)
 library(quadprog)
 library(parallel)
@@ -41,17 +39,12 @@ library(DiSCo)
 library(ggplot2)
 ```
 
-```         
-```
-
-`{# fldr <- here::here("R/")} # sapply(paste0(fldr,list.files(fldr)), source)`
 
 # Introduction
 
 This vignette demonstrates how to use the DiSCo package by way of the
 empirical application in @gunsilius2023distributional, which is based
-on\
-@dube2019minimum. We illustrate the use of the two main functions: 1)
+on @dube2019minimum. We illustrate the use of the two main functions: 1)
 `DiSCo`, which estimates the raw distributional counterfactuals,
 computes confidence intervals, and optionally performs a permutation
 test; and 2) `DiSCoTEA`, the "Treatment Effect Aggregator", which takes
@@ -107,9 +100,9 @@ t0 <- 2003
 which indicate the id of the treated unit and the time period of the
 intervention, respectively. We can now run the DiSCo command:
 
-```{r}
+```{r, fig.width=8,fig.height=5}
 df <- copy(dube)
-disco <- DiSCo(df, id_col.target, t0, M=10000, G = 1000, num.cores = 5, permutation = TRUE, CI = TRUE, boots = 1000, graph = TRUE, simplex=TRUE, seed=1)
+disco <- DiSCo(df, id_col.target, t0, G = 1000, num.cores = 5, permutation = TRUE, CI = TRUE, boots = 1000, graph = TRUE, simplex=TRUE, seed=1)
 ```
 
 where we have chosen a grid (`G`) of 1000 quantile and opted for
@@ -217,7 +210,7 @@ where $\text{q_min} < \text{q_max}$ are the bounds of the quantile range
 we're interested in. Doing this in R is as simple as,
 
 ```{r}
-disco <- DiSCo(dube, id_col.target, G = 250, num.cores = 2, permutation = TRUE, CI = TRUE, boots = 1000, graph = TRUE, q_min = 0.7, q_max=0.95, seed=1, simplex=TRUE)
+disco <- DiSCo(dube, id_col.target=id_col.target, t0=t0, G = 250, num.cores = 5, permutation = TRUE, CI = TRUE, boots = 1000, graph = FALSE, q_min = 0.7, q_max=0.95, seed=1, simplex=TRUE)
 ```
 
 where we set the lower bound to 0.75 since that where the effects start

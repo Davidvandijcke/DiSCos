@@ -2,22 +2,19 @@
 % Please edit documentation in R/DiSCo_per.R
 \name{print.permut}
 \alias{print.permut}
-\title{title print.permut}
+\title{print.permut}
 \usage{
-\method{print}{permut}(x, digits = 3)
+\method{print}{permut}(x, ...)
 }
 \arguments{
 \item{x}{Object of class permut}
 
-\item{digits}{Number of digits to print}
+\item{...}{Additional arguments}
 }
 \value{
 Prints permutation test results
 }
 \description{
 Print permutation test results
-}
-\examples{
-print(x, digits=3)
 }
 \keyword{internal}

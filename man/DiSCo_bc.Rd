@@ -10,9 +10,6 @@ DiSCo_bc(controls.q, weights, evgrid = seq(from = 0, to = 1, length.out = 101))
 \item{controls.q}{List with matrices of control quantile functions}
 
 \item{weights}{Vector of optimal synthetic control weights, computed using the DiSCo_weights_reg function.}
-
-\item{evgrid}{Optional vector containing an evenly spaced grid on \link{0,1} on which the quantile function for the control units will be evaluated
-By default, a grid of 100 points is used.}
 }
 \value{
 The quantile function of the barycenter associated with the "weights" evaluated at the vector "evgrid"

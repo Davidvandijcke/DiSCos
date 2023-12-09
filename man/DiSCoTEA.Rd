@@ -28,7 +28,7 @@ DiSCoTEA(
 
 \item{t_plot}{Optional vector of time periods (\code{t_col} values in the original dataframe) to be plotted. Default is NULL, which plots all time periods.}
 
-\item{savePlots}{Boolean indicating whether to save the plots to the current working directory. The plot names will be \link{agg}\emph{\link{start_year}}\link{end_year}.pdf. The default is FALSE.}
+\item{savePlots}{Boolean indicating whether to save the plots to the current working directory. The plot names will be \verb{[agg]_[start_year]_[end_year].pdf}. The default is FALSE.}
 
 \item{xlim}{Optional vector of length 2 indicating the x-axis limits of the plot. This and the \code{ylim} option can be useful to zoom in on the relevant parts of the distribution for fat-tailed distributions.}
 
@@ -50,7 +50,7 @@ the function will plot the distribution of the aggregation statistic over time. 
 has a \code{summary} property that will print a selection of aggregated effects (specified by the \code{samples} parameter) for the chosen \code{agg} method, by post-treatment year (see examples below).
 This \code{summary} call will only print effects if the \code{agg} parameter requested a distribution difference (\code{quantileDiff} or \code{cdfDiff}). The other aggregations are meant to be inspected visually.
 If the \code{permutation} parameter was set to TRUE in the original \code{DiSCo} call, the summary table will include the results of the permutation test.
-If the original \code{DiSCo} call was restricted to a range of quantiles smaller than \link{0,1} (i.e. \code{q_min} > 0 or \code{q_max} < 1), the \code{samples} parameter is ignored
+If the original \code{DiSCo} call was restricted to a range of quantiles smaller than \verb{[0,1]} (i.e. \code{q_min} > 0 or \code{q_max} < 1), the \code{samples} parameter is ignored
 and only the aggregated differences for the quantile range specified in the original call are returned.
 }
 \examples{
@@ -58,9 +58,11 @@ and only the aggregated differences for the quantile range specified in the orig
 # load data
 data("dube")
 # run DiSCo
-disco <- DiSCo(dube, id_col.target = 2, t0 = 2003, M = 1000, G = 1000, num.cores = 4, permutation = TRUE,
-                     CI = TRUE, boots = 1000, cl = 0.95,  CI_placebo=TRUE, graph = TRUE, qmethod=NULL, q_min=0, q_max=1)
-discot <- DiSCoTEA(disco, agg = "quantileDiff", graph = TRUE, n_per_window = NULL, savePlots = FALSE, samples = c(0.2, 0.4, 0.6, 0.8))
+disco <- DiSCo(dube, id_col.target = 2, t0 = 2003, M = 1000, G = 1000,
+num.cores = 4, permutation = TRUE, CI = TRUE, boots = 1000, cl = 0.95,
+CI_placebo=TRUE, graph = TRUE, qmethod=NULL, q_min=0, q_max=1)
+discot <- DiSCoTEA(disco, agg = "quantileDiff", graph = TRUE,
+savePlots = FALSE, samples = c(0.2, 0.4, 0.6, 0.8))
 # print summary table
 summary(discot)
 }

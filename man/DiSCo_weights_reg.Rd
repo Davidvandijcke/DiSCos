@@ -19,15 +19,17 @@ DiSCo_weights_reg(
 
 \item{target}{Matrix containing the target distribution}
 
-\item{M}{Optional integer, number of draws from the uniform distribution for approximating the integral. See section 3.1 in the paper.}
+\item{M}{Integer indicating the number of control quantiles to use in the DiSCo method. Default is 1000.}
 
-\item{qmethod}{Optional string, method for computing the quantile function. See section 3.1 in the paper.}
+\item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
+Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
+Both are substantially slower than the default method.}
 
-\item{simplex}{Optional boolean, if TRUE the weights are constrained to be non-negative and sum to one.}
+\item{simplex}{Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.}
 
-\item{q_min}{Optional numeric, lower bound for the uniform distribution from which the quantile draws are taken.}
+\item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).}
 
-\item{q_max}{Optional numeric, upper bound for the uniform distribution from which the quantile draws are taken.}
+\item{q_max}{Numeric, maximum quantile to use. Set this together with \code{q_min} to restrict the range of quantiles used to construct the synthetic control. Default is 1 (all quantiles).}
 }
 \value{
 Vector of optimal synthetic control weights

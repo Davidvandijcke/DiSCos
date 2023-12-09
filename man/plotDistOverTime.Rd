@@ -9,7 +9,6 @@ plotDistOverTime(
   grid_cdf,
   t_start,
   t_max,
-  n_per_window,
   CI,
   ci_lower,
   ci_upper,
@@ -35,13 +34,33 @@ plotDistOverTime(
 
 \item{t_max}{maximum time}
 
-\item{n_per_window}{number of windows per plot}
-
 \item{CI}{logical indicating whether to plot confidence intervals}
 
 \item{ci_lower}{lower confidence interval}
 
 \item{ci_upper}{upper confidence interval}
+
+\item{ylim}{y limits}
+
+\item{xlim}{x limits}
+
+\item{cdf}{logical indicating whether to plot CDF or quantile difference}
+
+\item{xlab}{x label}
+
+\item{ylab}{y label}
+
+\item{obsLine}{optional additional line to plot. Default is NULL which means no line is plotted.}
+
+\item{savePlots}{logical indicating whether to save plots}
+
+\item{plotName}{name of plot to save}
+
+\item{lty}{line type for the main line passed as cdf_centered}
+
+\item{lty_obs}{line type for the optional additional line passed as obsLine}
+
+\item{t_plot}{optional vector of times to plot. Default is NULL which means all times are plotted.}
 }
 \value{
 plot of distribution of treatment effects over time
@@ -49,3 +68,4 @@ plot of distribution of treatment effects over time
 \description{
 Plot distribution of treatment effects over time
 }
+\keyword{internal}

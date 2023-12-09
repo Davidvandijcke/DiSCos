@@ -9,25 +9,26 @@ Authors@R:
     person("Siyun", "He", , "siyunhe@umich.edu", role = c("aut"),
            comment = c(ORCID = "0000-0001-5825-3447"))
     )
-Description: The method of synthetic controls is a widely-adopted tool for evaluating causal effects of policy changes in settings with observational data. In many settings where it is applicable, researchers want to identify causal effects of policy changes on a treated unit at an aggregate level while having access to data at a finer granularity. We develop a simple extension of the synthetic controls estimator that takes advantage of this additional structure and provides nonparametric estimates of the heterogeneity within the aggregate unit. The idea is to replicate the quantile function associated with the treated unit by a weighted average of quantile functions of the control units. This estimator has desirable properties and relies on the same mathematical theory as the changes-in-changes estimator. It operates in both repeated cross-sections and panel data with as little as a single pre-treatment period and provides a unique counterfactual quantile function for continuous, discrete or mixed distributions.
+Description: The method of synthetic controls is a widely-adopted tool for evaluating causal effects of policy changes in settings with observational data. In many settings where it is applicable, researchers want to identify causal effects of policy changes on a treated unit at an aggregate level while having access to data at a finer granularity. This package implements a simple extension of the synthetic controls estimator, developed in Gunsilius (2023) <doi:10.3982/ECTA18260>, that takes advantage of this additional structure and provides nonparametric estimates of the heterogeneity within the aggregate unit. The idea is to replicate the quantile function associated with the treated unit by a weighted average of quantile functions of the control units. The package contains tools for aggregating and plotting the resulting distributional estimates, as well as for carrying out inference on them. 
 License: MIT license
 BugReports: https://github.com/
 URL: https://github.com/, http://www.davidvandijcke.com/DiSCo/
 LazyData: TRUE
-Imports: data.table, CVXR, pracma, quadprog, Rdpack, parallel, ggplot2
+Imports: CVXR, pracma, Rdpack, parallel, evmix, utils, extremeStat
 Depends: 
     data.table,
-    R (>= 2.10)
+    R (>= 2.10),
+    ggplot2
 RdMacros: Rdpack
 Suggests: 
     haven,
-    utils,
     latex2exp,
     knitr,
     rmarkdown,
-    CVXR,
-    Maps
+    maps,
+    testthat (>= 3.0.0)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.2
 VignetteBuilder: knitr
+Config/testthat/edition: 3

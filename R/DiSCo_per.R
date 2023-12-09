@@ -8,30 +8,19 @@
 #' root mean squared Wasserstein distances to calculate the p-value, rather than the level in each period, following @abadie2010synthetic.
 #'
 #' @param results.periods List of period-specific results from DiSCo
-#' @param evgrid Vector of evaluation grid points for quantiles
 #' @param T0 Integer indicating first year of treatment as counted from 1 (e.g, if treatment year 2002 was the 5th year in the sample, this parameter should be 5).
 #' @param ww Optional vector of weights indicating the relative importance of each time period. If not specified, each time period is weighted equally.
 #' @param peridx Optional integer indicating number of permutations. If not specified, by default equal to the number of units in the sample.
-#' @param evgrid Optional vector containing an evenly spaced grid on [0,1] on which the quantile function for the control units will be evaulated.
-#' By default, a grid of 100 points is used.
-#' @param graph Boolean indicating whether to plot graphs
-#' @param y_name Y axis label of the graph
-#' @param x_name X axis label of the graph
-#' @param num_cores Integer, number of cores to use for parallel computation. Set to 1 by default (sequential computation), this can be very slow!
 #' @param redo_weights Boolean indicating whether to recompute the weights for the "true" treated unit. Set to FALSE by default.
 #' @param weights Optional vector of weights to use for the "true" treated unit. `redo_weights` has to be set to FALSE for these weights to be used.
-#' @param qmethod Quantile method, see `DiSCo` function.
-#' @param q_min Minimum quantile to use for the permutation test. Default is 0.
-#' @param q_max Maximum quantile to use for the permutation test. Default is 1.
-#' @param M Number of samples from uniform distribution to use for the permutation test. Default is 1000.
-#' @param simplex Boolean indicating whether to constrain the weights to the unit simplex.
+#' @inheritParams DiSCo
 #' @return List of matrices containing synthetic time path of the outcome variable
 #' for the target unit together with the time paths of the control units
 #' @references
 #' \insertAllCited{}
 #' @keywords internal
 DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, length.out=101),
-                 graph=TRUE, num_cores = 1, redo_weights=FALSE, weights=NULL, qmethod=NULL, q_min=0, q_max=1, M=1000, simplex=FALSE){
+                 graph=TRUE, num.cores = 1, redo_weights=FALSE, weights=NULL, qmethod=NULL, q_min=0, q_max=1, M=1000, simplex=FALSE){
 
   # slightly hacky way to fix reporting of q_min and q_max
   q_min_report <- q_min
@@ -60,9 +49,9 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
     lambda_t=list()
 
 
-    lambda_t <- parallel::mclapply.hack(seq_len(T0), function(t) {
+    lambda_t <- mclapply.hack(seq_len(T0), function(t) {
       DiSCo_weights_reg(c_df[[t]], as.vector(t_df[[t]]), M, qmethod=qmethod, q_min=q_min, q_max=q_max, simplex=simplex)
-    }, mc.cores = num_cores)
+    }, mc.cores = num.cores)
 
     #calculate the average optimal lambda
     if (length(ww)==1){
@@ -83,7 +72,7 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
 
   bc_t <- mclapply.hack(1:length(c_df), function(x) {
     DiSCo_bc(controls.q[[x]], lambda.opt, evgrid)
-  }, mc.cores = num_cores)
+  }, mc.cores = num.cores)
 
 
 
@@ -108,7 +97,7 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
   distp <- mclapply.hack(seq_len(length(peridx)), function(idx) {
     DiSCo_per_iter(c_df=c_df, c_df.q=controls.q, t_df=t_df, T0=T0, ww=ww, peridx=peridx, evgrid=evgrid, idx=idx, qmethod=qmethod, M=M,
                    q_min=q_min, q_max=q_max, simplex=simplex)
-  }, mc.cores = num_cores)
+  }, mc.cores = num.cores)
   cat('Permutation finished!')
 
 
@@ -200,32 +189,28 @@ permut <- function(distp, distt,p_overall, J_1, q_min, q_max, plot) {
 }
 
 
-#' @ title print.permut
+#' @title print.permut
 #'
 #' @description Print permutation test results
 #'
 #' @param x Object of class permut
-#' @param digits Number of digits to print
+#' @param ... Additional arguments
 #' @return Prints permutation test results
 #' @export
-#' @examples
-#' print(x, digits=3)
 #' @keywords internal
-print.permut <- function(x, digits = 3) {
+print.permut <- function(x, ...) {
   cat(paste0("Permutation test for quantile range: [", x$q_min, ", ", x$q_max, "] \n"))
-  cat("P-value: ", format(x$p_overall, digits=digits), "\n")
+  cat("P-value: ", format(x$p_overall, digits=3), "\n")
   cat("Number of control units: ", x$J_1, "\n")
 }
 
 #' @ title summary.permut
 #' @description Summarize permutation test results
-#' @param object Object of class permut
-#' @param digits Number of digits to print
+#' @param x Object of class permut
+#' @param ... Additional arguments
 #' @return Prints permutation test results
 #' @export
-#' @examples
-#' summary(x, digits=3)
-summary.permut <- function(x, digits = 3) {
-  print.permut(x, digits=digits)
+summary.permut <- function(object, ...) {
+  print.permut(object, digits=3)
 }
 

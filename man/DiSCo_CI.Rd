@@ -6,7 +6,6 @@
 \usage{
 DiSCo_CI(
   controls,
-  bc,
   weights,
   mc.cores = 1,
   cl = 0.95,
@@ -18,19 +17,19 @@ DiSCo_CI(
 \arguments{
 \item{controls}{A list containing the raw data for the control group}
 
-\item{bc}{A list of barycenters for the control group}
-
 \item{weights}{A vector of optimal weights}
 
 \item{mc.cores}{Number of cores to use for parallelization}
 
-\item{cl}{The confidence level for the confidence interval}
+\item{cl}{Numeric, confidence level for the (two-sided) confidence intervals.}
 
 \item{num.redraws}{The number of bootstrap samples to draw}
 
-\item{evgrid}{The grid of quantiles to evaluate the counterfactual quantile function}
+\item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
+Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
+Both are substantially slower than the default method.}
 
-\item{qmethod}{The method for computing the quantile function}
+\item{bc}{A list of barycenters for the control group}
 }
 \value{
 \code{DSC_CI} returns a list containing the following components:

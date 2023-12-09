@@ -15,25 +15,42 @@ DiSCo_iter(
   qmethod = NULL,
   q_min = 0,
   q_max = 1,
-  ...
+  simplex = FALSE,
+  controls.id
 )
 }
 \arguments{
 \item{yy}{Integer indicating the current year being processed.}
 
-\item{df}{Data frame containing the data for both target and control units.}
+\item{df}{Data frame or data table containing the distributional data for the target and control units. The data table should contain the following columns:
+\itemize{
+\item{\code{y_col} }{A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)}
+\item{\code{id_col} }{A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals}
+\item{\code{time_col} }{A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.}
+}}
 
-\item{evgrid}{Vector containing an evenly spaced grid on \link{0,1} for evaluating quantile functions.}
+\item{evgrid}{A vector of grid points on which to evaluate the quantile functions.}
 
-\item{id_col.target}{String specifying the column name for the target unit's identifier.}
+\item{id_col.target}{Variable indicating the name of the target unit, as specified in the id_col column of the data table.
+This variable can be any type, as long as it is the same type as the id_col column of the data table.}
 
-\item{M}{Integer specifying the number of iterations for optimization.}
+\item{M}{Integer indicating the number of control quantiles to use in the DiSCo method. Default is 1000.}
 
-\item{G}{Integer indicating the grid size for evaluation.}
+\item{G}{Integer indicating the number of grid points for the grid on which the estimated functions are evaluated. Default is 1000.}
 
-\item{T0}{Integer indicating the first year of treatment as counted from 1.}
+\item{T0}{Integer indicating the last pre-treatment period starting from 1.}
 
-\item{...}{Additional arguments passed to the function.}
+\item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
+Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
+Both are substantially slower than the default method.}
+
+\item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).}
+
+\item{q_max}{Numeric, maximum quantile to use. Set this together with \code{q_min} to restrict the range of quantiles used to construct the synthetic control. Default is 1 (all quantiles).}
+
+\item{simplex}{Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.}
+
+\item{controls.id}{List of strings specifying the column names for the control units' identifiers.}
 }
 \value{
 A list with the following elements:
@@ -58,7 +75,6 @@ A list with the following elements:
 \itemize{
 \item{\code{data} }{Original data for the control units.}
 \item{\code{cdf} }{Empirical CDFs of the control units.}
-\item{\code{id} }{IDs of the control units.}
 \item{\code{quantiles} }{Quantiles for the control units, evaluated on the specified grid.}
 }
 }

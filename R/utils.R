@@ -4,11 +4,6 @@
 #' @param q A vector containing the quantiles
 #' @return A vector containing the empirical quantile function
 #' @keywords internal
-#' @examples
-#' set.seed(123)
-#' X <- rnorm(100)
-#' q <- 0.1
-#' myquant(X,q)
 myQuant <- function(X,q, qmethod=NULL,...){
   # sort if unsorted
   # if (is.unsorted(X)) X <- sort(X)
@@ -34,16 +29,6 @@ myQuant <- function(X,q, qmethod=NULL,...){
   }
 }
 
-## Creating a function for the empirical quantile function
-myquant <- function(X,q){
-  # sort if unsorted
-  if (is.unsorted(X)) X <- sort(X)
-  # compute empirical CDF
-  X.cdf <- 1:length(X) / length(X)
-  # obtain the corresponding empirical quantile
-  return(X[which(X.cdf >= q)[1]])
-}
-
 
 #' @title getGrid
 #' @description Set up a grid for the estimation of the quantile functions and CDFs
@@ -59,13 +44,6 @@ myquant <- function(X,q){
 #' \item{grid.ord}{A vector containing the grid points, ordered}
 #' }
 #' @keywords internal
-#' @examples
-#' set.seed(123)
-#' target <- rnorm(100)
-#' controls <- list(rnorm(100),rnorm(100),rnorm(100))
-#' grid <- list(grid.min = NA, grid.max = NA, grid.rand = NA, grid.ord = NA)
-#' grid[c("grid.min", "grid.max", "grid.rand", "grid.ord")] <- getGrid(target, controls, G)
-#' plot(grid$grid.ord, type="l")
 getGrid <- function(target, controls, G) {
   grid.min <- min(c(min(target),unlist(lapply(controls,min))))
   grid.max <- max(c(max(target),unlist(lapply(controls,max))))
@@ -75,7 +53,7 @@ getGrid <- function(target, controls, G) {
   grid.max <- ceiling(grid.max*10)/10
 
   # sampling uniformly on the grid
-  grid.rand <- runif(G,grid.min-0.25,grid.max+0.25)
+  grid.rand <- stats::runif(G,grid.min-0.25,grid.max+0.25)
 
   # ordered grid
   grid.ord <- grid.rand[order(grid.rand)]
@@ -227,26 +205,16 @@ is.integer <- function(x) {
 
 
 
-#' mclapply.hack: forking for Windows
+#' @title mclapply.hack
 #'
-#' This function mimics forking (done with mclapply in Mac or Linux) for the
+#' @description This function mimics forking (done with mclapply in Mac or Linux) for the
 #' Windows environment.  Designed to be used just like mclapply.  Credit goes to
 #' Nathan VanHoudnos.
-#' (Extremely) lightly adapted from:
-#' https://github.com/nathanvan/mcmc-in-irt/blob/master/post-10-mclapply-hack.R
-#' ## post-10-mclapply.hack.R
-#' ##
-#' ## Nathan VanHoudnos
-#' ## nathanvan AT northwestern FULL STOP edu
-#' ## July 14, 2014
-#' ## Last Edit:  August 26, 2014
-#' ##
-#' ## A script to implement a hackish version of
-#' ## parallel:mclapply() on Windows machines.
-
 #' @param verbose Should users be warned this is hack-y? Defaults to FALSE.
 #' @seealso mclapply
 #' @keywords internal
+#' @importFrom parallel makeCluster detectCores parLapply stopCluster clusterExport
+#' @importFrom utils sessionInfo
 mclapply.hack <- function(..., verbose=FALSE, mc.cores=NULL) {
 
   if (mc.cores == 1) {
@@ -268,7 +236,7 @@ mclapply.hack <- function(..., verbose=FALSE, mc.cores=NULL) {
     ## Find out the names of the loaded packages
     loaded.package.names <- c(
       ## Base packages
-      sessionInfo()$basePkgs,
+      utils::sessionInfo()$basePkgs,
       ## Additional packages
       names( sessionInfo()$otherPkgs ))
 
@@ -279,12 +247,12 @@ mclapply.hack <- function(..., verbose=FALSE, mc.cores=NULL) {
       this.env <- environment()
       while( identical( this.env, globalenv() ) == FALSE ) {
         clusterExport(cl,
-                      ls(all.names=TRUE, env=this.env),
+                      ls(all.names=TRUE, envir=this.env),
                       envir=this.env)
         this.env <- parent.env(environment())
       }
       clusterExport(cl,
-                    ls(all.names=TRUE, env=globalenv()),
+                    ls(all.names=TRUE, envir=globalenv()),
                     envir=globalenv())
 
       ## Load the libraries on all the clusters
@@ -332,3 +300,14 @@ citation <- function() {
   cat('Reference: Gunsilius, Florian F. "Distributional synthetic controls." Econometrica 91, no. 3 (2023): 1105-1117. \n')
 }
 
+
+#' @title sampleDubeData
+#' @description sample 10,000 observations from the Dube (2010) data
+#' @keywords internal
+#' @importFrom data data
+#' @return a data frame with 10,000 observations
+sampleDubeData <- function() {
+  set.seed(1860)
+  df <- data("dube")
+  return(df[sample(nrow(df), 10000), ])
+}

@@ -4,10 +4,12 @@
 \alias{summary.DiSCoT}
 \title{summary.DiSCoT}
 \usage{
-\method{summary}{DiSCoT}(object)
+\method{summary}{DiSCoT}(object, ...)
 }
 \arguments{
 \item{object}{DiSCoT object}
+
+\item{...}{Additional arguments}
 }
 \value{
 summary of DiSCoT object

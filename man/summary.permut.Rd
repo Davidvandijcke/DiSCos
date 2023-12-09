@@ -4,19 +4,16 @@
 \alias{summary.permut}
 \title{title summary.permut}
 \usage{
-\method{summary}{permut}(x, digits = 3)
+\method{summary}{permut}(object, ...)
 }
 \arguments{
-\item{digits}{Number of digits to print}
+\item{...}{Additional arguments}
 
-\item{object}{Object of class permut}
+\item{x}{Object of class permut}
 }
 \value{
 Prints permutation test results
 }
 \description{
 Summarize permutation test results
-}
-\examples{
-summary(x, digits=3)
 }
