@@ -56,7 +56,6 @@
 <span>  <span class="va">grid_cdf</span>,</span>
 <span>  <span class="va">t_start</span>,</span>
 <span>  <span class="va">t_max</span>,</span>
-<span>  <span class="va">n_per_window</span>,</span>
 <span>  <span class="va">CI</span>,</span>
 <span>  <span class="va">ci_lower</span>,</span>
 <span>  <span class="va">ci_upper</span>,</span>
@@ -92,10 +91,6 @@
 <dd><p>maximum time</p></dd>
 
 
-<dt>n_per_window</dt>
-<dd><p>number of windows per plot</p></dd>
-
-
 <dt>CI</dt>
 <dd><p>logical indicating whether to plot confidence intervals</p></dd>
 
@@ -106,6 +101,50 @@
 
 <dt>ci_upper</dt>
 <dd><p>upper confidence interval</p></dd>
+
+
+<dt>ylim</dt>
+<dd><p>y limits</p></dd>
+
+
+<dt>xlim</dt>
+<dd><p>x limits</p></dd>
+
+
+<dt>cdf</dt>
+<dd><p>logical indicating whether to plot CDF or quantile difference</p></dd>
+
+
+<dt>xlab</dt>
+<dd><p>x label</p></dd>
+
+
+<dt>ylab</dt>
+<dd><p>y label</p></dd>
+
+
+<dt>obsLine</dt>
+<dd><p>optional additional line to plot. Default is NULL which means no line is plotted.</p></dd>
+
+
+<dt>savePlots</dt>
+<dd><p>logical indicating whether to save plots</p></dd>
+
+
+<dt>plotName</dt>
+<dd><p>name of plot to save</p></dd>
+
+
+<dt>lty</dt>
+<dd><p>line type for the main line passed as cdf_centered</p></dd>
+
+
+<dt>lty_obs</dt>
+<dd><p>line type for the optional additional line passed as obsLine</p></dd>
+
+
+<dt>t_plot</dt>
+<dd><p>optional vector of times to plot. Default is NULL which means all times are plotted.</p></dd>
 
 </dl></div>
     <div class="section level2">

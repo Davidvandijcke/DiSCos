@@ -62,7 +62,8 @@
 <span>  qmethod <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  q_min <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  q_max <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  <span class="va">...</span></span>
+<span>  simplex <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">controls.id</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -73,31 +74,53 @@
 
 
 <dt>df</dt>
-<dd><p>Data frame containing the data for both target and control units.</p></dd>
+<dd><p>Data frame or data table containing the distributional data for the target and control units. The data table should contain the following columns:</p><ul><li><p><code>y_col</code> A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)</p></li>
+<li><p><code>id_col</code> A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals</p></li>
+<li><p><code>time_col</code> A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.</p></li>
+</ul></dd>
 
 
 <dt>evgrid</dt>
-<dd><p>Vector containing an evenly spaced grid on 0,1 for evaluating quantile functions.</p></dd>
+<dd><p>A vector of grid points on which to evaluate the quantile functions.</p></dd>
 
 
 <dt>id_col.target</dt>
-<dd><p>String specifying the column name for the target unit's identifier.</p></dd>
+<dd><p>Variable indicating the name of the target unit, as specified in the id_col column of the data table.
+This variable can be any type, as long as it is the same type as the id_col column of the data table.</p></dd>
 
 
 <dt>M</dt>
-<dd><p>Integer specifying the number of iterations for optimization.</p></dd>
+<dd><p>Integer indicating the number of control quantiles to use in the DiSCo method. Default is 1000.</p></dd>
 
 
 <dt>G</dt>
-<dd><p>Integer indicating the grid size for evaluation.</p></dd>
+<dd><p>Integer indicating the number of grid points for the grid on which the estimated functions are evaluated. Default is 1000.</p></dd>
 
 
 <dt>T0</dt>
-<dd><p>Integer indicating the first year of treatment as counted from 1.</p></dd>
+<dd><p>Integer indicating the last pre-treatment period starting from 1.</p></dd>
 
 
-<dt>...</dt>
-<dd><p>Additional arguments passed to the function.</p></dd>
+<dt>qmethod</dt>
+<dd><p>Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the <code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></code> function from the stats package.
+Other options are "<code><a href="https://rdrr.io/pkg/evmix/man/kden.html" class="external-link">qkden</a></code>" (based on smoothed kernel density function) and "<code><a href="https://rdrr.io/pkg/extremeStat/man/distLquantile.html" class="external-link">extreme</a></code>" (based on parametric extreme value distributions).
+Both are substantially slower than the default method.</p></dd>
+
+
+<dt>q_min</dt>
+<dd><p>Numeric, minimum quantile to use. Set this together with <code>q_max</code> to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).</p></dd>
+
+
+<dt>q_max</dt>
+<dd><p>Numeric, maximum quantile to use. Set this together with <code>q_min</code> to restrict the range of quantiles used to construct the synthetic control. Default is 1 (all quantiles).</p></dd>
+
+
+<dt>simplex</dt>
+<dd><p>Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.</p></dd>
+
+
+<dt>controls.id</dt>
+<dd><p>List of strings specifying the column names for the control units' identifiers.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -119,7 +142,6 @@
 <li><p><code>controls</code> 
 </p><ul><li><p><code>data</code> Original data for the control units.</p></li>
 <li><p><code>cdf</code> Empirical CDFs of the control units.</p></li>
-<li><p><code>id</code> IDs of the control units.</p></li>
 <li><p><code>quantiles</code> Quantiles for the control units, evaluated on the specified grid.</p></li>
 </ul></li>
 <li><p><code>controls.q</code> Quantiles for the control units, evaluated on the specified grid.</p></li>

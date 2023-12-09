@@ -84,7 +84,7 @@
 
 
 <dt>savePlots</dt>
-<dd><p>Boolean indicating whether to save the plots to the current working directory. The plot names will be agg<em>start_year</em>end_year.pdf. The default is FALSE.</p></dd>
+<dd><p>Boolean indicating whether to save the plots to the current working directory. The plot names will be <code>[agg]_[start_year]_[end_year].pdf</code>. The default is FALSE.</p></dd>
 
 
 <dt>xlim</dt>
@@ -114,7 +114,7 @@ the function will plot the distribution of the aggregation statistic over time. 
 has a <code>summary</code> property that will print a selection of aggregated effects (specified by the <code>samples</code> parameter) for the chosen <code>agg</code> method, by post-treatment year (see examples below).
 This <code>summary</code> call will only print effects if the <code>agg</code> parameter requested a distribution difference (<code>quantileDiff</code> or <code>cdfDiff</code>). The other aggregations are meant to be inspected visually.
 If the <code>permutation</code> parameter was set to TRUE in the original <code>DiSCo</code> call, the summary table will include the results of the permutation test.
-If the original <code>DiSCo</code> call was restricted to a range of quantiles smaller than 0,1 (i.e. <code>q_min</code> &gt; 0 or <code>q_max</code> &lt; 1), the <code>samples</code> parameter is ignored
+If the original <code>DiSCo</code> call was restricted to a range of quantiles smaller than <code>[0,1]</code> (i.e. <code>q_min</code> &gt; 0 or <code>q_max</code> &lt; 1), the <code>samples</code> parameter is ignored
 and only the aggregated differences for the quantile range specified in the original call are returned.</p>
     </div>
 
@@ -124,9 +124,11 @@ and only the aggregated differences for the quantile range specified in the orig
 <span class="r-in"><span><span class="co"># load data</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"dube"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># run DiSCo</span></span></span>
-<span class="r-in"><span><span class="va">disco</span> <span class="op">&lt;-</span> <span class="fu"><a href="DiSCo.html">DiSCo</a></span><span class="op">(</span><span class="va">dube</span>, id_col.target <span class="op">=</span> <span class="fl">2</span>, t0 <span class="op">=</span> <span class="fl">2003</span>, M <span class="op">=</span> <span class="fl">1000</span>, G <span class="op">=</span> <span class="fl">1000</span>, num.cores <span class="op">=</span> <span class="fl">4</span>, permutation <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>                     CI <span class="op">=</span> <span class="cn">TRUE</span>, boots <span class="op">=</span> <span class="fl">1000</span>, cl <span class="op">=</span> <span class="fl">0.95</span>,  CI_placebo<span class="op">=</span><span class="cn">TRUE</span>, graph <span class="op">=</span> <span class="cn">TRUE</span>, qmethod<span class="op">=</span><span class="cn">NULL</span>, q_min<span class="op">=</span><span class="fl">0</span>, q_max<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">discot</span> <span class="op">&lt;-</span> <span class="fu">DiSCoTEA</span><span class="op">(</span><span class="va">disco</span>, agg <span class="op">=</span> <span class="st">"quantileDiff"</span>, graph <span class="op">=</span> <span class="cn">TRUE</span>, n_per_window <span class="op">=</span> <span class="cn">NULL</span>, savePlots <span class="op">=</span> <span class="cn">FALSE</span>, samples <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.4</span>, <span class="fl">0.6</span>, <span class="fl">0.8</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">disco</span> <span class="op">&lt;-</span> <span class="fu"><a href="DiSCo.html">DiSCo</a></span><span class="op">(</span><span class="va">dube</span>, id_col.target <span class="op">=</span> <span class="fl">2</span>, t0 <span class="op">=</span> <span class="fl">2003</span>, M <span class="op">=</span> <span class="fl">1000</span>, G <span class="op">=</span> <span class="fl">1000</span>,</span></span>
+<span class="r-in"><span>num.cores <span class="op">=</span> <span class="fl">4</span>, permutation <span class="op">=</span> <span class="cn">TRUE</span>, CI <span class="op">=</span> <span class="cn">TRUE</span>, boots <span class="op">=</span> <span class="fl">1000</span>, cl <span class="op">=</span> <span class="fl">0.95</span>,</span></span>
+<span class="r-in"><span>CI_placebo<span class="op">=</span><span class="cn">TRUE</span>, graph <span class="op">=</span> <span class="cn">TRUE</span>, qmethod<span class="op">=</span><span class="cn">NULL</span>, q_min<span class="op">=</span><span class="fl">0</span>, q_max<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">discot</span> <span class="op">&lt;-</span> <span class="fu">DiSCoTEA</span><span class="op">(</span><span class="va">disco</span>, agg <span class="op">=</span> <span class="st">"quantileDiff"</span>, graph <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>savePlots <span class="op">=</span> <span class="cn">FALSE</span>, samples <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.4</span>, <span class="fl">0.6</span>, <span class="fl">0.8</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># print summary table</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">discot</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>

@@ -34,10 +34,16 @@
     <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_CI.html</loc>
   </url>
   <url>
+    <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_CI_iter.html</loc>
+  </url>
+  <url>
     <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_bc.html</loc>
   </url>
   <url>
     <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_iter.html</loc>
+  </url>
+  <url>
+    <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_mixture.html</loc>
   </url>
   <url>
     <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_per.html</loc>
@@ -62,9 +68,6 @@
   </url>
   <url>
     <loc>http://www.davidvandijcke.com/DiSCo/reference/getGrid.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/getMixture.html</loc>
   </url>
   <url>
     <loc>http://www.davidvandijcke.com/DiSCo/reference/index.html</loc>

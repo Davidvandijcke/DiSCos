@@ -68,12 +68,13 @@ as well as the alternative mixture of distributions approach.</p>
 <span>  q_min <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  q_max <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  CI <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  CI_placebo <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  CI_placebo <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  boots <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>  cl <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  graph <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  qmethod <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  simplex <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -143,13 +144,17 @@ If you have a lot of pre-treatment periods, setting this to FALSE can speed up t
 
 <dt>qmethod</dt>
 <dd><p>Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the <code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></code> function from the stats package.
-Other options are "<code>qkden</code>" (based on smoothed kernel density function) and "<code>extreme</code>" (based on parametric extreme value distributions).
+Other options are "<code><a href="https://rdrr.io/pkg/evmix/man/kden.html" class="external-link">qkden</a></code>" (based on smoothed kernel density function) and "<code><a href="https://rdrr.io/pkg/extremeStat/man/distLquantile.html" class="external-link">extreme</a></code>" (based on parametric extreme value distributions).
 Both are substantially slower than the default method.</p></dd>
 
 
 <dt>seed</dt>
-<dd><p>Integer, seed for the random number generator. This needs to be set explicitly in the function call, since it will invoke <code>RNGstreams</code> which will set the seed for each core
+<dd><p>Integer, seed for the random number generator. This needs to be set explicitly in the function call, since it will invoke <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">RNGkind</a></code> which will set the seed for each core
 when using parallel processes. Default is NULL, which does not set a seed.</p></dd>
+
+
+<dt>simplex</dt>
+<dd><p>Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.</p></dd>
 
 </dl></div>
     <div class="section level2">

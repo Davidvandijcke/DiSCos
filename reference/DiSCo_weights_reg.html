@@ -73,23 +73,25 @@
 
 
 <dt>M</dt>
-<dd><p>Optional integer, number of draws from the uniform distribution for approximating the integral. See section 3.1 in the paper.</p></dd>
+<dd><p>Integer indicating the number of control quantiles to use in the DiSCo method. Default is 1000.</p></dd>
 
 
 <dt>qmethod</dt>
-<dd><p>Optional string, method for computing the quantile function. See section 3.1 in the paper.</p></dd>
+<dd><p>Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the <code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></code> function from the stats package.
+Other options are "<code><a href="https://rdrr.io/pkg/evmix/man/kden.html" class="external-link">qkden</a></code>" (based on smoothed kernel density function) and "<code><a href="https://rdrr.io/pkg/extremeStat/man/distLquantile.html" class="external-link">extreme</a></code>" (based on parametric extreme value distributions).
+Both are substantially slower than the default method.</p></dd>
 
 
 <dt>simplex</dt>
-<dd><p>Optional boolean, if TRUE the weights are constrained to be non-negative and sum to one.</p></dd>
+<dd><p>Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.</p></dd>
 
 
 <dt>q_min</dt>
-<dd><p>Optional numeric, lower bound for the uniform distribution from which the quantile draws are taken.</p></dd>
+<dd><p>Numeric, minimum quantile to use. Set this together with <code>q_max</code> to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).</p></dd>
 
 
 <dt>q_max</dt>
-<dd><p>Optional numeric, upper bound for the uniform distribution from which the quantile draws are taken.</p></dd>
+<dd><p>Numeric, maximum quantile to use. Set this together with <code>q_min</code> to restrict the range of quantiles used to construct the synthetic control. Default is 1 (all quantiles).</p></dd>
 
 </dl></div>
     <div class="section level2">
