@@ -41,7 +41,7 @@ If you get an error in "all cores" or similar, try setting num.cores=1 to see th
 
 \item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
 Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
-Both are substantially slower than the default method.}
+Both are substantially slower than the default method but may be useful for fat-tailed distributions with few data points at the upper quantiles. Alternatively, one could use the q_max option to restrict the range of quantiles used.}
 
 \item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).}
 
@@ -61,7 +61,7 @@ Function to implement permutation test for Distributional Synthetic Controls
 \details{
 This program iterates through all units and computes the optimal weights on the other units
 for replicating the unit of iteration's outcome variable, assuming that it is the treated unit.
-See Algorithm 1 in \insertCite{gunsilius2023distributional;textual}{DiSCo} for more details. The only modification is that we take the ratio of post- and pre-treatment
+See Algorithm 1 in \insertCite{gunsilius2023distributional;textual}{DiSCos} for more details. The only modification is that we take the ratio of post- and pre-treatment
 root mean squared Wasserstein distances to calculate the p-value, rather than the level in each period, following @abadie2010synthetic.
 }
 \references{

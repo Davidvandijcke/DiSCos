@@ -2,7 +2,7 @@
 % Please edit documentation in R/DiSCoTEA.R
 \name{DiSCoTEA}
 \alias{DiSCoTEA}
-\title{DiSCoTEA}
+\title{Aggregate treatment effects from DiSCo function.}
 \usage{
 DiSCoTEA(
   disco,
@@ -16,32 +16,34 @@ DiSCoTEA(
 )
 }
 \arguments{
-\item{disco}{Output of the DiSCo function}
+\item{disco}{Output of the DiSCo function.}
 
-\item{agg}{String indicating the aggregation statistic to be used. Options are
+\item{agg}{String indicating the aggregation statistic to be used. Options include
 \itemize{
 \item{\code{quantileDiff} }{Difference in quantiles between the target and the weighted average of the controls.}
 \item{\code{quantile} }{.}
 }}
 
-\item{graph}{Boolean indicating whether to plot graphs. Default is TRUE.}
+\item{graph}{Boolean indicating whether to plot graphs (default is TRUE).}
 
-\item{t_plot}{Optional vector of time periods (\code{t_col} values in the original dataframe) to be plotted. Default is NULL, which plots all time periods.}
+\item{t_plot}{Optional vector of time periods (\code{t_col} values in the original dataframe) to be plotted (default is NULL, which plots all time periods).}
 
-\item{savePlots}{Boolean indicating whether to save the plots to the current working directory. The plot names will be \verb{[agg]_[start_year]_[end_year].pdf}. The default is FALSE.}
+\item{savePlots}{Boolean indicating whether to save the plots to the current working directory (default is FALSE). The plot names will be \verb{[agg]_[start_year]_[end_year].pdf}.}
 
-\item{xlim}{Optional vector of length 2 indicating the x-axis limits of the plot. This and the \code{ylim} option can be useful to zoom in on the relevant parts of the distribution for fat-tailed distributions.}
+\item{xlim}{Optional vector of length 2 indicating the x-axis limits of the plot. Useful for zooming in on relevant parts of the distribution for fat-tailed distributions.}
 
 \item{ylim}{Optional vector of length 2 indicating the y-axis limits of the plot.}
 
-\item{samples}{Numeric vector indicating the range of quantiles of the aggregation statistic (\code{agg}) to be summarized in the \code{summary} property of the S3 class returned by the function.
-For example, if \code{samples} = c(0.25, 0.5, 0.75) (the default), the summary table will include the average effect for the 0-25th, 25-50th, 50-75th and 75-100th quantiles of the distribution of the aggregation statistic over time.}
+\item{samples}{Numeric vector indicating the range of quantiles of the aggregation statistic (\code{agg}) to be summarized in the \code{summary} property of the S3 class returned by the function (default is c(0.25, 0.5, 0.75)).
+For example, if \code{samples} = c(0.25, 0.5, 0.75), the summary table will include the average effect for the 0-25th, 25-50th, 50-75th and 75-100th quantiles of the distribution of the aggregation statistic over time.}
 }
 \value{
 A \code{\link[DiSCo]{DiSCoT}} object.
 }
 \description{
-Distributional Synthetic Controls Treatment Effect Aggregator (DiSCoTEA).
+Function to aggregate treatment effects from the output of the
+DiSCo function, plot the distribution of the aggregation statistic over time,
+and report summary tables.
 }
 \details{
 This function takes in the output of the DiSCo_per function and computes aggregate treatment effect using a user-specified aggregation statistic.
@@ -60,7 +62,7 @@ data("dube")
 # run DiSCo
 disco <- DiSCo(dube, id_col.target = 2, t0 = 2003, M = 1000, G = 1000,
 num.cores = 4, permutation = TRUE, CI = TRUE, boots = 1000, cl = 0.95,
-CI_placebo=TRUE, graph = TRUE, qmethod=NULL, q_min=0, q_max=1)
+graph = TRUE, qmethod=NULL, q_min=0, q_max=1)
 discot <- DiSCoTEA(disco, agg = "quantileDiff", graph = TRUE,
 savePlots = FALSE, samples = c(0.2, 0.4, 0.6, 0.8))
 # print summary table

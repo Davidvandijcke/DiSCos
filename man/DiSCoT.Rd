@@ -2,7 +2,7 @@
 % Please edit documentation in R/DiSCoTEA.R
 \name{DiSCoT}
 \alias{DiSCoT}
-\title{DiSCoT}
+\title{Store aggregated treatment effects}
 \usage{
 DiSCoT(
   agg,

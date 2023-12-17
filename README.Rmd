@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r, echo=FALSE, results="hide", warning=FALSE, message=FALSE}
-library(DiSCo)
+library(DiSCos)
 library(ggpubr)
 devtools::load_all()
 library(BMisc)

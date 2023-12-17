@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(DiSCo)
+library(DiSCos)
 
-test_check("DiSCo")
+test_check("DiSCos")

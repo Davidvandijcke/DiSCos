@@ -63,7 +63,7 @@ If you have a lot of pre-treatment periods, setting this to FALSE can speed up t
 
 \item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
 Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
-Both are substantially slower than the default method.}
+Both are substantially slower than the default method but may be useful for fat-tailed distributions with few data points at the upper quantiles. Alternatively, one could use the q_max option to restrict the range of quantiles used.}
 
 \item{seed}{Integer, seed for the random number generator. This needs to be set explicitly in the function call, since it will invoke \code{\link[base]{RNGkind}} which will set the seed for each core
 when using parallel processes. Default is NULL, which does not set a seed.}

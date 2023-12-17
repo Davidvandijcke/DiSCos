@@ -29,22 +29,20 @@ knitr::opts_chunk$set(
 ```{r, include=FALSE}
 
 library(pracma)
-library(quadprog)
 library(parallel)
 library(stats)
 library(maps)
 library(data.table)
 library(CVXR)
-library(DiSCo)
+library(DiSCos)
 library(ggplot2)
 ```
-
 
 # Introduction
 
 This vignette demonstrates how to use the DiSCo package by way of the
-empirical application in @gunsilius2023distributional, which is based
-on @dube2019minimum. We illustrate the use of the two main functions: 1)
+empirical application in @gunsilius2023distributional, which is based on
+@dube2019minimum. We illustrate the use of the two main functions: 1)
 `DiSCo`, which estimates the raw distributional counterfactuals,
 computes confidence intervals, and optionally performs a permutation
 test; and 2) `DiSCoTEA`, the "Treatment Effect Aggregator", which takes
@@ -102,7 +100,7 @@ intervention, respectively. We can now run the DiSCo command:
 
 ```{r, fig.width=8,fig.height=5}
 df <- copy(dube)
-disco <- DiSCo(df, id_col.target, t0, G = 1000, num.cores = 2, permutation = TRUE, CI = TRUE, boots = 1000, graph = TRUE, simplex=TRUE, seed=1)
+disco <- DiSCo(df, id_col.target, t0, G = 1000, num.cores = 1, permutation = TRUE, CI = TRUE, boots = 1000, graph = TRUE, simplex=TRUE, seed=1)
 ```
 
 where we have chosen a grid (`G`) of 1000 quantile and opted for
@@ -114,7 +112,7 @@ function call, which ensures reproducibility across the parallel cores.
 The returned `disco` object contains a host of information produced by
 the command. Typing `?DiSCoT` in the console pulls up the help files
 which lay out the precise structure of the returned object. For now, we
-will just have a look at the estimated weights,
+will just have a look at the top 10 estimated weights,
 
 ```{r}
 # retrieve the weights
@@ -127,11 +125,13 @@ controls <- disco$control_ids
 weights_df <- data.frame(weights = weights, fips = controls)
 
 # merge with state fips codes (built into the maps package)
-weights_df <- merge(weights_df, maps::state.fips, by = "fips")
+state.fips <- as.data.table(maps::state.fips)
+state.fips <- state.fips[!duplicated(state.fips$abb), c("fips", "abb")]
+weights_df <- merge(weights_df, state.fips, by = "fips")
 
 setorder(weights_df, -weights)
 
-print(weights_df)
+print(weights_df[1:10,])
 
 ```
 
@@ -210,7 +210,7 @@ where $\text{q_min} < \text{q_max}$ are the bounds of the quantile range
 we're interested in. Doing this in R is as simple as,
 
 ```{r}
-disco <- DiSCo(dube, id_col.target=id_col.target, t0=t0, G = 250, num.cores = 2, permutation = TRUE, CI = TRUE, boots = 1000, graph = FALSE, q_min = 0.7, q_max=0.95, seed=1, simplex=TRUE)
+disco <- DiSCo(dube, id_col.target=id_col.target, t0=t0, G = 250, num.cores = 1, permutation = TRUE, CI = TRUE, boots = 1000, graph = FALSE, q_min = 0.7, q_max=0.95, seed=1, simplex=TRUE)
 ```
 
 where we set the lower bound to 0.75 since that where the effects start

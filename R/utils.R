@@ -85,6 +85,14 @@ checks <- function(df, id_col.target, t0, M, G, num.cores, permutation, q_min, q
     stop("id_col is not a column in the data table")
   }
 
+  if ((t0 > max(df$time_col))) {
+    stop("First treatment period t0 has to be within time_col range")
+  }
+
+  if (t0 <= min(df$time_col)) {
+    stop("There are no pre-treatment periods based on provided t0")
+  }
+
   # checks on the input data types
   if (!is.numeric(df$id_col)) {
     stop("id_col must be numeric")
@@ -115,8 +123,11 @@ checks <- function(df, id_col.target, t0, M, G, num.cores, permutation, q_min, q
   if ((t0 < min(df$time_col)) | (t0 > max(df$time_col))) {
     stop("T0 must be between minimum and the maximum value of year_col")
   }
-  if (M < 1) {
-    stop("M must be greater than or equal to 1")
+  if (M < (uniqueN(df$id_col) -1) ) {
+    stop("M must be greater than or equal to the number of control units, and ideally large")
+  }
+  if (G < 2) {
+    stop("G must be greater than or equal to 2, and ideally larger than 100")
   }
   if (num.cores < 1) {
     stop("num.cores must be greater than or equal to 1")
@@ -176,8 +187,8 @@ checks <- function(df, id_col.target, t0, M, G, num.cores, permutation, q_min, q
   }
 
   if (!is.null(qmethod)) {
-    if (!qmethod %in% c("smooth", "extreme")) {
-      stop("qmethod must be either NULL, 'smooth' or 'extre,e'")
+    if (!qmethod %in% c("qkden", "extreme")) {
+      stop("qmethod must be either NULL, 'qkden' or 'extreme'")
     }
   }
 
@@ -308,54 +319,58 @@ citation <- function() {
 #' The target has a distribution of a mixture of 4 Gaussian distributions.
 #'
 #' @keywords internal
+#' @param t an integer indicating the number of time periods
+#' @param num.con an integer indicating the number of control units
+#' @param numdraws an integer indicating the number of draws
 #' @return
 #' \item{\code{target}}{a vector.}
 #' \item{\code{control}}{a matrix.}
 #' @importFrom MASS mvrnorm
 #' @importFrom stats runif
-ex_gmm=function(){
-  ##### Things the researcher needs to choose
-  # Required parameters for both examples
-  set.seed(1860)
-  numdraws <- 1000 # number of draws for each distribution
-  sd.mult <- 5 # seed_multiplier to change the randomness in a controlled way when generating the
-  # controls. The number used is immaterial, it is just used to get the same
-  # random seed each time
-  sd.target <- 1860 # seed for the target
+ex_gmm=function(Ts=2, num.con=30, numdraws=1000){
 
-  num.con <- 30 # number of control variables
+  for (t in 1:Ts) {
+    # Mixture of 3 Gaussians
+    con <- matrix(0, nrow=num.con, ncol=numdraws)
+    for (ii in 1:num.con){
+      # generating uniformly distributed weights in the unit simplex
+      a1 <- matrix(runif(3), nrow=1)
+      a1 <- sweep(a1, 1, rowSums(a1), FUN="/")
+      components <- sample(1:3,prob=a1,size=numdraws,replace=TRUE)
+      mus <- runif(3,-10,10)
+      sigmas <- runif(3,0.5,6)
+      sigmas <- (sigmas + t(sigmas))/2
+      con[ii,] <- rnorm(numdraws)*sigmas[components]+mus[components]
+    }
 
 
-  # Mixture of 3 Gaussians
-  con <- matrix(0, nrow=num.con, ncol=numdraws)
-  for (ii in 1:num.con){
-    set.seed(sd.mult*ii)
-    # generating uniformly distributed weights in the unit simplex
-    a1 <- matrix(runif(3), nrow=1)
+    # generating the target distribution as a mixture of 4 Normals
+    a1 <- matrix(runif(4), nrow=1)
     a1 <- sweep(a1, 1, rowSums(a1), FUN="/")
-    components <- sample(1:3,prob=a1,size=numdraws,replace=TRUE)
-    mus <- runif(3,-10,10)
-    sigmas <- runif(3,0.5,6)
+    components <- sample(1:4,prob=a1,size=numdraws,replace=TRUE)
+    mus <- runif(4,-10,10)
+    sigmas <- runif(4,0.5,6)
     sigmas <- (sigmas + t(sigmas))/2
-    con[ii,] <- rnorm(numdraws)*sigmas[components]+mus[components]
+    treat <- rnorm(numdraws)*sigmas[components]+mus[components]
+
+
+    con <- t(con)
+    target <- treat
+
+    # stick in dataframe
+    df <- data.table(target=target, control=con)
+    # convert to long format
+    df <- melt(df, id.vars = NULL, measure.vars = c("target", paste0("control.V", 1:num.con)))
+    setnames(df, c("variable", "value"), c("id_col", "y_col"))
+    df[, time_col := t]
+
+    if (t==1) df_out <- df
+    else df_out <- rbind(df_out, df)
   }
 
+  df_out[, id_col := as.numeric(id_col)]
 
-  # generating the target distribution as a mixture of 4 Normals
-  set.seed(sd.target)
-  a1 <- matrix(runif(4), nrow=1)
-  a1 <- sweep(a1, 1, rowSums(a1), FUN="/")
-  components <- sample(1:4,prob=a1,size=numdraws,replace=TRUE)
-  mus <- runif(4,-10,10)
-  sigmas <- runif(4,0.5,6)
-  sigmas <- (sigmas + t(sigmas))/2
-  treat <- rnorm(numdraws)*sigmas[components]+mus[components]
-
-
-  con <- t(con)
-  target <- treat
-
-  return(list(target=target, control=con))
+  return(df_out)
 }
 
 

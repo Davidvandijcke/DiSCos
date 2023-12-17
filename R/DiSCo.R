@@ -1,7 +1,7 @@
 
-#' @title DiSCo
+#' @title Distributional Synthetic Controls
 #'
-#' @description This function implements the distributional synthetic controls (DiSCo) method from \insertCite{gunsilius2023distributional;textual}{DiSCo}.
+#' @description This function implements the distributional synthetic controls (DiSCo) method from \insertCite{gunsilius2023distributional;textual}{DiSCos}.
 #' as well as the alternative mixture of distributions approach.
 #'
 #' @details This function is called for every time period in the DiSCo function. It implements the DiSCo method for a single time period, as well as the mixture of distributions approach.
@@ -32,11 +32,10 @@
 #' @param graph Logical, indicating whether to plot the permutation graph as in Figure 3 of the paper. Default is FALSE.
 #' @param qmethod Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
 #' Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
-#' Both are substantially slower than the default method.
+#' Both are substantially slower than the default method but may be useful for fat-tailed distributions with few data points at the upper quantiles. Alternatively, one could use the q_max option to restrict the range of quantiles used.
 #' @param seed Integer, seed for the random number generator. This needs to be set explicitly in the function call, since it will invoke \code{\link[base]{RNGkind}} which will set the seed for each core
 #' when using parallel processes. Default is NULL, which does not set a seed.
 #' @param simplex Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.
-#'
 #' @return A list containing, for each time period, the elements described in the return argument of \code{\link{DiSCo_iter}}, as well as the following additional elements:
 #' \itemize{
 #'  \item{\code{DiSco}}{
@@ -122,9 +121,11 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 2, perm
   #---------------------------------------------------------------------------
   Weights_DiSCo_avg <- results.periods$`1`$DiSCo$weights
   Weights_mixture_avg <- results.periods$`1`$mixture$weights
-  for (yy in 2:T0){
-    Weights_DiSCo_avg <- Weights_DiSCo_avg + results.periods[[yy]]$DiSCo$weights
-    Weights_mixture_avg <- Weights_mixture_avg + results.periods[[yy]]$mixture$weights
+  if (T0 > 1) {
+    for (yy in 2:T0){
+      Weights_DiSCo_avg <- Weights_DiSCo_avg + results.periods[[yy]]$DiSCo$weights
+      Weights_mixture_avg <- Weights_mixture_avg + results.periods[[yy]]$mixture$weights
+    }
   }
   Weights_DiSCo_avg <- (1/T0) * Weights_DiSCo_avg
   Weights_mixture_avg <- (1/T0) * Weights_mixture_avg

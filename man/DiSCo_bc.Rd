@@ -16,7 +16,7 @@ The quantile function of the barycenter associated with the "weights" evaluated 
 }
 \description{
 Compute barycenters in the DiSCo method at every time period, as in Definition 1,
-Step 4 in \insertCite{gunsilius2023distributional;textual}{DiSCo}.
+Step 4 in \insertCite{gunsilius2023distributional;textual}{DiSCos}.
 }
 \references{
 \insertAllCited{}

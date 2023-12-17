@@ -1,7 +1,7 @@
 #' Function for computing barycenters in the DiSCo method at every time period
 #'
 #' Compute barycenters in the DiSCo method at every time period, as in Definition 1,
-#' Step 4 in \insertCite{gunsilius2023distributional;textual}{DiSCo}.
+#' Step 4 in \insertCite{gunsilius2023distributional;textual}{DiSCos}.
 #'
 #' @param controls.q List with matrices of control quantile functions
 #' @param weights Vector of optimal synthetic control weights, computed using the DiSCo_weights_reg function.

@@ -1,7 +1,7 @@
 #' @title DiSCo_weights_reg
 #' @description Function for obtaining the weights in the DiSCo method at every time period
 #' @details Estimate the optimal weights for the distributional synthetic controls method.
-#' solving the convex minimization problem in Eq. (2) in \insertCite{gunsilius2023distributional;textual}{DiSCo}..
+#' solving the convex minimization problem in Eq. (2) in \insertCite{gunsilius2023distributional;textual}{DiSCos}..
 #' using a regression of the simulated target quantile on the simulated control quantiles, as in Eq. (3),
 #' \eqn{\underset{\vec{\lambda} \in \Delta^J}{\operatorname{argmin}}\left\|\mathbb{Y}_t \vec{\lambda}_t-\vec{Y}_{1 t}\right\|_2^2}.
 #' For the constrained optimization we rely on the package pracma

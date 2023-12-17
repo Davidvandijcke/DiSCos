@@ -1,6 +1,8 @@
 
-#' @title DiSCoTEA
-#' @description Distributional Synthetic Controls Treatment Effect Aggregator (DiSCoTEA).
+#' @title Aggregate treatment effects from DiSCo function.
+#' @description Function to aggregate treatment effects from the output of the
+#' DiSCo function, plot the distribution of the aggregation statistic over time,
+#' and report summary tables.
 #'
 #' @details This function takes in the output of the DiSCo_per function and computes aggregate treatment effect using a user-specified aggregation statistic.
 #' The default is the differences between the counterfactual and the observed quantile functions (`quantileDiff`). If `graph` is set to TRUE,
@@ -11,26 +13,26 @@
 #' If the original `DiSCo` call was restricted to a range of quantiles smaller than `[0,1]` (i.e. `q_min` > 0 or `q_max` < 1), the `samples` parameter is ignored
 #' and only the aggregated differences for the quantile range specified in the original call are returned.
 #'
-#' @param disco Output of the DiSCo function
-#' @param agg String indicating the aggregation statistic to be used. Options are
+#' @param disco Output of the DiSCo function.
+#' @param agg String indicating the aggregation statistic to be used. Options include
 #' \itemize{
 #'  \item{\code{quantileDiff} }{Difference in quantiles between the target and the weighted average of the controls.}
 #'  \item{\code{quantile} }{.}
-#'  }
-#' @param graph Boolean indicating whether to plot graphs. Default is TRUE.
-#' @param t_plot Optional vector of time periods (`t_col` values in the original dataframe) to be plotted. Default is NULL, which plots all time periods.
-#' @param savePlots Boolean indicating whether to save the plots to the current working directory. The plot names will be `[agg]_[start_year]_[end_year].pdf`. The default is FALSE.
-#' @param xlim Optional vector of length 2 indicating the x-axis limits of the plot. This and the `ylim` option can be useful to zoom in on the relevant parts of the distribution for fat-tailed distributions.
+#' }
+#' @param graph Boolean indicating whether to plot graphs (default is TRUE).
+#' @param t_plot Optional vector of time periods (`t_col` values in the original dataframe) to be plotted (default is NULL, which plots all time periods).
+#' @param savePlots Boolean indicating whether to save the plots to the current working directory (default is FALSE). The plot names will be `[agg]_[start_year]_[end_year].pdf`.
+#' @param xlim Optional vector of length 2 indicating the x-axis limits of the plot. Useful for zooming in on relevant parts of the distribution for fat-tailed distributions.
 #' @param ylim Optional vector of length 2 indicating the y-axis limits of the plot.
-#' @param samples Numeric vector indicating the range of quantiles of the aggregation statistic (`agg`) to be summarized in the `summary` property of the S3 class returned by the function.
-#' For example, if `samples` = c(0.25, 0.5, 0.75) (the default), the summary table will include the average effect for the 0-25th, 25-50th, 50-75th and 75-100th quantiles of the distribution of the aggregation statistic over time.
+#' @param samples Numeric vector indicating the range of quantiles of the aggregation statistic (`agg`) to be summarized in the `summary` property of the S3 class returned by the function (default is c(0.25, 0.5, 0.75)).
+#' For example, if `samples` = c(0.25, 0.5, 0.75), the summary table will include the average effect for the 0-25th, 25-50th, 50-75th and 75-100th quantiles of the distribution of the aggregation statistic over time.
 #' @examples \dontrun{
 #' # load data
 #' data("dube")
 #' # run DiSCo
 #' disco <- DiSCo(dube, id_col.target = 2, t0 = 2003, M = 1000, G = 1000,
 #' num.cores = 4, permutation = TRUE, CI = TRUE, boots = 1000, cl = 0.95,
-#' CI_placebo=TRUE, graph = TRUE, qmethod=NULL, q_min=0, q_max=1)
+#' graph = TRUE, qmethod=NULL, q_min=0, q_max=1)
 #' discot <- DiSCoTEA(disco, agg = "quantileDiff", graph = TRUE,
 #' savePlots = FALSE, samples = c(0.2, 0.4, 0.6, 0.8))
 #' # print summary table
@@ -53,7 +55,6 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
   T_max <- max(df$time_col) - t_min + 1
   CI <- disco$params$CI
   cl <- disco$params$cl
-  placebo <- disco$params$CI_placebo
   evgrid = seq(from=0,to=1,length.out=disco$params$G+1)
   qmethod <- disco$params$qmethod
   q_min <- disco$params$q_min
@@ -339,7 +340,7 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
 }
 
 
-#' @title DiSCoT
+#' @title Store aggregated treatment effects
 #' @description S3 object holding aggregated treatment effects
 #' @param agg aggregation method
 #' @param treats list of treatment effects

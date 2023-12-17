@@ -4,7 +4,7 @@
 #' @description Function to implement permutation test for Distributional Synthetic Controls
 #' @details This program iterates through all units and computes the optimal weights on the other units
 #' for replicating the unit of iteration's outcome variable, assuming that it is the treated unit.
-#' See Algorithm 1 in \insertCite{gunsilius2023distributional;textual}{DiSCo} for more details. The only modification is that we take the ratio of post- and pre-treatment
+#' See Algorithm 1 in \insertCite{gunsilius2023distributional;textual}{DiSCos} for more details. The only modification is that we take the ratio of post- and pre-treatment
 #' root mean squared Wasserstein distances to calculate the p-value, rather than the level in each period, following @abadie2010synthetic.
 #'
 #' @param results.periods List of period-specific results from DiSCo
@@ -204,9 +204,9 @@ print.permut <- function(x, ...) {
   cat("Number of control units: ", x$J_1, "\n")
 }
 
-#' @ title summary.permut
+#' @title summary.permut
 #' @description Summarize permutation test results
-#' @param x Object of class permut
+#' @param object Object of class permut
 #' @param ... Additional arguments
 #' @return Prints permutation test results
 #' @export

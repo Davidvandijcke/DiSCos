@@ -1,8 +1,15 @@
-#' @title DiSCo_iter
+#' @title Estimate DiSCo in a single period
 #'
 #' @description This function implements the DiSCo method for a single time period, as well as the mixture of distributions approach.
+#' Its return values contain valuable period-specific estimation outputs.
 #'
-#' @details This function is part of the DiSCo method, called for each time period. It calculates the optimal weights for the DiSCo method and the mixture of distributions approach for a single time period. The function processes data for both the target and control units, computes the quantile functions, and evaluates these on a specified grid. The function is designed to be used within the broader context of the DiSCo function, which aggregates results across multiple time periods.
+#' @details This function is part of the DiSCo method, called for each time period.
+#' It calculates the optimal weights for the DiSCo method and the mixture of
+#' distributions approach for a single time period. The function processes data f
+#' or both the target and control units, computes the quantile functions,
+#' and evaluates these on a specified grid. The function is designed to be used
+#' within the broader context of the DiSCo function, which aggregates results
+#' across multiple time periods.
 #'
 #' @param yy Integer indicating the current year being processed.
 #' @inheritParams DiSCo

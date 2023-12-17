@@ -23,7 +23,7 @@ DiSCo_weights_reg(
 
 \item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
 Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
-Both are substantially slower than the default method.}
+Both are substantially slower than the default method but may be useful for fat-tailed distributions with few data points at the upper quantiles. Alternatively, one could use the q_max option to restrict the range of quantiles used.}
 
 \item{simplex}{Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.}
 
@@ -39,7 +39,7 @@ Function for obtaining the weights in the DiSCo method at every time period
 }
 \details{
 Estimate the optimal weights for the distributional synthetic controls method.
-solving the convex minimization problem in Eq. (2) in \insertCite{gunsilius2023distributional;textual}{DiSCo}..
+solving the convex minimization problem in Eq. (2) in \insertCite{gunsilius2023distributional;textual}{DiSCos}..
 using a regression of the simulated target quantile on the simulated control quantiles, as in Eq. (3),
 \eqn{\underset{\vec{\lambda} \in \Delta^J}{\operatorname{argmin}}\left\|\mathbb{Y}_t \vec{\lambda}_t-\vec{Y}_{1 t}\right\|_2^2}.
 For the constrained optimization we rely on the package pracma

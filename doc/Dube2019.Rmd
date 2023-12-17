@@ -28,18 +28,14 @@ knitr::opts_chunk$set(
 
 ```{r, include=FALSE}
 
-# fldr <- here::here("R/")
-# sapply(paste0(fldr,list.files(fldr)), source)# library(CVXR)
 library(pracma)
-library(quadprog)
 library(parallel)
 library(stats)
+library(maps)
 library(data.table)
 library(CVXR)
-library(DiSCo)
+library(DiSCos)
 library(ggplot2)
-# fldr <- here::here("R/")
-# sapply(paste0(fldr,list.files(fldr)), source)
 ```
 
 # Introduction
@@ -72,16 +68,16 @@ $$\
 In practice, we do this by solving the following optimization problem:
 $$
 \vec{\lambda}_t^*=\underset{\vec{\lambda} \in \Delta^J}{\operatorname{argmin}} \int_0^1\left|\sum_{j=2}^{J+1} \lambda_j F_{Y_{j t}}^{-1}(q)-F_{Y_{1 t}}^{-1}(q)\right|^2 d q
-$$ which gives optimal weights for each period. This problem can be
-solved by a simple weighted regression, which is implemented in the
-`DiSCo_weights_reg` function. To obtain the overall optimal weights
-$\vec{\lambda}^*$, we take the average of the optimal weights across all
-periods.
+$$which gives an optimal weight for each unit-period combination. This
+problem can be solved by a simple weighted regression, which is
+implemented in the `DiSCo_weights_reg` function. To obtain the overall
+optimal weights $\vec{\lambda}^*$, we take the average of the optimal
+weights across all periods.
 
-# Illustration
+# Basic Usage
 
-The data from @dube2019minimum is available in the package. We load it
-here:
+To get coding, we load the data from @dube2019minimum, which is
+available in the package.
 
 ```{r}
 data("dube")
@@ -102,43 +98,152 @@ t0 <- 2003
 which indicate the id of the treated unit and the time period of the
 intervention, respectively. We can now run the DiSCo command:
 
-```{r}
-# if the below gives issues it's the knit cache...
-
-disco <- DiSCo(dube, id_col.target, t0, M = 500, G = 1000, num.cores = 2, permutation = FALSE,
-                 CI = FALSE, boots = 1, cl = 0.95, CI_placebo=TRUE, graph = FALSE, qmethod=NULL)
+```{r, fig.width=8,fig.height=5}
+df <- copy(dube)
+disco <- DiSCo(df, id_col.target, t0, G = 1000, num.cores = 1, permutation = TRUE, CI = TRUE, boots = 1000, graph = TRUE, simplex=TRUE, seed=1)
 ```
 
-where we have chosen grids of 1000 grid points and opted for parallel
-computation with 5 cores to speed up the permutation test and confidence
-intervals, which we calculate using 500 resamples.
+where we have chosen a grid (`G`) of 1000 quantile and opted for
+parallel computation with 2 cores to speed up the permutation test and
+confidence intervals (`CI` is set to `TRUE`), which we calculate using
+500 resamples (`boots`). We also set the `seed` explicitly in the
+function call, which ensures reproducibility across the parallel cores.
 
-We can use the DiSCo Treatment Effect Aggregator (`DiSCoTEA`) function
-to aggregate the resulting counterfactual quantile functions into
-various treatment effect measures. For example, we can calculate the
-average treatment effect (ATE) as follows:
+The returned `disco` object contains a host of information produced by
+the command. Typing `?DiSCoT` in the console pulls up the help files
+which lay out the precise structure of the returned object. For now, we
+will just have a look at the top 10 estimated weights,
 
 ```{r}
+# retrieve the weights
+weights <- disco$Weights_DiSCo_avg
+
+# retrieve the control unit IDs 
+controls <- disco$control_ids
+
+# store in a dataframe
+weights_df <- data.frame(weights = weights, fips = controls)
+
+# merge with state fips codes (built into the maps package)
+state.fips <- as.data.table(maps::state.fips)
+state.fips <- state.fips[!duplicated(state.fips$abb), c("fips", "abb")]
+weights_df <- merge(weights_df, state.fips, by = "fips")
+
+setorder(weights_df, -weights)
+
+print(weights_df[1:10,])
+
+```
+
+When we ran the `DiSCo` command, we set `permutation` to `TRUE`, which
+runs the permutation test described in the paper (see `?DiSCo_per` for
+more details). This will allow us to inspect the permutation inference
+results below. Already, by setting `graph` to `TRUE`, the function
+displayed a plot of the full distribution of permutation tests. The
+black solid line shows the fit of the "true" synthetic control. The fact
+that it does not diverge stronger than the other lines in gray after
+treatment suggests that the treatment had no effect.
+
+For context, the y-axis is the squared Wasserstein distance between the
+counterfactual and observed quantile functions, $$
+d_{t t}^2:=\int_0^1\left|F_{Y_{u t, N}}^{-1}(q)-F_{Y_{u t}}^{-1}(q)\right|^2 d q
+$$and, as in @abadie2010synthetic we take the ratio of post- to
+pre-intervention Wasserstein distance to account for variation in the
+pre-treatment fit across placebo tests, $$
+r_j=\frac{R_j\left(T_0+1, T\right)}{R_j\left(1, T_0\right)}
+$$ and calculate the p-value for the permutation test as, $$
+p=\frac{1}{J+1} \sum_{j=1}^{J+1} H\left(r_j-r_1\right),
+$$where $H(x)$ is the Heaviside function which is 1 if $x\geq 0$ and 0
+otherwise. This p-value gives the probability of observing a placebo
+test with a larger ratio than the true treatment effect. It can be
+retrieved by calling
+
+```{r}
+summary(disco$perm)
+```
+
+The p-value is larger than 0.05, which confirms the visual result from
+the plot above, while accounting for potential differences in
+pre-treatment fit across placebo units.
+
+Finally, we can use the DiSCo Treatment Effect Aggregator (`DiSCoTEA`)
+function to aggregate the resulting counterfactual quantile functions
+into various treatment effect measures. For example, we can calculate
+the difference between the counterfactual and observed quantile
+functions as follows.
+
+```{r, fig.width=5,fig.height=8, fig.align='center'}
 discot <- DiSCoTEA(disco,  agg="quantileDiff", graph=TRUE)
 summary(discot)
+```
+
+Calling `summary` on the returned object prints a table summarizing the
+effects across the distribution. You can choose the intervals of
+quantiles over which it aggregates using the `samples` parameter. If you
+calculated the permutation test and confidence intervals in the `DiSCo`
+function, these are reported as well.
+
+Setting `graph` to `TRUE` also prints a plot of the distribution
+differences over time You can focus on specific years using the `t_plot`
+parameter. You can use the other parameters of the `DiSCOTEA` function
+to adjust the basic appearance of the plots, or directly alter the
+returned ggplot object that is stored in the returned `DiSCoT` object.
+
+Looking at the plot of the quantile differences, there appear to be
+positive effects of the minimum wage increase on household income for
+the upper quantile. That seems a little strange. The first indication
+that this is probably a spurious result comes from the permutation test,
+which could not reject the hypothesis test of there being no effect.
+
+# Robustness tests
+
+The package offers various ways to further test suspected effects. For
+example, we can focus on a specific part of the distribution, and
+construct a separate synthetic control for it. Mathematically, this
+comes down to,
+
+$$
+\vec{\lambda}_t^*=\underset{\vec{\lambda} \in \Delta^J}{\operatorname{argmin}} \int_{\text{q_min}}^{\text{q_max}}\left|\sum_{j=2}^{J+1} \lambda_j F_{Y_{j t}}^{-1}(q)-F_{Y_{1 t}}^{-1}(q)\right|^2 d q,
+$$
+
+where $\text{q_min} < \text{q_max}$ are the bounds of the quantile range
+we're interested in. Doing this in R is as simple as,
+
+```{r}
+disco <- DiSCo(dube, id_col.target=id_col.target, t0=t0, G = 250, num.cores = 1, permutation = TRUE, CI = TRUE, boots = 1000, graph = FALSE, q_min = 0.7, q_max=0.95, seed=1, simplex=TRUE)
+```
+
+where we set the lower bound to 0.75 since that where the effects start
+appearing clearly, and the upper bound to 0.95 to account for the fact
+that the CPS data used in @dube2019minimum is imputed for the top income
+quantiles, which may explain the erratic behavior of the estimator at
+those quantiles. Another way one could try to deal with irregularity in
+the estimated quantile functions is by using the `qmethod` option in the
+`DiSCo` command, which allows for the use of alternative quantile
+estimation methods that can account for non-smoothness and extreme
+values. As above, we plot the results using the `DiScoTEA` function:
+
+```{r, fig.width=5,fig.height=8, fig.align='center'}
+discot <- DiSCoTEA(disco, agg="quantileDiff", graph=TRUE)
+summary(discot) 
 
 ```
 
+For this restricted range of quantiles, the estimator appears to produce
+a slightly better --- though not perfect -- pre-treatment fit. We still
+observe the positive effects in the post-treatment periods, but the
+restricted permutation test is still not significant. Overall, we cannot
+reject the null hypothesis of there being no effect of the treatment.
 
-# Permutation test
+# Conclusion
 
-Similar to the canonical permutation test in @abadie2010synthetic, we
-can carry out a distributional permutation test. The idea is entirely
-analogous: we iteratively reassign the treatment to units in the set of
-controls and estimate "placebo" quantile functions. Then we calculate
-the squared Wasserstein error of the entire distribution as, $$
-d_{t t}^2:=\int_0^1\left|F_{Y_{u t, N}}^{-1}(q)-F_{Y_{u t}}^{-1}(q)\right|^2 d q
-$$ for each time period. The `permutation` option in the `DiSCo`
-function allows one to plot the time evolution of these terms for all
-units by setting `graph = TRUE`, to visually inspect the abnormality of
-the "true" treatment effects. We also calculate the p-value of the test
-as, $$
-p_t=\frac{r\left(d_{1 t}\right)}{J+1}
-$$ where $r(d_{1t})$ is the rank of the true treatment effect in the
-distribution of placebo effects.
-
+In this vignette, we have demonstrated the DiSCo package using the data
+from the empirical application in @gunsilius2023distributional. We
+estimated the difference in between the quantile functions of the
+distributional synthetic control constructed with the `DiSco` command
+and the observed quantile function. To test for the presence of
+treatment effects, we inspected the pre-treatment distributional fit,
+carried out a permutation test, and re-estimated the synthetic control
+for a restricted quantile range; all these robustness tests are
+available in the DiSCo package, together with handy graphing and
+aggregation tools.

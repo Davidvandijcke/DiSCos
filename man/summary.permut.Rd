@@ -2,14 +2,14 @@
 % Please edit documentation in R/DiSCo_per.R
 \name{summary.permut}
 \alias{summary.permut}
-\title{title summary.permut}
+\title{summary.permut}
 \usage{
 \method{summary}{permut}(object, ...)
 }
 \arguments{
-\item{...}{Additional arguments}
+\item{object}{Object of class permut}
 
-\item{x}{Object of class permut}
+\item{...}{Additional arguments}
 }
 \value{
 Prints permutation test results

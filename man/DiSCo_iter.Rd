@@ -2,7 +2,7 @@
 % Please edit documentation in R/DiSCo_iter.R
 \name{DiSCo_iter}
 \alias{DiSCo_iter}
-\title{DiSCo_iter}
+\title{Estimate DiSCo in a single period}
 \usage{
 DiSCo_iter(
   yy,
@@ -42,7 +42,7 @@ This variable can be any type, as long as it is the same type as the id_col colu
 
 \item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
 Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
-Both are substantially slower than the default method.}
+Both are substantially slower than the default method but may be useful for fat-tailed distributions with few data points at the upper quantiles. Alternatively, one could use the q_max option to restrict the range of quantiles used.}
 
 \item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).}
 
@@ -83,7 +83,14 @@ A list with the following elements:
 }
 \description{
 This function implements the DiSCo method for a single time period, as well as the mixture of distributions approach.
+Its return values contain valuable period-specific estimation outputs.
 }
 \details{
-This function is part of the DiSCo method, called for each time period. It calculates the optimal weights for the DiSCo method and the mixture of distributions approach for a single time period. The function processes data for both the target and control units, computes the quantile functions, and evaluates these on a specified grid. The function is designed to be used within the broader context of the DiSCo function, which aggregates results across multiple time periods.
+This function is part of the DiSCo method, called for each time period.
+It calculates the optimal weights for the DiSCo method and the mixture of
+distributions approach for a single time period. The function processes data f
+or both the target and control units, computes the quantile functions,
+and evaluates these on a specified grid. The function is designed to be used
+within the broader context of the DiSCo function, which aggregates results
+across multiple time periods.
 }
