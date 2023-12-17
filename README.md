@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# DiSCo <img src="man/figures/logo.png" align="right" alt="" width="155" />
+# DiSCos <img src="man/figures/logo.png" align="right" alt="" width="155" />
 
 [![](http://cranlogs.r-pkg.org/badges/grand-total/DiSCo?color=blue)](https://cran.r-project.org/package=DiSCo)
 [![](http://cranlogs.r-pkg.org/badges/last-month/DiSCo?color=blue)](https://cran.r-project.org/package=DiSCo)
@@ -13,8 +13,8 @@ checks](https://badges.cranchecks.info/summary/DiSCo.svg)](https://cran.r-projec
 
 <!-- README.mdƒ is generated from README.Rmd. Please edit that file -->
 
-The **DiSCo** package contains tools for computing counterfactual
-quantile functions in a Distributional Synthetic Controls (DiSco)
+The **DiSCos** package contains tools for computing counterfactual
+quantile functions in a Distributional Synthetic Controls (DiSCos)
 setting, following the method proposed in Gunsilius (2023).
 
 **Warning** This package is currently under development. A first version
@@ -32,7 +32,7 @@ You can install latest version from GitHub with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("Davidvandijcke/DiSCo")
+devtools::install_github("Davidvandijcke/DiSCos")
 ```
 
 <div id="refs" class="references csl-bib-body hanging-indent">
