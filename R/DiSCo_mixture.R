@@ -9,11 +9,11 @@
 #' @inheritParams DiSCo
 #' @return A list containing the following elements:
 #' \itemize{
-#' \item{\code{cdf} }{A matrix containing the CDFs of the target and control units evaluated on the grid.}
-#' \item{\code{distance.opt} }{The optimal value of the Wasserstein distance.}
-#' \item{\code{mean} }{The optimal value of the Wasserstein barycenter.}
-#' \item{\code{target.order} }{The target unit, ordered.}
-#' \item{\code{weights.opt} }{The optimal weights.}
+#' \item \code{cdf } A matrix containing the CDFs of the target and control units evaluated on the grid.
+#' \item \code{distance.opt } The optimal value of the Wasserstein distance.
+#' \item \code{mean } The optimal value of the Wasserstein barycenter.
+#' \item \code{target.order } The target unit, ordered.
+#' \item \code{weights.opt } The optimal weights.
 #' }
 #' @keywords internal
 DiSCo_mixture <- function(controls1, target, grid.min, grid.max, grid.rand, M) {

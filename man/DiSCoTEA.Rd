@@ -38,7 +38,7 @@ DiSCoTEA(
 For example, if \code{samples} = c(0.25, 0.5, 0.75), the summary table will include the average effect for the 0-25th, 25-50th, 50-75th and 75-100th quantiles of the distribution of the aggregation statistic over time.}
 }
 \value{
-A \code{\link[DiSCo]{DiSCoT}} object.
+A \code{\link[DiSCos]{DiSCoT}} object.
 }
 \description{
 Function to aggregate treatment effects from the output of the

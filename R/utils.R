@@ -319,7 +319,7 @@ citation <- function() {
 #' The target has a distribution of a mixture of 4 Gaussian distributions.
 #'
 #' @keywords internal
-#' @param t an integer indicating the number of time periods
+#' @param Ts an integer indicating the number of time periods
 #' @param num.con an integer indicating the number of control units
 #' @param numdraws an integer indicating the number of draws
 #' @return

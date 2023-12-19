@@ -1,3 +1,4 @@
+utils::globalVariables(c("y_col", "id_col", "time_col", "t_col", "group", "x", "y"))
 
 #' @title Distributional Synthetic Controls
 #'
@@ -10,9 +11,9 @@
 #'
 #' @param df Data frame or data table containing the distributional data for the target and control units. The data table should contain the following columns:
 #' \itemize{
-#' \item{\code{y_col} }{A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)}
-#' \item{\code{id_col} }{A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals}
-#' \item{\code{time_col} }{A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.}
+#' \item \code{y_col } A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)
+#' \item \code{id_col } A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals
+#' \item \code{time_col } A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.
 #' }
 #' @param id_col.target Variable indicating the name of the target unit, as specified in the id_col column of the data table.
 #' This variable can be any type, as long as it is the same type as the id_col column of the data table.
@@ -38,20 +39,20 @@
 #' @param simplex Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.
 #' @return A list containing, for each time period, the elements described in the return argument of \code{\link{DiSCo_iter}}, as well as the following additional elements:
 #' \itemize{
-#'  \item{\code{DiSco}}{
+#'  \item \code{DiSco}
 #'  \itemize{
-#'  \item{\code{CI} }{A list with the confidence intervals and standard errors for the counterfactual quantiles, if `CI` is TRUE and for the periods specified in `CI_periods`.
-#'  See the output of \code{\link{DiSCo_CI}} for details.}
-#'  \item{\code{quantile} }{The counterfactual quantiles for the target unit.}
-#'  \item{\code{weights} }{The optimal weights for the target unit.}
-#'  \item{\code{cdf} }{The counterfactual CDF for the target unit.}
+#'  \item \code{CI } A list with the confidence intervals and standard errors for the counterfactual quantiles, if `CI` is TRUE and for the periods specified in `CI_periods`.
+#'  See the output of \code{\link{DiSCo_CI}} for details.
+#'  \item \code{quantile } The counterfactual quantiles for the target unit.
+#'  \item \code{weights } The optimal weights for the target unit.
+#'  \item \code{cdf } The counterfactual CDF for the target unit.
 #'  }
-#'  }
-#' \item{\code{perm} }{A \code{\link{permut}} object containing the results of the permutation method, if `permutation` is TRUE.
-#' Call `summary` on this object to print the overall results of the permutation test.}
+#'
+#' \item \code{perm } A \code{\link{permut}} object containing the results of the permutation method, if `permutation` is TRUE.
+#' Call `summary` on this object to print the overall results of the permutation test.
 #' }
 #' @importFrom Rdpack reprompt
-#' @importFrom stats sd quantile
+#' @importFrom stats sd quantile rnorm
 #' @import data.table ggplot2
 #' @references
 #'  \insertAllCited()
@@ -170,8 +171,8 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 2, perm
 
     # run the permutation test
     perm_obj <- DiSCo_per(results.periods=results.periods, evgrid=evgrid, T0=T0,
-                      weights=Weights_DiSCo_avg, num.cores=num.cores,
-                      graph=graph, qmethod=qmethod, M=M, q_min=q_min, q_max=q_max)
+                          weights=Weights_DiSCo_avg, num.cores=num.cores,
+                          graph=graph, qmethod=qmethod, M=M, q_min=q_min, q_max=q_max)
 
 
   } else {
@@ -186,6 +187,6 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 2, perm
 
   return(list(results.periods=results.periods, Weights_DiSCo_avg=Weights_DiSCo_avg,
               Weights_mixture_avg=Weights_mixture_avg, control_ids=controls.id, perm=perm_obj, evgrid=evgrid, params=list(df=df_pres, id_col.target=id_col.target,
-              t0=t0, M=M, G=G, CI=CI, cl=cl, CI_placebo=CI_placebo, qmethod=qmethod, boot=boots, q_min=q_min, q_max=q_max)))
+                                                                                                                          t0=t0, M=M, G=G, CI=CI, cl=cl, CI_placebo=CI_placebo, qmethod=qmethod, boot=boots, q_min=q_min, q_max=q_max)))
 
 }

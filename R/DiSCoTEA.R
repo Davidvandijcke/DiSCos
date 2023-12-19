@@ -16,8 +16,10 @@
 #' @param disco Output of the DiSCo function.
 #' @param agg String indicating the aggregation statistic to be used. Options include
 #' \itemize{
-#'  \item{\code{quantileDiff} }{Difference in quantiles between the target and the weighted average of the controls.}
-#'  \item{\code{quantile} }{.}
+#'  \item \code{quantileDiff}  Difference in quantiles between the target and the weighted average of the controls.
+#'  \item \code{quantile} Plots both the observed and the counterfactual quantile functions. No summary statistics will be produced.
+#'  \item \code{cdfDiff}  Difference in CDFs between the target and the weighted average of the controls.
+#'  \item \code{cdf} Plots both the observed and the counterfactual CDFs. No summary statistics will be produced.
 #' }
 #' @param graph Boolean indicating whether to plot graphs (default is TRUE).
 #' @param t_plot Optional vector of time periods (`t_col` values in the original dataframe) to be plotted (default is NULL, which plots all time periods).
@@ -38,7 +40,7 @@
 #' # print summary table
 #' summary(discot)
 #' }
-#' @return A \code{\link[DiSCo]{DiSCoT}} object.
+#' @return A \code{\link[DiSCos]{DiSCoT}} object.
 #'
 #'
 #' @importFrom stats sd

@@ -4,6 +4,7 @@ test_that("quantile works", {
   df <- ex_gmm(Ts=Ts)
   disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2)
 
+
   expect_no_error(discot <- DiSCoTEA(disco, agg="quantile"))
   expect_true(typeof(discot$plot) == "list")
   expect_no_error(summary(discot))

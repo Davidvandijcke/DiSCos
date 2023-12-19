@@ -7,11 +7,11 @@
 ex_gmm(Ts = 2, num.con = 30, numdraws = 1000)
 }
 \arguments{
+\item{Ts}{an integer indicating the number of time periods}
+
 \item{num.con}{an integer indicating the number of control units}
 
 \item{numdraws}{an integer indicating the number of draws}
-
-\item{t}{an integer indicating the number of time periods}
 }
 \value{
 \item{\code{target}}{a vector.}

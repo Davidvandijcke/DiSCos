@@ -1,6 +1,6 @@
 Package: DiSCos
 Title: Distributional Synthetic Controls Estimation
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R: 
     c(person("David", "Van Dijcke", , "dvdijcke@umich.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-5825-3447")),
@@ -12,9 +12,9 @@ Authors@R:
 Description: The method of synthetic controls is a widely-adopted tool for evaluating causal effects of policy changes in settings with observational data. In many settings where it is applicable, researchers want to identify causal effects of policy changes on a treated unit at an aggregate level while having access to data at a finer granularity. This package implements a simple extension of the synthetic controls estimator, developed in Gunsilius (2023) <doi:10.3982/ECTA18260>, that takes advantage of this additional structure and provides nonparametric estimates of the heterogeneity within the aggregate unit. The idea is to replicate the quantile function associated with the treated unit by a weighted average of quantile functions of the control units. The package contains tools for aggregating and plotting the resulting distributional estimates, as well as for carrying out inference on them. 
 License: MIT + file LICENSE
 BugReports: https://github.com/
-URL: https://github.com/, http://www.davidvandijcke.com/DiSCo/
+URL: https://github.com/, http://www.davidvandijcke.com/DiSCos/
 LazyData: TRUE
-Imports: CVXR, pracma, Rdpack, parallel, evmix, utils, extremeStat, MASS
+Imports: CVXR, pracma, Rdpack, parallel, evmix, utils, extremeStat, MASS, quadprog
 Depends: 
     data.table,
     R (>= 2.10),
