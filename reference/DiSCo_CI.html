@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">DiSCos</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,10 +88,6 @@
 <dd><p>Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the <code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></code> function from the stats package.
 Other options are "<code><a href="https://rdrr.io/pkg/evmix/man/kden.html" class="external-link">qkden</a></code>" (based on smoothed kernel density function) and "<code><a href="https://rdrr.io/pkg/extremeStat/man/distLquantile.html" class="external-link">extreme</a></code>" (based on parametric extreme value distributions).
 Both are substantially slower than the default method but may be useful for fat-tailed distributions with few data points at the upper quantiles. Alternatively, one could use the q_max option to restrict the range of quantiles used.</p></dd>
-
-
-<dt>bc</dt>
-<dd><p>A list of barycenters for the control group</p></dd>
 
 </dl></div>
     <div class="section level2">
