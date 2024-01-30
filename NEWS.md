@@ -1,3 +1,6 @@
+# DiSCos 0.0.2
+
+* Fixed an issue with the `q_min`, `q_max` option.
 
 # DiSCos 0.0.1
 

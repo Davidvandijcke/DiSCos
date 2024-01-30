@@ -71,9 +71,9 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
 
   ##  calculate quantile treatment effects
   qtiles_centered <- lapply(T_start:T_max,
-                            function(x) disco$results.periods[[x]]$DiSCo$quantile - disco$results.periods[[x]]$target$quantiles)
+                            function(x) disco$results.periods[[x]]$target$quantiles -  disco$results.periods[[x]]$DiSCo$quantile )
   if (CI) { # calculate CI quantile treatment effects
-    qtiles_centered_boot <- lapply(T_start:T_max, function(x) disco$results.periods[[x]]$DiSCo$CI$bootmat - disco$results.periods[[x]]$target$quantiles)
+    qtiles_centered_boot <- lapply(T_start:T_max, function(x) disco$results.periods[[x]]$target$quantiles - disco$results.periods[[x]]$DiSCo$CI$bootmat)
 
     qtiles_boot <- lapply(T_start:T_max,
                           function(x) disco$results.periods[[x]]$DiSCo$CI$bootmat)
@@ -99,10 +99,10 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
     for (i in 1:length(disco$results.periods)) {
       c_cdf <- stats::ecdf(disco$results.periods[[i]]$DiSCo$quantile)(grid)
       t_cdf <- stats::ecdf(disco$results.periods[[i]]$target$quantile)(grid)
-      treats[[i]] <- c_cdf - t_cdf
+      treats[[i]] <- t_cdf - c_cdf
       if (CI) {
         boot_cdf <- apply(disco$results.periods[[i]]$DiSCo$CI$bootmat, 2, function(x) stats::ecdf(x)(grid))
-        treats_boot[[i]] <- sweep(boot_cdf, 1, t_cdf, "-")
+        treats_boot[[i]] <- - sweep(boot_cdf, 1, t_cdf, "-")
       }
     }
 
