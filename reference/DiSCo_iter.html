@@ -77,9 +77,9 @@ Its return values contain valuable period-specific estimation outputs.</p>
 
 
 <dt>df</dt>
-<dd><p>Data frame or data table containing the distributional data for the target and control units. The data table should contain the following columns:</p><ul><li><p><code>y_col</code> A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)</p></li>
-<li><p><code>id_col</code> A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals</p></li>
-<li><p><code>time_col</code> A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.</p></li>
+<dd><p>Data frame or data table containing the distributional data for the target and control units. The data table should contain the following columns:</p><ul><li><p><code>y_col </code> A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)</p></li>
+<li><p><code>id_col </code> A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals</p></li>
+<li><p><code>time_col </code> A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.</p></li>
 </ul></dd>
 
 
@@ -130,24 +130,22 @@ Both are substantially slower than the default method but may be useful for fat-
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A list with the following elements:</p><ul><li><p><code>DiSCo_weights</code> Weights calculated using the DiSCo method.</p></li>
-<li><p><code>mixture</code> 
-</p><ul><li><p><code>weights</code> Optimal weights for the mixture approach.</p></li>
-<li><p><code>distance</code> Value of the objective function for the mixture approach.</p></li>
-<li><p><code>mean</code> Weighted mixture of the controls' CDFs.</p></li>
+<p>A list with the following elements:</p><ul><li><p><code>DiSCo_weights </code> Weights calculated using the DiSCo method.</p></li>
+<li><p><code>mixture </code></p><ul><li><p><code>weights </code> Optimal weights for the mixture approach.</p></li>
+<li><p><code>distance </code> Value of the objective function for the mixture approach.</p></li>
+<li><p><code>mean </code> Weighted mixture of the controls' CDFs.</p></li>
 </ul></li>
-<li><p><code>target</code> 
-</p><ul><li><p><code>cdf</code> Empirical CDF of the target.</p></li>
-<li><p><code>grid</code> Grid on which the quantile and CDF functions were evaluated.</p></li>
-<li><p><code>data</code> Original data for the target unit.</p></li>
-<li><p><code>quantiles</code> Quantiles for the target unit, evaluated on the specified grid.</p></li>
+<li><p><code>target </code></p><ul><li><p><code>cdf </code> Empirical CDF of the target.</p></li>
+<li><p><code>grid </code> Grid on which the quantile and CDF functions were evaluated.</p></li>
+<li><p><code>data </code> Original data for the target unit.</p></li>
+<li><p><code>quantiles </code> Quantiles for the target unit, evaluated on the specified grid.</p></li>
 </ul></li>
-<li><p><code>controls</code> 
-</p><ul><li><p><code>data</code> Original data for the control units.</p></li>
-<li><p><code>cdf</code> Empirical CDFs of the control units.</p></li>
-<li><p><code>quantiles</code> Quantiles for the control units, evaluated on the specified grid.</p></li>
+<li><p><code>controls </code></p><ul><li><p><code>data </code> Original data for the control units.</p></li>
+<li><p><code>cdf </code> Empirical CDFs of the control units.</p></li>
+<li><p><code>quantiles </code> Quantiles for the control units, evaluated on the specified grid.
+.</p></li>
 </ul></li>
-<li><p><code>controls.q</code> Quantiles for the control units, evaluated on the specified grid.</p></li>
+<li><p><code>controls.q </code> Quantiles for the control units, evaluated on the specified grid.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

@@ -63,7 +63,7 @@ as well as the alternative mixture of distributions approach.</p>
 <span>  <span class="va">t0</span>,</span>
 <span>  M <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  G <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>  num.cores <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  num.cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  permutation <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  q_min <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  q_max <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -81,9 +81,9 @@ as well as the alternative mixture of distributions approach.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>df</dt>
-<dd><p>Data frame or data table containing the distributional data for the target and control units. The data table should contain the following columns:</p><ul><li><p><code>y_col</code> A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)</p></li>
-<li><p><code>id_col</code> A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals</p></li>
-<li><p><code>time_col</code> A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.</p></li>
+<dd><p>Data frame or data table containing the distributional data for the target and control units. The data table should contain the following columns:</p><ul><li><p><code>y_col </code> A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)</p></li>
+<li><p><code>id_col </code> A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals</p></li>
+<li><p><code>time_col </code> A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.</p></li>
 </ul></dd>
 
 
@@ -105,7 +105,7 @@ This variable can be any type, as long as it is the same type as the id_col colu
 
 
 <dt>num.cores</dt>
-<dd><p>Integer, number of cores to use for parallel computation. Default is 2. If the <code>permutation</code> or <code>CI</code> arguments are set to TRUE, this can be slow and it is recommended to set this to 4 or more, if possible.
+<dd><p>Integer, number of cores to use for parallel computation. Default is 1. If the <code>permutation</code> or <code>CI</code> arguments are set to TRUE, this can be slow and it is recommended to set this to 4 or more, if possible.
 If you get an error in "all cores" or similar, try setting num.cores=1 to see the precise error value.</p></dd>
 
 
@@ -161,14 +161,13 @@ when using parallel processes. Default is NULL, which does not set a seed.</p></
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A list containing, for each time period, the elements described in the return argument of <code><a href="DiSCo_iter.html">DiSCo_iter</a></code>, as well as the following additional elements:</p><ul><li><p><code>DiSco</code>
-</p><ul><li><p><code>CI</code> A list with the confidence intervals and standard errors for the counterfactual quantiles, if <code>CI</code> is TRUE and for the periods specified in <code>CI_periods</code>.
+<p>A list containing, for each time period, the elements described in the return argument of <code><a href="DiSCo_iter.html">DiSCo_iter</a></code>, as well as the following additional elements:</p><ul><li><p><code>DiSco</code></p><ul><li><p><code>CI </code> A list with the confidence intervals and standard errors for the counterfactual quantiles, if <code>CI</code> is TRUE and for the periods specified in <code>CI_periods</code>.
 See the output of <code><a href="DiSCo_CI.html">DiSCo_CI</a></code> for details.</p></li>
-<li><p><code>quantile</code> The counterfactual quantiles for the target unit.</p></li>
-<li><p><code>weights</code> The optimal weights for the target unit.</p></li>
-<li><p><code>cdf</code> The counterfactual CDF for the target unit.</p></li>
+<li><p><code>quantile </code> The counterfactual quantiles for the target unit.</p></li>
+<li><p><code>weights </code> The optimal weights for the target unit.</p></li>
+<li><p><code>cdf </code> The counterfactual CDF for the target unit.</p></li>
 </ul></li>
-<li><p><code>perm</code> A <code><a href="permut.html">permut</a></code> object containing the results of the permutation method, if <code>permutation</code> is TRUE.
+<li><p><code>perm </code> A <code><a href="permut.html">permut</a></code> object containing the results of the permutation method, if <code>permutation</code> is TRUE.
 Call <code>summary</code> on this object to print the overall results of the permutation test.</p></li>
 </ul></div>
     <div class="section level2">

@@ -76,8 +76,10 @@ and report summary tables.</p>
 
 
 <dt>agg</dt>
-<dd><p>String indicating the aggregation statistic to be used. Options include</p><ul><li><p><code>quantileDiff</code> Difference in quantiles between the target and the weighted average of the controls.</p></li>
-<li><p><code>quantile</code> .</p></li>
+<dd><p>String indicating the aggregation statistic to be used. Options include</p><ul><li><p><code>quantileDiff</code>  Difference in quantiles between the target and the weighted average of the controls.</p></li>
+<li><p><code>quantile</code> Plots both the observed and the counterfactual quantile functions. No summary statistics will be produced.</p></li>
+<li><p><code>cdfDiff</code>  Difference in CDFs between the target and the weighted average of the controls.</p></li>
+<li><p><code>cdf</code> Plots both the observed and the counterfactual CDFs. No summary statistics will be produced.</p></li>
 </ul></dd>
 
 
@@ -110,7 +112,10 @@ For example, if <code>samples</code> = c(0.25, 0.5, 0.75), the summary table wil
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A <code><a href="DiSCoT.html">DiSCoT</a></code> object.</p>
+<p>A <code><a href="DiSCoT.html">DiSCoT</a></code> object, which is an S3 class that stores a list of treatment effects, their standard errors,
+the corresponding confidence intervals (if specified), and a dataframe with treatment effects aggregated
+according to the <code>agg</code> input. The S3 class also has a <code>summary</code> property that will print a selection of aggregated effects (specified by the <code>samples</code> parameter)
+for the chosen <code>agg</code> method, by post-treatment year, as well as the permutation test results, if specified.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -126,18 +131,12 @@ and only the aggregated differences for the quantile range specified in the orig
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span><span class="co"># load data</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"dube"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="co"># run DiSCo</span></span></span>
-<span class="r-in"><span><span class="va">disco</span> <span class="op">&lt;-</span> <span class="fu"><a href="DiSCo.html">DiSCo</a></span><span class="op">(</span><span class="va">dube</span>, id_col.target <span class="op">=</span> <span class="fl">2</span>, t0 <span class="op">=</span> <span class="fl">2003</span>, M <span class="op">=</span> <span class="fl">1000</span>, G <span class="op">=</span> <span class="fl">1000</span>,</span></span>
-<span class="r-in"><span>num.cores <span class="op">=</span> <span class="fl">4</span>, permutation <span class="op">=</span> <span class="cn">TRUE</span>, CI <span class="op">=</span> <span class="cn">TRUE</span>, boots <span class="op">=</span> <span class="fl">1000</span>, cl <span class="op">=</span> <span class="fl">0.95</span>,</span></span>
-<span class="r-in"><span>graph <span class="op">=</span> <span class="cn">TRUE</span>, qmethod<span class="op">=</span><span class="cn">NULL</span>, q_min<span class="op">=</span><span class="fl">0</span>, q_max<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">discot</span> <span class="op">&lt;-</span> <span class="fu">DiSCoTEA</span><span class="op">(</span><span class="va">disco</span>, agg <span class="op">=</span> <span class="st">"quantileDiff"</span>, graph <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>savePlots <span class="op">=</span> <span class="cn">FALSE</span>, samples <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.4</span>, <span class="fl">0.6</span>, <span class="fl">0.8</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="co"># print summary table</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">discot</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">Ts</span> <span class="op">&lt;-</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="va">t0</span> <span class="op">&lt;-</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="ex_gmm.html">ex_gmm</a></span><span class="op">(</span>Ts<span class="op">=</span><span class="va">Ts</span>,  num.con<span class="op">=</span><span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in ex_gmm(Ts = Ts, num.con = 4):</span> could not find function "ex_gmm"</span>
+<span class="r-in"><span><span class="va">disco</span> <span class="op">&lt;-</span> <span class="fu"><a href="DiSCo.html">DiSCo</a></span><span class="op">(</span>df<span class="op">=</span><span class="va">df</span>, id_col.target<span class="op">=</span><span class="fl">1</span>, t0<span class="op">=</span><span class="va">t0</span>, seed<span class="op">=</span><span class="fl">1</span>, CI<span class="op">=</span><span class="cn">TRUE</span>, boots<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in as.data.frame.default(x, ...):</span> cannot coerce class ‘"function"’ to a data.frame</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

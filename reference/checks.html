@@ -80,9 +80,9 @@ Carry out checks on the inputs</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>df</dt>
-<dd><p>Data frame or data table containing the distributional data for the target and control units. The data table should contain the following columns:</p><ul><li><p><code>y_col</code> A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)</p></li>
-<li><p><code>id_col</code> A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals</p></li>
-<li><p><code>time_col</code> A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.</p></li>
+<dd><p>Data frame or data table containing the distributional data for the target and control units. The data table should contain the following columns:</p><ul><li><p><code>y_col </code> A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)</p></li>
+<li><p><code>id_col </code> A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals</p></li>
+<li><p><code>time_col </code> A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.</p></li>
 </ul></dd>
 
 
@@ -104,7 +104,7 @@ This variable can be any type, as long as it is the same type as the id_col colu
 
 
 <dt>num.cores</dt>
-<dd><p>Integer, number of cores to use for parallel computation. Default is 2. If the <code>permutation</code> or <code>CI</code> arguments are set to TRUE, this can be slow and it is recommended to set this to 4 or more, if possible.
+<dd><p>Integer, number of cores to use for parallel computation. Default is 1. If the <code>permutation</code> or <code>CI</code> arguments are set to TRUE, this can be slow and it is recommended to set this to 4 or more, if possible.
 If you get an error in "all cores" or similar, try setting num.cores=1 to see the precise error value.</p></dd>
 
 
