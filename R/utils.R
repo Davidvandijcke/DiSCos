@@ -38,10 +38,10 @@ myQuant <- function(X,q, qmethod=NULL,...){
 #' @param G The number of grid points
 #' @return A list containing the following elements:
 #' \itemize{
-#' \item{grid.min}{The minimum value of the grid}
-#' \item{grid.max}{The maximum value of the grid}
-#' \item{grid.rand}{A vector containing the grid points}
-#' \item{grid.ord}{A vector containing the grid points, ordered}
+#' \item \code{grid.min} The minimum value of the grid
+#' \item \code{grid.max} The maximum value of the grid
+#' \item \code{grid.rand} A vector containing the grid points
+#' \item \code{grid.ord} A vector containing the grid points, ordered
 #' }
 #' @keywords internal
 getGrid <- function(target, controls, G) {
@@ -222,11 +222,12 @@ is.integer <- function(x) {
 #' Windows environment.  Designed to be used just like mclapply.  Credit goes to
 #' Nathan VanHoudnos.
 #' @param verbose Should users be warned this is hack-y? Defaults to FALSE.
+#' @param mc.cores Number of cores to use. Defaults to 1.
 #' @seealso mclapply
 #' @keywords internal
 #' @importFrom parallel makeCluster detectCores parLapply stopCluster clusterExport
 #' @importFrom utils sessionInfo
-mclapply.hack <- function(..., verbose=FALSE, mc.cores=NULL) {
+mclapply.hack <- function(..., verbose=FALSE, mc.cores=1) {
 
   if (mc.cores == 1) {
     return(lapply(...))

@@ -1,7 +1,7 @@
 test_that("quantile works", {
   Ts <- 2
   t0 <- 2
-  df <- ex_gmm(Ts=Ts)
+  df <- ex_gmm(Ts=Ts,  num.con=4)
   disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2)
 
 
@@ -18,7 +18,7 @@ test_that("quantile works", {
 test_that("cdf works", {
   Ts <- 2
   t0 <- 2
-  df <- ex_gmm(Ts=Ts)
+  df <- ex_gmm(Ts=Ts,  num.con=4)
   disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1,  CI=TRUE, boots=2)
 
   expect_no_error(discot <- DiSCoTEA(disco, agg="cdf"))
@@ -35,7 +35,7 @@ test_that("cdf works", {
 test_that("quantileDiff works", {
   Ts <- 2
   t0 <- 2
-  df <- ex_gmm(Ts=Ts)
+  df <- ex_gmm(Ts=Ts,  num.con=4)
   disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1,  CI=TRUE, boots=2)
 
   expect_no_error(discot <- DiSCoTEA(disco, agg="quantileDiff"))
@@ -52,7 +52,7 @@ test_that("quantileDiff works", {
 test_that("cdfDiff works", {
   Ts <- 2
   t0 <- 2
-  df <- ex_gmm(Ts=Ts)
+  df <- ex_gmm(Ts=Ts,  num.con=4)
   disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2)
 
   expect_no_error(discot <- DiSCoTEA(disco, agg="quantileDiff"))
@@ -68,7 +68,7 @@ test_that("cdfDiff works", {
 test_that("samples works", {
   Ts <- 2
   t0 <- 2
-  df <- ex_gmm(Ts=Ts)
+  df <- ex_gmm(Ts=Ts,  num.con=4)
   disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2)
 
   smpls <- c(0.1, 0.2, 0.5, 0.9)
@@ -82,7 +82,7 @@ test_that("nonsensical samples throws error", {
 
   Ts <- 2
   t0 <- 2
-  df <- ex_gmm(Ts=Ts)
+  df <- ex_gmm(Ts=Ts,  num.con=4)
   disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2)
 
   smpls <- c(0.5, 100)

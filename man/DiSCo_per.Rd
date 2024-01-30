@@ -32,7 +32,7 @@ DiSCo_per(
 
 \item{graph}{Logical, indicating whether to plot the permutation graph as in Figure 3 of the paper. Default is FALSE.}
 
-\item{num.cores}{Integer, number of cores to use for parallel computation. Default is 2. If the \code{permutation} or \code{CI} arguments are set to TRUE, this can be slow and it is recommended to set this to 4 or more, if possible.
+\item{num.cores}{Integer, number of cores to use for parallel computation. Default is 1. If the \code{permutation} or \code{CI} arguments are set to TRUE, this can be slow and it is recommended to set this to 4 or more, if possible.
 If you get an error in "all cores" or similar, try setting num.cores=1 to see the precise error value.}
 
 \item{redo_weights}{Boolean indicating whether to recompute the weights for the "true" treated unit. Set to FALSE by default.}

@@ -27,9 +27,9 @@ checks(
 \arguments{
 \item{df}{Data frame or data table containing the distributional data for the target and control units. The data table should contain the following columns:
 \itemize{
-\item{\code{y_col} }{A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)}
-\item{\code{id_col} }{A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals}
-\item{\code{time_col} }{A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.}
+\item \code{y_col } A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)
+\item \code{id_col } A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals
+\item \code{time_col } A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.
 }}
 
 \item{id_col.target}{Variable indicating the name of the target unit, as specified in the id_col column of the data table.
@@ -41,7 +41,7 @@ This variable can be any type, as long as it is the same type as the id_col colu
 
 \item{G}{Integer indicating the number of grid points for the grid on which the estimated functions are evaluated. Default is 1000.}
 
-\item{num.cores}{Integer, number of cores to use for parallel computation. Default is 2. If the \code{permutation} or \code{CI} arguments are set to TRUE, this can be slow and it is recommended to set this to 4 or more, if possible.
+\item{num.cores}{Integer, number of cores to use for parallel computation. Default is 1. If the \code{permutation} or \code{CI} arguments are set to TRUE, this can be slow and it is recommended to set this to 4 or more, if possible.
 If you get an error in "all cores" or similar, try setting num.cores=1 to see the precise error value.}
 
 \item{permutation}{logical, whether to use permutation or not}

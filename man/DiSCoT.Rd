@@ -50,6 +50,9 @@ DiSCoT(
 
 \item{plot}{a ggplot object containing the plot for the aggregated treatment effects using the \code{agg} parameter}
 }
+\value{
+S3 object of class \code{DiSCoT} with associated \code{summary} and \code{print} methods
+}
 \description{
 S3 object holding aggregated treatment effects
 }

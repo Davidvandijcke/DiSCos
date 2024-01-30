@@ -24,9 +24,9 @@ DiSCo_iter(
 
 \item{df}{Data frame or data table containing the distributional data for the target and control units. The data table should contain the following columns:
 \itemize{
-\item{\code{y_col} }{A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)}
-\item{\code{id_col} }{A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals}
-\item{\code{time_col} }{A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.}
+\item \code{y_col } A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)
+\item \code{id_col } A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals
+\item \code{time_col } A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.
 }}
 
 \item{evgrid}{A vector of grid points on which to evaluate the quantile functions.}
@@ -55,30 +55,30 @@ Both are substantially slower than the default method but may be useful for fat-
 \value{
 A list with the following elements:
 \itemize{
-\item{\code{DiSCo_weights} }{Weights calculated using the DiSCo method.}
-\item{\code{mixture} }{
+\item \code{DiSCo_weights } Weights calculated using the DiSCo method.
+\item \code{mixture }
 \itemize{
-\item{\code{weights} }{Optimal weights for the mixture approach.}
-\item{\code{distance} }{Value of the objective function for the mixture approach.}
-\item{\code{mean} }{Weighted mixture of the controls' CDFs.}
+\item \code{weights } Optimal weights for the mixture approach.
+\item \code{distance } Value of the objective function for the mixture approach.
+\item \code{mean } Weighted mixture of the controls' CDFs.
 }
-}
-\item{\code{target} }{
+
+\item \code{target }
 \itemize{
-\item{\code{cdf} }{Empirical CDF of the target.}
-\item{\code{grid} }{Grid on which the quantile and CDF functions were evaluated.}
-\item{\code{data} }{Original data for the target unit.}
-\item{\code{quantiles} }{Quantiles for the target unit, evaluated on the specified grid.}
+\item \code{cdf } Empirical CDF of the target.
+\item \code{grid } Grid on which the quantile and CDF functions were evaluated.
+\item \code{data } Original data for the target unit.
+\item \code{quantiles } Quantiles for the target unit, evaluated on the specified grid.
 }
-}
-\item{\code{controls} }{
+
+\item \code{controls }
 \itemize{
-\item{\code{data} }{Original data for the control units.}
-\item{\code{cdf} }{Empirical CDFs of the control units.}
-\item{\code{quantiles} }{Quantiles for the control units, evaluated on the specified grid.}
+\item \code{data } Original data for the control units.
+\item \code{cdf } Empirical CDFs of the control units.
+\item \code{quantiles } Quantiles for the control units, evaluated on the specified grid.
+.
 }
-}
-\item{\code{controls.q} }{Quantiles for the control units, evaluated on the specified grid.}
+\item \code{controls.q } Quantiles for the control units, evaluated on the specified grid.
 }
 }
 \description{

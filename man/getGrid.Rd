@@ -16,10 +16,10 @@ getGrid(target, controls, G)
 \value{
 A list containing the following elements:
 \itemize{
-\item{grid.min}{The minimum value of the grid}
-\item{grid.max}{The maximum value of the grid}
-\item{grid.rand}{A vector containing the grid points}
-\item{grid.ord}{A vector containing the grid points, ordered}
+\item \code{grid.min} The minimum value of the grid
+\item \code{grid.max} The maximum value of the grid
+\item \code{grid.rand} A vector containing the grid points
+\item \code{grid.ord} A vector containing the grid points, ordered
 }
 }
 \description{

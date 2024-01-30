@@ -47,8 +47,6 @@
 #' @export
 DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_min=0, q_max=1, simplex=FALSE, controls.id) {
 
-
-
   # target
   target <- df[(id_col == id_col.target) & (t_col == yy)]$y_col
 

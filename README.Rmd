@@ -27,7 +27,7 @@ cat(
   badger::badge_cran_download("DiSCos", "last-month", "blue"),
   badger::badge_cran_release("DiSCos", "blue"),
   badger::badge_devel("Davidvandijcke/DiSCos", "blue"),
-  badger::badge_cran_checks("DiSCos"),
+  # badger::badge_cran_checks("DiSCos"),
   badger::badge_last_commit("Davidvandijcke/DiSCos")
 )
 ```

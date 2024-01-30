@@ -16,9 +16,6 @@ A data frame with 652,870 rows and 3 columns:
 }
 }
 }
-\source{
-\url{https://www.aeaweb.org/articles?id=10.1257/app.20170085}
-}
 \usage{
 dube
 }

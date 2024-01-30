@@ -10,7 +10,7 @@ DiSCo(
   t0,
   M = 1000,
   G = 1000,
-  num.cores = 2,
+  num.cores = 1,
   permutation = FALSE,
   q_min = 0,
   q_max = 1,
@@ -27,9 +27,9 @@ DiSCo(
 \arguments{
 \item{df}{Data frame or data table containing the distributional data for the target and control units. The data table should contain the following columns:
 \itemize{
-\item{\code{y_col} }{A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)}
-\item{\code{id_col} }{A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals}
-\item{\code{time_col} }{A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.}
+\item \code{y_col } A numeric vector containing the outcome variable for each unit. Units can be individuals, states, etc., but they should be nested within a larger unit (e.g. individuals or counties within a state)
+\item \code{id_col } A numeric vector containing the aggregate IDs of the units. This could be, for example, the state if the units are counties or individuals
+\item \code{time_col } A vector containing the time period of the observation for each unit. This should be a monotonically increasing integer.
 }}
 
 \item{id_col.target}{Variable indicating the name of the target unit, as specified in the id_col column of the data table.
@@ -41,7 +41,7 @@ This variable can be any type, as long as it is the same type as the id_col colu
 
 \item{G}{Integer indicating the number of grid points for the grid on which the estimated functions are evaluated. Default is 1000.}
 
-\item{num.cores}{Integer, number of cores to use for parallel computation. Default is 2. If the \code{permutation} or \code{CI} arguments are set to TRUE, this can be slow and it is recommended to set this to 4 or more, if possible.
+\item{num.cores}{Integer, number of cores to use for parallel computation. Default is 1. If the \code{permutation} or \code{CI} arguments are set to TRUE, this can be slow and it is recommended to set this to 4 or more, if possible.
 If you get an error in "all cores" or similar, try setting num.cores=1 to see the precise error value.}
 
 \item{permutation}{Logical, indicating whether to use the permutation method for computing the optimal weights. Default is FALSE.}
@@ -73,17 +73,17 @@ when using parallel processes. Default is NULL, which does not set a seed.}
 \value{
 A list containing, for each time period, the elements described in the return argument of \code{\link{DiSCo_iter}}, as well as the following additional elements:
 \itemize{
-\item{\code{DiSco}}{
+\item \code{DiSco}
 \itemize{
-\item{\code{CI} }{A list with the confidence intervals and standard errors for the counterfactual quantiles, if \code{CI} is TRUE and for the periods specified in \code{CI_periods}.
-See the output of \code{\link{DiSCo_CI}} for details.}
-\item{\code{quantile} }{The counterfactual quantiles for the target unit.}
-\item{\code{weights} }{The optimal weights for the target unit.}
-\item{\code{cdf} }{The counterfactual CDF for the target unit.}
+\item \code{CI } A list with the confidence intervals and standard errors for the counterfactual quantiles, if \code{CI} is TRUE and for the periods specified in \code{CI_periods}.
+See the output of \code{\link{DiSCo_CI}} for details.
+\item \code{quantile } The counterfactual quantiles for the target unit.
+\item \code{weights } The optimal weights for the target unit.
+\item \code{cdf } The counterfactual CDF for the target unit.
 }
-}
-\item{\code{perm} }{A \code{\link{permut}} object containing the results of the permutation method, if \code{permutation} is TRUE.
-Call \code{summary} on this object to print the overall results of the permutation test.}
+
+\item \code{perm } A \code{\link{permut}} object containing the results of the permutation method, if \code{permutation} is TRUE.
+Call \code{summary} on this object to print the overall results of the permutation test.
 }
 }
 \description{

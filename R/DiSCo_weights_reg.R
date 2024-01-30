@@ -65,6 +65,12 @@ DiSCo_weights_reg <- function(controls,target, M = 500, qmethod=NULL, simplex=FA
     sc <- CVXR::norm(controls.s,"2")
 
   if (simplex) { lb <- 0 } else { lb <- NULL }
+  # mirror the behavior of the lsqlincon, which explicitly requires
+  # quadprog to be loaded which confuses R CMD check
+  if (!requireNamespace("quadprog", quietly = TRUE)) {
+    stop("quadprog needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
   # solve with the pracma package, which runs FORTRAN under the hood so it is fast
   weights.opt <- pracma::lsqlincon(controls.s/sc,target.s/sc, A=NULL,b=NULL,
                   Aeq = Aequ, # LHS of equality constraint: matrix of 1s, need coefficients to lie sum up to 1

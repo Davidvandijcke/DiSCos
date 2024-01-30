@@ -9,4 +9,7 @@
 library(testthat)
 library(DiSCos)
 
+options(datatable.auto.thread = 1)  # Limit data.table to 1 thread
+Sys.setenv(OMP_NUM_THREADS = 1) # limit environment to 1 thread
+
 test_check("DiSCos")

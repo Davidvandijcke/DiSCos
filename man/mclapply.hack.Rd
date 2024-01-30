@@ -4,10 +4,12 @@
 \alias{mclapply.hack}
 \title{mclapply.hack}
 \usage{
-mclapply.hack(..., verbose = FALSE, mc.cores = NULL)
+mclapply.hack(..., verbose = FALSE, mc.cores = 1)
 }
 \arguments{
 \item{verbose}{Should users be warned this is hack-y? Defaults to FALSE.}
+
+\item{mc.cores}{Number of cores to use. Defaults to 1.}
 }
 \description{
 This function mimics forking (done with mclapply in Mac or Linux) for the

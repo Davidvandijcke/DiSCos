@@ -20,7 +20,7 @@ utils::globalVariables(c("y_col", "id_col", "time_col", "t_col", "group", "x", "
 #' @param t0 Integer indicating period of treatment.
 #' @param M Integer indicating the number of control quantiles to use in the DiSCo method. Default is 1000.
 #' @param G Integer indicating the number of grid points for the grid on which the estimated functions are evaluated. Default is 1000.
-#' @param num.cores Integer, number of cores to use for parallel computation. Default is 2. If the `permutation` or `CI` arguments are set to TRUE, this can be slow and it is recommended to set this to 4 or more, if possible.
+#' @param num.cores Integer, number of cores to use for parallel computation. Default is 1. If the `permutation` or `CI` arguments are set to TRUE, this can be slow and it is recommended to set this to 4 or more, if possible.
 #' If you get an error in "all cores" or similar, try setting num.cores=1 to see the precise error value.
 #' @param permutation Logical, indicating whether to use the permutation method for computing the optimal weights. Default is FALSE.
 #' @param q_min Numeric, minimum quantile to use. Set this together with `q_max` to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).
@@ -59,7 +59,7 @@ utils::globalVariables(c("y_col", "id_col", "time_col", "t_col", "group", "x", "
 #' @export
 
 
-DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 2, permutation = FALSE, q_min = 0, q_max = 1,
+DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, permutation = FALSE, q_min = 0, q_max = 1,
                   CI = FALSE, CI_placebo=TRUE, boots = 500, cl = 0.95, graph = FALSE,
                   qmethod=NULL, seed=NULL, simplex=FALSE) {
 
@@ -79,7 +79,7 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 2, perm
   # if restricted quantile range, subset the data
   # I am passing q_min = 0, q_min = 1 to the other functions below, which is a legacy feature but it's useful to have
   if ((q_min >0) | (q_max < 1)) {
-    df[, quantile := data.table::frank(y_col, ties.method = "average") / .N, by = id_col]
+    df[, quantile := data.table::frank(y_col, ties.method = "average") / .N, by = c("id_col", "time_col")]
     df <- df[(quantile >= q_min) & (quantile <= q_max)]
   }
 

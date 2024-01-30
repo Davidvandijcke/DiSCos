@@ -32,10 +32,10 @@ Both are substantially slower than the default method but may be useful for fat-
 \value{
 \code{DSC_CI} returns a list containing the following components:
 \itemize{
-\item{\code{upper} }{a vector of the upper bound.}
-\item{\code{lower} }{a vector of the lower bound.}
-\item{\code{se} }{A vector of the standard errors of each counterfactual quantile estimate.}
-\item{\code{bootmat} }{A matrix of the counterfactual quantile estimates for each bootstrap sample.}
+\item \code{upper } A vector of the upper bound.
+\item \code{lower } A vector of the lower bound.
+\item \code{se } A vector of the standard errors of each counterfactual quantile estimate.
+\item \code{bootmat } A matrix of the counterfactual quantile estimates for each bootstrap sample.
 }
 }
 \description{

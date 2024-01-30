@@ -93,12 +93,10 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
   }
 
 
-  cat("Starting permutation test...")
   distp <- mclapply.hack(seq_len(length(peridx)), function(idx) {
     DiSCo_per_iter(c_df=c_df, c_df.q=controls.q, t_df=t_df, T0=T0, ww=ww, peridx=peridx, evgrid=evgrid, idx=idx, qmethod=qmethod, M=M,
                    q_min=q_min, q_max=q_max, simplex=simplex)
   }, mc.cores = num.cores)
-  cat('Permutation finished!')
 
 
   # Convert the list to a nested list (the parallelization messes up the output of foreach when choosing .combine = list)

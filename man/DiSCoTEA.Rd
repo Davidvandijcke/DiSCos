@@ -20,8 +20,10 @@ DiSCoTEA(
 
 \item{agg}{String indicating the aggregation statistic to be used. Options include
 \itemize{
-\item{\code{quantileDiff} }{Difference in quantiles between the target and the weighted average of the controls.}
-\item{\code{quantile} }{.}
+\item \code{quantileDiff}  Difference in quantiles between the target and the weighted average of the controls.
+\item \code{quantile} Plots both the observed and the counterfactual quantile functions. No summary statistics will be produced.
+\item \code{cdfDiff}  Difference in CDFs between the target and the weighted average of the controls.
+\item \code{cdf} Plots both the observed and the counterfactual CDFs. No summary statistics will be produced.
 }}
 
 \item{graph}{Boolean indicating whether to plot graphs (default is TRUE).}
@@ -38,7 +40,10 @@ DiSCoTEA(
 For example, if \code{samples} = c(0.25, 0.5, 0.75), the summary table will include the average effect for the 0-25th, 25-50th, 50-75th and 75-100th quantiles of the distribution of the aggregation statistic over time.}
 }
 \value{
-A \code{\link[DiSCos]{DiSCoT}} object.
+A \code{\link[DiSCos]{DiSCoT}} object, which is an S3 class that stores a list of treatment effects, their standard errors,
+the corresponding confidence intervals (if specified), and a dataframe with treatment effects aggregated
+according to the \code{agg} input. The S3 class also has a \code{summary} property that will print a selection of aggregated effects (specified by the \code{samples} parameter)
+for the chosen \code{agg} method, by post-treatment year, as well as the permutation test results, if specified.
 }
 \description{
 Function to aggregate treatment effects from the output of the
@@ -56,16 +61,8 @@ If the original \code{DiSCo} call was restricted to a range of quantiles smaller
 and only the aggregated differences for the quantile range specified in the original call are returned.
 }
 \examples{
-\dontrun{
-# load data
-data("dube")
-# run DiSCo
-disco <- DiSCo(dube, id_col.target = 2, t0 = 2003, M = 1000, G = 1000,
-num.cores = 4, permutation = TRUE, CI = TRUE, boots = 1000, cl = 0.95,
-graph = TRUE, qmethod=NULL, q_min=0, q_max=1)
-discot <- DiSCoTEA(disco, agg = "quantileDiff", graph = TRUE,
-savePlots = FALSE, samples = c(0.2, 0.4, 0.6, 0.8))
-# print summary table
-summary(discot)
-}
+Ts <- 2
+t0 <- 2
+df <- ex_gmm(Ts=Ts,  num.con=4)
+disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2)
 }

@@ -10,5 +10,4 @@
 #'   \item{y_col}{`adj0contpov` variable in \insertCite{dube2019minimum;textual}{DiSCos}. Captures the distribution of equalized family income from wages and salary, defined as multiples of the federal poverty threshold.}
 #'   ...
 #' }
-#' @source <https://www.aeaweb.org/articles?id=10.1257/app.20170085>
 "dube"
