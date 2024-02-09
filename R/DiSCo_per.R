@@ -19,6 +19,7 @@
 #' @references
 #' \insertAllCited{}
 #' @keywords internal
+#' # TODO add option to select the post-treatment time periods
 DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, length.out=101),
                  graph=TRUE, num.cores = 1, redo_weights=FALSE, weights=NULL, qmethod=NULL, q_min=0, q_max=1, M=1000, simplex=FALSE){
 
@@ -159,7 +160,7 @@ DiSCo_per_rank <- function(distt, distp, T0) {
   rnks <- list()
   p_values <- list()
 
-  R <- apply(distall, 1, function(x) sqrt(mean(x[1:T0])) / sqrt(mean(x[(T0+1):length(x)])) )
+  R <- apply(distall, 1, function(x) sqrt(mean(x[(T0+1):length(x)])) / sqrt(mean(x[1:T0]))  )
   p_val <- rank(-R)[1] / (J_1) # minus cause we want the largest to be the smallest rank
 
 
