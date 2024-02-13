@@ -161,7 +161,7 @@ DiSCo_per_rank <- function(distt, distp, T0) {
   p_values <- list()
 
   R <- apply(distall, 1, function(x) sqrt(mean(x[(T0+1):length(x)])) / sqrt(mean(x[1:T0]))  )
-  p_val <- rank(-R)[1] / (J_1) # minus cause we want the largest to be the smallest rank
+  p_val <- (rank(-R)[length(R)]) / (J_1) # minus cause we want to count the number of tests it is smaller than
 
 
   return(p_val)
