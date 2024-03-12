@@ -316,10 +316,8 @@ citation <- function() {
 #' @title ex_gmm
 #'
 #' @description Example data for \code{DiSCo} command.
-#' There are 30 control units, each has a distribution of a mixture of 3 Gaussian distributions.
-#' The target has a distribution of a mixture of 4 Gaussian distributions.
+#' Returns simulated target and control that are mixtures of Gaussian distributions.
 #'
-#' @keywords internal
 #' @param Ts an integer indicating the number of time periods
 #' @param num.con an integer indicating the number of control units
 #' @param numdraws an integer indicating the number of draws
@@ -328,7 +326,8 @@ citation <- function() {
 #' \item{\code{control}}{a matrix.}
 #' @importFrom MASS mvrnorm
 #' @importFrom stats runif
-ex_gmm=function(Ts=2, num.con=30, numdraws=1000){
+#' @export
+ex_gmm <- function(Ts=2, num.con=30, numdraws=1000){
 
   for (t in 1:Ts) {
     # Mixture of 3 Gaussians

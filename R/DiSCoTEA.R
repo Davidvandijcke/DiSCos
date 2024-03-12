@@ -312,6 +312,7 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
     out <- cbind.data.frame(out, sig_text)
     ooi <- gsub(" \n", "", ooi)
     colnames(out) <- c("Time", "X_from", "X_to",  ooi, "Std. Error", cband_text1, "Conf. Band]", "")
+    rownames(out) <- NULL
 
     if (q_min != 0 | q_max != 1) { # if we have a subset of the distribution, we only calculate the effect there
       out$X_from <- q_min

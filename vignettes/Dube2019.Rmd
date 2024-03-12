@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
   tidy = FALSE,
   cache = FALSE,
   collapse = TRUE,
-  eval=FALSE, # dont rerun vignette when building package
+  eval=TRUE, # dont rerun vignette when building package
   out.width = '100%',
   dpi = 144
 )
@@ -37,6 +37,7 @@ library(data.table)
 library(CVXR)
 library(DiSCos)
 library(ggplot2)
+devtools::load_all()
 ```
 
 # Introduction
@@ -101,14 +102,19 @@ intervention, respectively. We can now run the DiSCo command:
 
 ```{r, fig.width=8,fig.height=5}
 df <- copy(dube)
-disco <- DiSCo(df, id_col.target, t0, G = 1000, num.cores = 1, permutation = TRUE, CI = TRUE, boots = 1000, graph = TRUE, simplex=TRUE, seed=1)
+disco <- DiSCo(df, id_col.target, t0, G = 1000, num.cores = 5, permutation = TRUE, CI = TRUE, boots = 1000, graph = TRUE, simplex=TRUE, seed=1, q_max=0.9)
 ```
 
-where we have chosen a grid (`G`) of 1000 quantile and opted for
-parallel computation with 2 cores to speed up the permutation test and
+where we have chosen a grid (`G`) of 1000 quantiles and opted for
+parallel computation with 5 cores to speed up the permutation test and
 confidence intervals (`CI` is set to `TRUE`), which we calculate using
-500 resamples (`boots`). We also set the `seed` explicitly in the
+1000 resamples (`boots`). We also set the `seed` explicitly in the
 function call, which ensures reproducibility across the parallel cores.
+We followed the "classical" approach of @abadie2010synthetic by
+restricting the weights to be between 0 and 1 (`simplex=TRUE`). Finally,
+we restricted the data to the 0-90th quantile to account for the fact
+that the CPS data used in @dube2019minimum is imputed for the top income
+quantiles (more detail in the section below).
 
 The returned `disco` object contains a host of information produced by
 the command. Typing `?DiSCoT` in the console pulls up the help files
@@ -171,10 +177,15 @@ Finally, we can use the DiSCo Treatment Effect Aggregator (`DiSCoTEA`)
 function to aggregate the resulting counterfactual quantile functions
 into various treatment effect measures. For example, we can calculate
 the difference between the counterfactual and observed quantile
-functions as follows.
+functions and cumulative distribution functions (CDF) as follows.
 
 ```{r, fig.width=5,fig.height=8, fig.align='center'}
 discot <- DiSCoTEA(disco,  agg="quantileDiff", graph=TRUE)
+summary(discot)
+```
+
+```{r, fig.width=5,fig.height=8, fig.align='center'}
+discot <- DiSCoTEA(disco,  agg="cdfDiff", graph=TRUE, ylim=c(-0.05, 0.05))
 summary(discot)
 ```
 
@@ -190,11 +201,11 @@ parameter. You can use the other parameters of the `DiSCOTEA` function
 to adjust the basic appearance of the plots, or directly alter the
 returned ggplot object that is stored in the returned `DiSCoT` object.
 
-Looking at the plot of the quantile differences, there appear to be
-positive effects of the minimum wage increase on household income for
-the upper quantile. That seems a little strange. The first indication
-that this is probably a spurious result comes from the permutation test,
-which could not reject the hypothesis test of there being no effect.
+Looking at the plot of the quantile and CDF differences, we can see two
+things: 1) the pre-treatment fit for the years 1998-2002 is decent but
+not perfect; 2) there do not appear to be any notable effects of the
+minimum wage inrease, asides from fluctuations in the function
+differences that are similar to those pre-treatment.
 
 # Robustness tests
 
@@ -208,21 +219,26 @@ $$
 $$
 
 where $\text{q_min} < \text{q_max}$ are the bounds of the quantile range
-we're interested in. Doing this in R is as simple as,
+we're interested in. For example, following @dube2019minimum, we can
+focus on the lower end of the distribution, up until observations that
+earn 3.5 times the poverty income threshold. This corresponds to around
+the 0.65th quantile in our data:
 
 ```{r}
-disco <- DiSCo(dube, id_col.target=id_col.target, t0=t0, G = 250, num.cores = 1, permutation = TRUE, CI = TRUE, boots = 1000, graph = FALSE, q_min = 0.7, q_max=0.95, seed=1, simplex=TRUE)
+ecdf(disco$results.periods$`2000`$target$quantiles)(3.5)
 ```
 
-where we set the lower bound to 0.75 since that where the effects start
-appearing clearly, and the upper bound to 0.95 to account for the fact
-that the CPS data used in @dube2019minimum is imputed for the top income
-quantiles, which may explain the erratic behavior of the estimator at
-those quantiles. Another way one could try to deal with irregularity in
-the estimated quantile functions is by using the `qmethod` option in the
-`DiSCo` command, which allows for the use of alternative quantile
-estimation methods that can account for non-smoothness and extreme
-values. As above, we plot the results using the `DiScoTEA` function:
+We can simply run the following code,
+
+```{r}
+disco <- DiSCo(dube, id_col.target=id_col.target, t0=t0, G = 1000, num.cores = 5, permutation = TRUE, CI = TRUE, boots = 1000, graph = FALSE, q_min = 0, q_max=0.65, seed=1, simplex=TRUE)
+```
+
+One could also try to deal with irregularity in the estimated quantile
+functions is by using the `qmethod` option in the `DiSCo` command, which
+allows for the use of alternative quantile estimation methods that can
+account for non-smoothness and extreme values. As above, we plot the
+results using the `DiScoTEA` function:
 
 ```{r, fig.width=5,fig.height=8, fig.align='center'}
 discot <- DiSCoTEA(disco, agg="quantileDiff", graph=TRUE)
@@ -230,11 +246,16 @@ summary(discot)
 
 ```
 
-For this restricted range of quantiles, the estimator appears to produce
-a slightly better --- though not perfect -- pre-treatment fit. We still
-observe the positive effects in the post-treatment periods, but the
-restricted permutation test is still not significant. Overall, we cannot
-reject the null hypothesis of there being no effect of the treatment.
+```{r, fig.width=5,fig.height=8, fig.align='center'}
+discot <- DiSCoTEA(disco, agg="cdfDiff", graph=TRUE, ylim=c(-0.05,0.05))
+summary(discot) 
+```
+
+Again, we do not observe any subtantial changes in the quantile
+functions or CDFs. Also, the p-value of the permutation test is now
+larger, losing the marginal significance it had before. Overall, we
+cannot reject the null hypothesis of there being no effect of the
+treatment.
 
 # Conclusion
 
