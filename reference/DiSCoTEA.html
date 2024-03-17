@@ -129,16 +129,6 @@ If the original <code>DiSCo</code> call was restricted to a range of quantiles s
 and only the aggregated differences for the quantile range specified in the original call are returned.</p>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">Ts</span> <span class="op">&lt;-</span> <span class="fl">2</span></span></span>
-<span class="r-in"><span><span class="va">t0</span> <span class="op">&lt;-</span> <span class="fl">2</span></span></span>
-<span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="ex_gmm.html">ex_gmm</a></span><span class="op">(</span>Ts<span class="op">=</span><span class="va">Ts</span>,  num.con<span class="op">=</span><span class="fl">4</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in ex_gmm(Ts = Ts, num.con = 4):</span> could not find function "ex_gmm"</span>
-<span class="r-in"><span><span class="va">disco</span> <span class="op">&lt;-</span> <span class="fu"><a href="DiSCo.html">DiSCo</a></span><span class="op">(</span>df<span class="op">=</span><span class="va">df</span>, id_col.target<span class="op">=</span><span class="fl">1</span>, t0<span class="op">=</span><span class="va">t0</span>, seed<span class="op">=</span><span class="fl">1</span>, CI<span class="op">=</span><span class="cn">TRUE</span>, boots<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in as.data.frame.default(x, ...):</span> cannot coerce class ‘"function"’ to a data.frame</span>
-</code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

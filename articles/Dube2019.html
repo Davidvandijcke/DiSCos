@@ -75,7 +75,7 @@
                         <h4 data-toc-skip class="author">David Van
 Dijcke</h4>
             
-            <h4 data-toc-skip class="date">2024-02-13</h4>
+            <h4 data-toc-skip class="date">2024-03-17</h4>
       
       <small class="dont-index">Source: <a href="NA/NA/NA/blob/HEAD/vignettes/Dube2019.Rmd"><code>vignettes/Dube2019.Rmd</code></a></small>
       <div class="d-none name"><code>Dube2019.Rmd</code></div>
@@ -147,14 +147,18 @@ DiSCo command. We also need to set the two following parameters:</p>
 intervention, respectively. We can now run the DiSCo command:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">copy</span><span class="op">(</span><span class="va">dube</span><span class="op">)</span></span>
-<span><span class="va">disco</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DiSCo.html">DiSCo</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">id_col.target</span>, <span class="va">t0</span>, G <span class="op">=</span> <span class="fl">1000</span>, num.cores <span class="op">=</span> <span class="fl">1</span>, permutation <span class="op">=</span> <span class="cn">TRUE</span>, CI <span class="op">=</span> <span class="cn">TRUE</span>, boots <span class="op">=</span> <span class="fl">1000</span>, graph <span class="op">=</span> <span class="cn">TRUE</span>, simplex<span class="op">=</span><span class="cn">TRUE</span>, seed<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p>where we have chosen a grid (<code>G</code>) of 1000 quantile and
-opted for parallel computation with 2 cores to speed up the permutation
+<span><span class="va">disco</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DiSCo.html">DiSCo</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">id_col.target</span>, <span class="va">t0</span>, G <span class="op">=</span> <span class="fl">1000</span>, num.cores <span class="op">=</span> <span class="fl">1</span>, permutation <span class="op">=</span> <span class="cn">TRUE</span>, CI <span class="op">=</span> <span class="cn">TRUE</span>, boots <span class="op">=</span> <span class="fl">1000</span>, graph <span class="op">=</span> <span class="cn">TRUE</span>, simplex<span class="op">=</span><span class="cn">TRUE</span>, seed<span class="op">=</span><span class="fl">1</span>, q_max<span class="op">=</span><span class="fl">0.9</span><span class="op">)</span></span></code></pre></div>
+<p>where we have chosen a grid (<code>G</code>) of 1000 quantiles and
+opted for parallel computation with 5 cores to speed up the permutation
 test and confidence intervals (<code>CI</code> is set to
-<code>TRUE</code>), which we calculate using 500 resamples
+<code>TRUE</code>), which we calculate using 1000 resamples
 (<code>boots</code>). We also set the <code>seed</code> explicitly in
 the function call, which ensures reproducibility across the parallel
-cores.</p>
+cores. We followed the “classical” approach of <span class="citation">Abadie, Diamond, and Hainmueller (2010)</span> by
+restricting the weights to be between 0 and 1
+(<code>simplex=TRUE</code>). Finally, we restricted the data to the
+0-90th quantile to account for the fact that the CPS data used in <span class="citation">Dube (2019)</span> is imputed for the top income
+quantiles (more detail in the section below).</p>
 <p>The returned <code>disco</code> object contains a host of information
 produced by the command. Typing <code><a href="../reference/DiSCoT.html">?DiSCoT</a></code> in the console
 pulls up the help files which lay out the precise structure of the
@@ -213,9 +217,13 @@ pre-treatment fit across placebo units.</p>
 (<code>DiSCoTEA</code>) function to aggregate the resulting
 counterfactual quantile functions into various treatment effect
 measures. For example, we can calculate the difference between the
-counterfactual and observed quantile functions as follows.</p>
+counterfactual and observed quantile functions and cumulative
+distribution functions (CDF) as follows.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">discot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DiSCoTEA.html">DiSCoTEA</a></span><span class="op">(</span><span class="va">disco</span>,  agg<span class="op">=</span><span class="st">"quantileDiff"</span>, graph<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">discot</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">discot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DiSCoTEA.html">DiSCoTEA</a></span><span class="op">(</span><span class="va">disco</span>,  agg<span class="op">=</span><span class="st">"cdfDiff"</span>, graph<span class="op">=</span><span class="cn">TRUE</span>, ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.05</span>, <span class="fl">0.05</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">discot</span><span class="op">)</span></span></code></pre></div>
 <p>Calling <code>summary</code> on the returned object prints a table
 summarizing the effects across the distribution. You can choose the
@@ -229,11 +237,11 @@ using the <code>t_plot</code> parameter. You can use the other
 parameters of the <code>DiSCOTEA</code> function to adjust the basic
 appearance of the plots, or directly alter the returned ggplot object
 that is stored in the returned <code>DiSCoT</code> object.</p>
-<p>Looking at the plot of the quantile differences, there appear to be
-positive effects of the minimum wage increase on household income for
-the upper quantile. That seems a little strange. The first indication
-that this is probably a spurious result comes from the permutation test,
-which could not reject the hypothesis test of there being no effect.</p>
+<p>Looking at the plot of the quantile and CDF differences, we can see
+two things: 1) the pre-treatment fit for the years 1998-2002 is decent
+but not perfect; 2) there do not appear to be any notable effects of the
+minimum wage inrease, asides from fluctuations in the function
+differences that are similar to those pre-treatment.</p>
 </div>
 <div class="section level2">
 <h2 id="robustness-tests">Robustness tests<a class="anchor" aria-label="anchor" href="#robustness-tests"></a>
@@ -250,26 +258,30 @@ F_{Y_{j t}}^{-1}(q)-F_{Y_{1 t}}^{-1}(q)\right|^2 d q,
 \]</span></p>
 <p>where <span class="math inline">\(\text{q_min} &lt;
 \text{q_max}\)</span> are the bounds of the quantile range we’re
-interested in. Doing this in R is as simple as,</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">disco</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DiSCo.html">DiSCo</a></span><span class="op">(</span><span class="va">dube</span>, id_col.target<span class="op">=</span><span class="va">id_col.target</span>, t0<span class="op">=</span><span class="va">t0</span>, G <span class="op">=</span> <span class="fl">250</span>, num.cores <span class="op">=</span> <span class="fl">1</span>, permutation <span class="op">=</span> <span class="cn">TRUE</span>, CI <span class="op">=</span> <span class="cn">TRUE</span>, boots <span class="op">=</span> <span class="fl">1000</span>, graph <span class="op">=</span> <span class="cn">FALSE</span>, q_min <span class="op">=</span> <span class="fl">0.7</span>, q_max<span class="op">=</span><span class="fl">0.95</span>, seed<span class="op">=</span><span class="fl">1</span>, simplex<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>where we set the lower bound to 0.75 since that where the effects
-start appearing clearly, and the upper bound to 0.95 to account for the
-fact that the CPS data used in <span class="citation">Dube (2019)</span>
-is imputed for the top income quantiles, which may explain the erratic
-behavior of the estimator at those quantiles. Another way one could try
-to deal with irregularity in the estimated quantile functions is by
-using the <code>qmethod</code> option in the <code>DiSCo</code> command,
-which allows for the use of alternative quantile estimation methods that
-can account for non-smoothness and extreme values. As above, we plot the
-results using the <code>DiScoTEA</code> function:</p>
+interested in. For example, following <span class="citation">Dube
+(2019)</span>, we can focus on the lower end of the distribution, up
+until observations that earn 3.5 times the poverty income threshold.
+This corresponds to around the 0.65th quantile in our data:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/ecdf.html" class="external-link">ecdf</a></span><span class="op">(</span><span class="va">disco</span><span class="op">$</span><span class="va">results.periods</span><span class="op">$</span><span class="va">`2000`</span><span class="op">$</span><span class="va">target</span><span class="op">$</span><span class="va">quantiles</span><span class="op">)</span><span class="op">(</span><span class="fl">3.5</span><span class="op">)</span></span></code></pre></div>
+<p>We can simply run the following code,</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">disco</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DiSCo.html">DiSCo</a></span><span class="op">(</span><span class="va">dube</span>, id_col.target<span class="op">=</span><span class="va">id_col.target</span>, t0<span class="op">=</span><span class="va">t0</span>, G <span class="op">=</span> <span class="fl">1000</span>, num.cores <span class="op">=</span> <span class="fl">1</span>, permutation <span class="op">=</span> <span class="cn">TRUE</span>, CI <span class="op">=</span> <span class="cn">TRUE</span>, boots <span class="op">=</span> <span class="fl">1000</span>, graph <span class="op">=</span> <span class="cn">FALSE</span>, q_min <span class="op">=</span> <span class="fl">0</span>, q_max<span class="op">=</span><span class="fl">0.65</span>, seed<span class="op">=</span><span class="fl">1</span>, simplex<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>One could also try to deal with irregularity in the estimated
+quantile functions is by using the <code>qmethod</code> option in the
+<code>DiSCo</code> command, which allows for the use of alternative
+quantile estimation methods that can account for non-smoothness and
+extreme values. As above, we plot the results using the
+<code>DiScoTEA</code> function:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">discot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DiSCoTEA.html">DiSCoTEA</a></span><span class="op">(</span><span class="va">disco</span>, agg<span class="op">=</span><span class="st">"quantileDiff"</span>, graph<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">discot</span><span class="op">)</span> </span></code></pre></div>
-<p>For this restricted range of quantiles, the estimator appears to
-produce a slightly better — though not perfect – pre-treatment fit. We
-still observe the positive effects in the post-treatment periods, but
-the restricted permutation test is still not significant. Overall, we
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">discot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DiSCoTEA.html">DiSCoTEA</a></span><span class="op">(</span><span class="va">disco</span>, agg<span class="op">=</span><span class="st">"cdfDiff"</span>, graph<span class="op">=</span><span class="cn">TRUE</span>, ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.05</span>,<span class="fl">0.05</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">discot</span><span class="op">)</span> </span></code></pre></div>
+<p>Again, we do not observe any subtantial changes in the quantile
+functions or CDFs. Also, the p-value of the permutation test is now
+larger, losing the marginal significance it had before. Overall, we
 cannot reject the null hypothesis of there being no effect of the
 treatment.</p>
 </div>
@@ -286,7 +298,7 @@ distributional fit, carried out a permutation test, and re-estimated the
 synthetic control for a restricted quantile range; all these robustness
 tests are available in the DiSCo package, together with handy graphing
 and aggregation tools.</p>
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-abadie2010synthetic" class="csl-entry">
 Abadie, Alberto, Alexis Diamond, and Jens Hainmueller. 2010.
 <span>“Synthetic Control Methods for Comparative Case Studies:
