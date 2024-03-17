@@ -26,10 +26,14 @@ in the paper to get started.
 
 ## Installation
 
-You can install latest version from GitHub with:
+To install the latest stable version, run
+```r
+install.packages("DiSCos")
+```
+
+You can install latest development version from GitHub with:
 
 ``` r
-# install.packages("devtools")
 devtools::install_github("Davidvandijcke/DiSCos")
 ```
 
