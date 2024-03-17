@@ -67,4 +67,14 @@ root mean squared Wasserstein distances to calculate the p-value, rather than th
 \references{
 \insertAllCited{}
 }
+\keyword{#}
+\keyword{TODO}
+\keyword{add}
 \keyword{internal}
+\keyword{option}
+\keyword{periods}
+\keyword{post-treatment}
+\keyword{select}
+\keyword{the}
+\keyword{time}
+\keyword{to}

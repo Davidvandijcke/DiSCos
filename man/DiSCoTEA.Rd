@@ -60,9 +60,3 @@ If the \code{permutation} parameter was set to TRUE in the original \code{DiSCo}
 If the original \code{DiSCo} call was restricted to a range of quantiles smaller than \verb{[0,1]} (i.e. \code{q_min} > 0 or \code{q_max} < 1), the \code{samples} parameter is ignored
 and only the aggregated differences for the quantile range specified in the original call are returned.
 }
-\examples{
-Ts <- 2
-t0 <- 2
-df <- ex_gmm(Ts=Ts,  num.con=4)
-disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2)
-}

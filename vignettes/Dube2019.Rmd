@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
   tidy = FALSE,
   cache = FALSE,
   collapse = TRUE,
-  eval=TRUE, # dont rerun vignette when building package
+  eval=FALSE, # dont rerun vignette when building package
   out.width = '100%',
   dpi = 144
 )
@@ -37,7 +37,6 @@ library(data.table)
 library(CVXR)
 library(DiSCos)
 library(ggplot2)
-devtools::load_all()
 ```
 
 # Introduction
@@ -102,7 +101,7 @@ intervention, respectively. We can now run the DiSCo command:
 
 ```{r, fig.width=8,fig.height=5}
 df <- copy(dube)
-disco <- DiSCo(df, id_col.target, t0, G = 1000, num.cores = 5, permutation = TRUE, CI = TRUE, boots = 1000, graph = TRUE, simplex=TRUE, seed=1, q_max=0.9)
+disco <- DiSCo(df, id_col.target, t0, G = 1000, num.cores = 1, permutation = TRUE, CI = TRUE, boots = 1000, graph = TRUE, simplex=TRUE, seed=1, q_max=0.9)
 ```
 
 where we have chosen a grid (`G`) of 1000 quantiles and opted for
@@ -231,7 +230,7 @@ ecdf(disco$results.periods$`2000`$target$quantiles)(3.5)
 We can simply run the following code,
 
 ```{r}
-disco <- DiSCo(dube, id_col.target=id_col.target, t0=t0, G = 1000, num.cores = 5, permutation = TRUE, CI = TRUE, boots = 1000, graph = FALSE, q_min = 0, q_max=0.65, seed=1, simplex=TRUE)
+disco <- DiSCo(dube, id_col.target=id_col.target, t0=t0, G = 1000, num.cores = 1, permutation = TRUE, CI = TRUE, boots = 1000, graph = FALSE, q_min = 0, q_max=0.65, seed=1, simplex=TRUE)
 ```
 
 One could also try to deal with irregularity in the estimated quantile

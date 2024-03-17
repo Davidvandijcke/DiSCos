@@ -19,7 +19,5 @@ ex_gmm(Ts = 2, num.con = 30, numdraws = 1000)
 }
 \description{
 Example data for \code{DiSCo} command.
-There are 30 control units, each has a distribution of a mixture of 3 Gaussian distributions.
-The target has a distribution of a mixture of 4 Gaussian distributions.
+Returns simulated target and control that are mixtures of Gaussian distributions.
 }
-\keyword{internal}

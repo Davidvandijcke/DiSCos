@@ -28,11 +28,6 @@
 #' @param ylim Optional vector of length 2 indicating the y-axis limits of the plot.
 #' @param samples Numeric vector indicating the range of quantiles of the aggregation statistic (`agg`) to be summarized in the `summary` property of the S3 class returned by the function (default is c(0.25, 0.5, 0.75)).
 #' For example, if `samples` = c(0.25, 0.5, 0.75), the summary table will include the average effect for the 0-25th, 25-50th, 50-75th and 75-100th quantiles of the distribution of the aggregation statistic over time.
-#' @examples
-#' Ts <- 2
-#' t0 <- 2
-#' df <- ex_gmm(Ts=Ts,  num.con=4)
-#' disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2)
 #' @return A \code{\link[DiSCos]{DiSCoT}} object, which is an S3 class that stores a list of treatment effects, their standard errors,
 #' the corresponding confidence intervals (if specified), and a dataframe with treatment effects aggregated
 #' according to the `agg` input. The S3 class also has a `summary` property that will print a selection of aggregated effects (specified by the `samples` parameter)
