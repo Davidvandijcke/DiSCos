@@ -35,6 +35,8 @@ You can install latest development version from GitHub with:
 devtools::install_github("Davidvandijcke/DiSCos")
 ```
 
+If you find any bugs or have any questions, please email dvdijcke@umich.edu.
+
 <div id="refs" class="references csl-bib-body hanging-indent">
 
 <div id="ref-gunsilius2023distributional" class="csl-entry">
