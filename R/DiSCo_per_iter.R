@@ -21,7 +21,6 @@ DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, M=1000, 
 
     for (i in 1:length(perc)){
       perc[[i]][[1]]=t_df[[i]]
-      # perc.q[[i]][,1] <- mapply(myquant, evgrid, MoreArgs = list(X=t_df[[i]]))
     }
 
     keepcon=peridx[-idx]
@@ -32,17 +31,10 @@ DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, M=1000, 
         perc.q[[i]][,j+1] <- c_df.q[[i]][,keepcon[j]]
       }
     }
-    # for (i in 1:length(perc)){
-    #   for (x in 1:length(perc[[i]])){
-    #     perc.q[[i]][,x] <- mapply(myquant, evgrid, MoreArgs = list(X=perc[[i]][[x]]))
-    #   }
-    # }
 
     for (i in 1:length(c_df)){
       pert[[i]]=c_df[[i]][[idx]]
     }
-
-
 
 
     #calculate lambda_t for t<=T0

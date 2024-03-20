@@ -37,6 +37,10 @@ utils::globalVariables(c("y_col", "id_col", "time_col", "t_col", "group", "x", "
 #' @param seed Integer, seed for the random number generator. This needs to be set explicitly in the function call, since it will invoke \code{\link[base]{RNGkind}} which will set the seed for each core
 #' when using parallel processes. Default is NULL, which does not set a seed.
 #' @param simplex Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.
+#' @param mixture Logical, indicating whether to use the mixture of distributions approach instead.
+#' See Section 4.3. in \insertCite{gunsilius2023distributional;textual}{DiSCos}. This approach minimizes the distance between the CDFs
+#' instead of the quantile functions, and is preferred for categorical variables. When working with such variables, one should
+#' also provide a list of support points in the `grid.cat` parameter. When that is provided, this parameter is automatically set to TRUE. Default is FALSE.
 #' @param grid.cat List, containing the discrete support points for a discrete grid to be used with the mixture of distributions approach.
 #' This is useful for constructing synthetic distributions for categorical variables. Default is NULL, which uses a continuous grid based on the other parameters.
 #' @return A list containing, for each time period, the elements described in the return argument of \code{\link{DiSCo_iter}}, as well as the following additional elements:
@@ -63,7 +67,7 @@ utils::globalVariables(c("y_col", "id_col", "time_col", "t_col", "group", "x", "
 
 DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, permutation = FALSE, q_min = 0, q_max = 1,
                   CI = FALSE, CI_placebo=TRUE, boots = 500, cl = 0.95, graph = FALSE,
-                  qmethod=NULL, seed=NULL, simplex=FALSE, grid.cat) {
+                  qmethod=NULL, seed=NULL, simplex=FALSE, mixture=FALSE, grid.cat=NULL) {
 
   #---------------------------------------------------------------------------
   ### process inputs
@@ -75,6 +79,8 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
   checks(df, id_col.target, t0, M, G, num.cores, permutation, q_min, q_max,
          CI, CI_placebo, boots, cl, graph,
          qmethod, seed)
+
+  if (!is.null(grid.cat)) mixture <- TRUE
 
   df_pres <- data.table::copy(df)
 
