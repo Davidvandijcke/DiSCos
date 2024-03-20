@@ -327,6 +327,7 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
 
 
   call <- match.call()
+  if (!graph) { p <- NULL }
   return(DiSCoT(agg=agg, treats=treats, grid=grid, ses=sds, ci_lower=ci_lower, ci_upper=ci_upper,
                 t0=t0, call=call, cl=cl, N=nrow(disco$params$df), J=data.table::uniqueN(disco$params$df$id_col)-1, agg_df=out,
                 perm=disco$perm, plot=p))

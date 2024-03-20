@@ -45,7 +45,7 @@
 #'   \item \code{controls.q } Quantiles for the control units, evaluated on the specified grid.
 #' }
 #' @export
-DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_min=0, q_max=1, simplex=FALSE, controls.id) {
+DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_min=0, q_max=1, simplex=FALSE, controls.id, grid.cat) {
 
   # target
   target <- df[(id_col == id_col.target) & (t_col == yy)]$y_col
@@ -78,7 +78,7 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_
   DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M=M, qmethod=qmethod, simplex=simplex, q_min=q_min, q_max=q_max)
 
   # obtaining the optimal weights for the mixture of distributions method, note that this one is not restricted to q_min, q_max
-  mixture <- DiSCo_mixture(controls, target, grid$grid.min, grid$grid.max, grid$grid.rand, M)
+  mixture <- DiSCo_mixture(controls, target, grid$grid.min, grid$grid.max, grid$grid.rand, M, grid.cat)
 
   #computing the target quantile function
   target.q <- myQuant(target, evgrid, qmethod)
@@ -88,7 +88,7 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_
   results[["DiSCo"]] <- list("weights" = DiSCo_res_weights) # DiSCo estimator
   results[["mixture"]] <- list("weights" = mixture$weights.opt, "distance" = mixture$distance.opt, "mean" = mixture$mean) # mixture of distributions estimator
   results[["target"]] <- list("cdf" = mixture$target.order, "grid" = grid$grid.ord, "data" = as.vector(target), "quantiles" = target.q)
-  results[["controls"]] <- list("cdf" = mixture$CDF.matrix, "data" = controls, "quantiles" = controls.q)
+  results[["controls"]] <- list("cdf" = mixture$CDF.matrix, "data" = controls, "quantiles" = controls.q) # TODO: fix cdf mixture
   return(results)
 }
 

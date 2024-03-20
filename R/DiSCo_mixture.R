@@ -16,7 +16,7 @@
 #' \item \code{weights.opt } The optimal weights.
 #' }
 #' @keywords internal
-DiSCo_mixture <- function(controls1, target, grid.min, grid.max, grid.rand, M) {
+DiSCo_mixture <- function(controls1, target, grid.min, grid.max, grid.rand, M, grid.cat) {
 
   ###### The mixture of distributions approach
   # we again only focus on the first half of the data
@@ -24,7 +24,11 @@ DiSCo_mixture <- function(controls1, target, grid.min, grid.max, grid.rand, M) {
   # obtaining the minimal and maximal values among all supports
   # creating a list of controls with only the full data
 
-
+  if (!is.null(grid.cat)) {
+    grid.rand <- grid.cat
+    grid.min <- min(grid.cat)
+    grid.max <- max(grid.cat)
+  }
   # Estimating the empirical CDFs
   CDF.control <- lapply(controls1,stats::ecdf)
   CDF.target <- stats::ecdf(target)

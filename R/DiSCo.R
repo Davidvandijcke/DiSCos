@@ -37,6 +37,8 @@ utils::globalVariables(c("y_col", "id_col", "time_col", "t_col", "group", "x", "
 #' @param seed Integer, seed for the random number generator. This needs to be set explicitly in the function call, since it will invoke \code{\link[base]{RNGkind}} which will set the seed for each core
 #' when using parallel processes. Default is NULL, which does not set a seed.
 #' @param simplex Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.
+#' @param grid.cat List, containing the discrete support points for a discrete grid to be used with the mixture of distributions approach.
+#' This is useful for constructing synthetic distributions for categorical variables. Default is NULL, which uses a continuous grid based on the other parameters.
 #' @return A list containing, for each time period, the elements described in the return argument of \code{\link{DiSCo_iter}}, as well as the following additional elements:
 #' \itemize{
 #'  \item \code{DiSco}
@@ -61,7 +63,7 @@ utils::globalVariables(c("y_col", "id_col", "time_col", "t_col", "group", "x", "
 
 DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, permutation = FALSE, q_min = 0, q_max = 1,
                   CI = FALSE, CI_placebo=TRUE, boots = 500, cl = 0.95, graph = FALSE,
-                  qmethod=NULL, seed=NULL, simplex=FALSE) {
+                  qmethod=NULL, seed=NULL, simplex=FALSE, grid.cat) {
 
   #---------------------------------------------------------------------------
   ### process inputs
@@ -111,7 +113,7 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
   controls.id <- unique(df[id_col != id_col.target]$id_col) # list of control ids
   results.periods <- mclapply.hack(periods, DiSCo_iter, df, evgrid, id_col.target = id_col.target, M = M,
                                    G = G, T0 = T0, mc.cores = num.cores, qmethod=qmethod, q_min=0, q_max=1,
-                                   controls.id=controls.id, simplex=simplex)
+                                   controls.id=controls.id, simplex=simplex, grid_cat)
 
   # turn results.periods into a named list where the name is the period
   names(results.periods) <- as.character(periods)

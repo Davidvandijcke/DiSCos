@@ -1,8 +1,8 @@
 # DiSCos 0.0.2
 
-* Fixed an issue with the `q_min`, `q_max` option.
-* Fixed a small coding mistake in the permutation test.
-* Fixed a small coding mistake in the `DiSCo_TEA` function for the quantile and cdf differences.
+* Fixed a small issue where plot=FALSE option didn't work in DiSCoTEA
+* Added option to supply ordinal vector of discrete points for mixture of distributions
+* Added mixture of distributions method CDFs, confidence intervals, and permutation test
 
 # DiSCos 0.0.1
 
