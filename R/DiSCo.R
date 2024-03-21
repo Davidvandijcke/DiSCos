@@ -119,7 +119,7 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
   controls.id <- unique(df[id_col != id_col.target]$id_col) # list of control ids
   results.periods <- mclapply.hack(periods, DiSCo_iter, df, evgrid, id_col.target = id_col.target, M = M,
                                    G = G, T0 = T0, mc.cores = num.cores, qmethod=qmethod, q_min=0, q_max=1,
-                                   controls.id=controls.id, simplex=simplex, grid_cat)
+                                   controls.id=controls.id, simplex=simplex, grid.cat)
 
   # turn results.periods into a named list where the name is the period
   names(results.periods) <- as.character(periods)
