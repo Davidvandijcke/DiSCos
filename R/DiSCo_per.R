@@ -38,6 +38,7 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
   # grab the quantiles for the control and target data, for the desired range
   controls.q <- lapply(seq(1:length(results.periods)), function(x) results.periods[[x]]$controls$quantiles) # here it's a matrix hence ,
   target.q <- lapply(seq(1:length(results.periods)), function(x) results.periods[[x]]$target$quantiles) # here it's a vector
+  target.cdf <- lapply(seq(1:length(results.periods)), function(x) results.periods[[x]]$target$cdf)
 
   grid_df <- lapply(seq(1:length(results.periods)), function(x) results.periods[[x]]$target$grid)
 
@@ -48,11 +49,19 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
   lambda.opt=weights
 
   bc_t <- lapply(results.periods, function(x) x$DiSCo$quantile) # grab quantiles
+  cdf_t <- lapply(results.periods, function(x) x$DiSCo$cdf) # grab quantiles
 
 
   distt=c()
-  for (t in 1:length(c_df)){
-    distt[t]=mean((bc_t[[t]]-target.q[[t]])**2)
+
+  if (!mixture) {
+    for (t in 1:length(c_df)){
+      distt[t]=mean((bc_t[[t]]-target.q[[t]])**2)
+    }
+  } else {
+    for (t in 1:length(c_df)){
+      distt[t]=mean((cdf_t[[t]]-target.cdf[[t]])**2)
+    }
   }
 
 

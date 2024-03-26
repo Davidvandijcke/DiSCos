@@ -213,6 +213,14 @@ test_that("test that variations of other arguments work",  {
   expect_no_error(disco <- DiSCo(df=df, id_col.target=1, t0=t0, permutation=TRUE, seed=1, mixture=TRUE))
   expect_true(!is.null(disco$perm))
 
+
+  # permutation TRUE and mixture TRUE and grid.cat
+  temp <- df
+  temp[, y_col := round(y_col)]
+  sprt <- unique(temp$y_col)
+  expect_no_error(disco <- DiSCo(df=df, id_col.target=1, t0=t0, permutation=TRUE, seed=1, mixture=TRUE, grid.cat=sprt))
+  expect_true(!is.null(disco$perm))
+
   # permutation FALSE
   expect_no_error(disco <- DiSCo(df=df, id_col.target=1, t0=t0, permutation=FALSE, seed=1))
   expect_true(is.null(disco$perm))
