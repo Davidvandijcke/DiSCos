@@ -49,10 +49,10 @@ DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, grid_df,
       }
     } else {
       perc.cdf <- list()
-      for (t in 1:T0){ # mixture
+      for (t in 1:length(perc)){ # mixture
         grid_t <- grid_df[[t]]
         mixt <- DiSCo_mixture(perc[[t]], as.vector(pert[[t]]), min(grid_t), max(grid_t), grid_t, M, simplex=simplex)
-        lambda_tp[[t]] <- mixt$weights.opt
+        if (t <= T0) lambda_tp[[t]] <- mixt$weights.opt
         perc.cdf[[t]] <- mixt$cdf
       }
     }
