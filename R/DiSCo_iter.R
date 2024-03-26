@@ -29,7 +29,7 @@
 #'
 #'   \item \code{target }
 #'     \itemize{
-#'       \item \code{cdf } Empirical CDF of the target.
+#'       \item \code{cdf } Empirical CDF of the target. Only computed when `mixture=TRUE`.
 #'       \item \code{grid } Grid on which the quantile and CDF functions were evaluated.
 #'       \item \code{data } Original data for the target unit.
 #'       \item \code{quantiles } Quantiles for the target unit, evaluated on the specified grid.
@@ -38,14 +38,14 @@
 #'   \item \code{controls }
 #'     \itemize{
 #'       \item \code{data } Original data for the control units.
-#'       \item \code{cdf } Empirical CDFs of the control units.
+#'       \item \code{cdf } Empirical CDFs of the control units. Only computed when `mixture=TRUE`.
 #'       \item \code{quantiles } Quantiles for the control units, evaluated on the specified grid.
 #'.
 #'   }
 #'   \item \code{controls.q } Quantiles for the control units, evaluated on the specified grid.
 #' }
 #' @export
-DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_min=0, q_max=1, simplex=FALSE, controls.id, grid.cat) {
+DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_min=0, q_max=1, simplex=FALSE, controls.id, grid.cat, mixture) {
 
   # target
   target <- df[(id_col == id_col.target) & (t_col == yy)]$y_col
@@ -71,15 +71,22 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_
   }
 
   # sample grid
-  grid <- list(grid.min = NA, grid.max = NA, grid.rand = NA, grid.ord = NA)
-  grid[c("grid.min", "grid.max", "grid.rand", "grid.ord")] <- getGrid(target, controls, G) # TODO: this can be done just once
+  if (is.null(grid.cat)) {
+    grid <- list(grid.min = NA, grid.max = NA, grid.rand = NA, grid.ord = NA)
+    grid[c("grid.min", "grid.max", "grid.rand", "grid.ord")] <- getGrid(target, controls, G) # TODO: this can be done just once
+  } else {
+    grid <- list(grid.min = min(grid.cat), grid.max = max(grid.cat), grid.rand = grid.cat, grid.ord = grid.cat)
+  }
 
+  if (!mixture) {
   # obtaining the optimal weights for the DiSCo method
-  DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M=M, qmethod=qmethod, simplex=simplex, q_min=q_min, q_max=q_max)
-
+    DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M=M, qmethod=qmethod, simplex=simplex, q_min=q_min, q_max=q_max)
+    mixture <- NULL
+  } else {
   # obtaining the optimal weights for the mixture of distributions method, note that this one is not restricted to q_min, q_max
-  mixture <- DiSCo_mixture(controls, target, grid$grid.min, grid$grid.max, grid$grid.rand, M, grid.cat)
-
+    mixture <- DiSCo_mixture(controls, target, grid$grid.min, grid$grid.max, grid$grid.ord, M, simplex=simplex)
+    DiSCo_res_weights <- NULL
+  }
   #computing the target quantile function
   target.q <- myQuant(target, evgrid, qmethod)
 
@@ -88,7 +95,7 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_
   results[["DiSCo"]] <- list("weights" = DiSCo_res_weights) # DiSCo estimator
   results[["mixture"]] <- list("weights" = mixture$weights.opt, "distance" = mixture$distance.opt, "mean" = mixture$mean) # mixture of distributions estimator
   results[["target"]] <- list("cdf" = mixture$target.order, "grid" = grid$grid.ord, "data" = as.vector(target), "quantiles" = target.q)
-  results[["controls"]] <- list("cdf" = mixture$CDF.matrix, "data" = controls, "quantiles" = controls.q) # TODO: fix cdf mixture
+  results[["controls"]] <- list("cdf" = mixture$cdf, "data" = controls, "quantiles" = controls.q) # TODO: fix cdf mixture
   return(results)
 }
 

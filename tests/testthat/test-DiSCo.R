@@ -5,7 +5,23 @@
 # uniformly distributed, ipw model is incorectly specified here
 #-----------------------------------------------------------------------------
 
-test_that("weights sum up to 1", {
+test_that("mixture weights sum up to 1", {
+  Ts <- 2
+  t0 <- 2
+  df <- ex_gmm(Ts=Ts,  num.con=4)
+  disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2, mixture=TRUE)
+  # period-specific weights
+  for (t in 1:(t0-1)) {
+    expect_equal(sum(disco$results.periods[[t]]$mixture$weights), 1, tolerance=1e-5)
+  }
+  expect_equal(sum(disco$Weights_mixture_avg), 1, tolerance=1e-5)
+
+})
+
+
+#-----
+
+test_that("disco weights sum up to 1", {
 
   ## test for more than pre- and post-period
   Ts <- 5
@@ -38,6 +54,7 @@ test_that("weights sum up to 1", {
 })
 
 
+
 test_that("wrong treatment period throws error", {
 
   Ts <- 2
@@ -65,6 +82,57 @@ test_that("simplex results in weakly positive weights", {
   expect_true(all(disco$Weights_DiSCo_avg > -1e-10))
 })
 
+
+test_that("simplex results in weakly positive weights for mixture", {
+
+  Ts <- 2
+  num.con <- 4
+  t0 <- 2
+  df <- ex_gmm(Ts=Ts, num.con=num.con)
+
+  # test simplex=TRUE
+  expect_no_error(disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, num.cores=1, simplex=TRUE, mixture=TRUE))
+  # expect true up to some margin of error
+  expect_true(all(disco$Weights_mixture_avg > -1e-5))
+})
+
+
+test_that("returned quantile functions and cdfs are weakly increasing", { # TODO left off here
+
+  ## test mixture
+  Ts <- 2
+  num.con <- 4
+  t0 <- 2
+  df <- ex_gmm(Ts=Ts, num.con=num.con)
+
+  # test simplex=TRUE
+  expect_no_error(disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, num.cores=1, simplex=TRUE, mixture=TRUE))
+
+  t_cdf <- disco$results.periods[[1]]$target$cdf
+  expect_true(all(t_cdf[-1] - t_cdf[-length(t_cdf)] > -1e-5))
+
+  disco_cdf <-  disco$results.periods[[1]]$DiSCo$cdf
+  expect_true(all(disco_cdf[-1] - disco_cdf[-length(disco_cdf)] > -1e-5))
+
+  ## test disco
+  Ts <- 2
+  num.con <- 4
+  t0 <- 2
+  df <- ex_gmm(Ts=Ts, num.con=num.con)
+
+  # test simplex=TRUE
+  expect_no_error(disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, num.cores=1, simplex=TRUE, mixture=FALSE))
+
+  t_cdf <- disco$results.periods[[1]]$target$quantiles
+  expect_true(all(t_cdf[-1] - t_cdf[-length(t_cdf)] > -1e-5))
+
+  disco_cdf <-  disco$results.periods[[1]]$DiSCo$quantile
+  expect_true(all(disco_cdf[-1] - disco_cdf[-length(disco_cdf)] > -1e-5))
+
+
+})
+
+
 test_that("alternative qmethods work", {
   Ts <- 2
   t0 <- 2
@@ -76,6 +144,28 @@ test_that("alternative qmethods work", {
 
   # qmethod = "extreme"
   expect_no_error(disco <- DiSCo(df=df, id_col.target=1, t0=t0, qmethod="extreme", seed=1, num.cores=1))
+})
+
+
+test_that("discrete support works for mixture", {
+  Ts <- 2
+  t0 <- 2
+  num.con <- 4
+  df <- ex_gmm(Ts=Ts, num.con=num.con)
+
+  df[, y_col := round(y_col)]
+  sprt <- unique(df$y_col)
+
+
+  expect_no_error(disco <- DiSCo(df=df, id_col.target=1, t0=t0,  seed=1, num.cores=1, mixture=TRUE, grid.cat=sprt))
+
+  # check that the length of the cdf is the same as the length of the support
+  expect_true(length(disco$results.periods[[1]]$DiSCo$cdf) == length(sprt))
+
+  # check that disco quantile function is weakly increasing
+  t_cdf <- disco$results.periods[[1]]$DiSCo$quantile
+  expect_true(all(t_cdf[-1] - t_cdf[-length(t_cdf)] > -1e-5))
+
 })
 
 

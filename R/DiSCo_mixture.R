@@ -16,7 +16,7 @@
 #' \item \code{weights.opt } The optimal weights.
 #' }
 #' @keywords internal
-DiSCo_mixture <- function(controls1, target, grid.min, grid.max, grid.rand, M, grid.cat) {
+DiSCo_mixture <- function(controls1, target, grid.min, grid.max, grid.rand, M, simplex) {
 
   ###### The mixture of distributions approach
   # we again only focus on the first half of the data
@@ -24,11 +24,7 @@ DiSCo_mixture <- function(controls1, target, grid.min, grid.max, grid.rand, M, g
   # obtaining the minimal and maximal values among all supports
   # creating a list of controls with only the full data
 
-  if (!is.null(grid.cat)) {
-    grid.rand <- grid.cat
-    grid.min <- min(grid.cat)
-    grid.max <- max(grid.cat)
-  }
+
   # Estimating the empirical CDFs
   CDF.control <- lapply(controls1,stats::ecdf)
   CDF.target <- stats::ecdf(target)
@@ -48,11 +44,15 @@ DiSCo_mixture <- function(controls1, target, grid.min, grid.max, grid.rand, M, g
   objective <- CVXR::cvxr_norm((CDF.matrix[,2:ncol(CDF.matrix)] %*% theweights - CDF.matrix[,1]))
 
   # the constraints for the unit simplex
-  constraints <- list(theweights>=0, CVXR::sum_entries(theweights) == 1)
+  if (simplex) {
+    constraints <- list(theweights>=0, CVXR::sum_entries(theweights) == 1)
+  } else {
+    constraints <- list(CVXR::sum_entries(theweights) == 1)
+  }
   # the optimization problem
   problem <- CVXR::Problem(CVXR::Minimize(objective),constraints)
   # solving the optimization problem
-  results <- CVXR::solve(problem, solver = "SCS")
+  results <- CVXR::solve(problem, solver = "SCS", max_iters=10000, eps_rel=1e-6, eps_abs=1e-6) # TODO check tolerance cause sum of weights has some error relative to 1
 
   # returning the optimal weights and the value function which provides the
   # squared Wasserstein distance between the target and the corresponding barycenter

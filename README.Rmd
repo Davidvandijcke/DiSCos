@@ -34,21 +34,33 @@ cat(
 
 <!-- README.mdƒ is generated from README.Rmd. Please edit that file -->
 
-The **DiSCos** package contains tools for computing counterfactual quantile functions in a Distributional Synthetic Controls (DiSco) setting, following the method proposed in @gunsilius2023distributional. 
-
-**Warning** This package is currently under development. A first version will be released soon.
 
 ## Getting Started
 
-Have a look at the vignette replicating the [empirical application](https://www.davidvandijcke.com/DiSCos/articles/Dube2019.html) in the paper to get started.
+Have a look at the vignette replicating the [empirical
+application](https://www.davidvandijcke.com/DiSCos/articles/Dube2019.html)
+in the paper to get started.
 
 ## Installation
 
-You can install latest version from GitHub with:
+To install the latest stable version, run
+```{r}
+install.packages("DiSCos")
+```
+
+U+26A0 U+FE0F **Note**: the confidence intervals returned by `DiSCo` are incorrect 
+in version 0.0.1, though the bootstrap matrix is fine. Please use the confidence intervals 
+returned by `DiSCoTEA` for the moment. A new stable version will be released soon. 
+
+You can install latest development version from GitHub with:
 
 ```{r gh-installation, eval = FALSE}
 # install.packages("devtools")
 devtools::install_github("Davidvandijcke/DiSCos")
 ```
+
+If you find any bugs or have any questions, please email dvdijcke@umich.edu.
+
+
 
 

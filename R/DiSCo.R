@@ -23,8 +23,10 @@ utils::globalVariables(c("y_col", "id_col", "time_col", "t_col", "group", "x", "
 #' @param num.cores Integer, number of cores to use for parallel computation. Default is 1. If the `permutation` or `CI` arguments are set to TRUE, this can be slow and it is recommended to set this to 4 or more, if possible.
 #' If you get an error in "all cores" or similar, try setting num.cores=1 to see the precise error value.
 #' @param permutation Logical, indicating whether to use the permutation method for computing the optimal weights. Default is FALSE.
-#' @param q_min Numeric, minimum quantile to use. Set this together with `q_max` to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).
-#' @param q_max Numeric, maximum quantile to use. Set this together with `q_min` to restrict the range of quantiles used to construct the synthetic control. Default is 1 (all quantiles).
+#' @param q_min Numeric, minimum quantile to use. Set this together with `q_max` to restrict the range of quantiles used to construct the synthetic control.
+#' Default is 0 (all quantiles). Currently NOT implemented for the `mixture` approach.
+#' @param q_max Numeric, maximum quantile to use. Set this together with `q_min` to restrict the range of quantiles used to construct the synthetic control.
+#' Default is 1 (all quantiles). Currently NOT implemented for the `mixture` approach.
 #' @param CI Logical, indicating whether to compute confidence intervals for the counterfactual quantiles. Default is FALSE.
 #' @param CI_placebo Logical, indicating whether to compute confidence intervals for the pre-treatment periods. Default is TRUE.
 #' If you have a lot of pre-treatment periods, setting this to FALSE can speed up the computation.
@@ -119,7 +121,7 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
   controls.id <- unique(df[id_col != id_col.target]$id_col) # list of control ids
   results.periods <- mclapply.hack(periods, DiSCo_iter, df, evgrid, id_col.target = id_col.target, M = M,
                                    G = G, T0 = T0, mc.cores = num.cores, qmethod=qmethod, q_min=0, q_max=1,
-                                   controls.id=controls.id, simplex=simplex, grid.cat)
+                                   controls.id=controls.id, simplex=simplex, grid.cat, mixture)
 
   # turn results.periods into a named list where the name is the period
   names(results.periods) <- as.character(periods)
@@ -141,17 +143,36 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
 
 
   #---------------------------------------------------------------------------
-  ### calculate average weights across pre-periods
+  ### calculate counterfactual quantile functions and cdfs across pre-periods
   #---------------------------------------------------------------------------
-  bc <- lapply(seq(1:T_max), function(x) DiSCo_bc(controls.q=results.periods[[x]]$controls$quantiles, Weights_DiSCo_avg, evgrid))
+  if (!mixture) {
+    bc <- lapply(seq(1:T_max), function(x) DiSCo_bc(controls.q=results.periods[[x]]$controls$quantiles, Weights_DiSCo_avg, evgrid))
+  } else {
+   cdf <- lapply(seq(1:T_max), function(x) results.periods[[x]]$controls$cdf[,-1] %*% as.vector(Weights_mixture_avg) )
+  }
   # calculating the counterfactual target quantiles and CDF
   for (x in seq(1:T_max)) {
-    bc_x <- bc[[x]]
-    results.periods[[x]]$DiSCo$quantile <- bc_x
-    grid_ord <- results.periods[[x]]$target$grid
-    cdff <- stats::ecdf(bc_x)
-    DiSCo_cdf <- cdff(grid_ord)
-    results.periods[[x]]$DiSCo$cdf <- DiSCo_cdf
+    if (!mixture) { # if DiSCo
+      bc_x <- bc[[x]]
+      results.periods[[x]]$DiSCo$quantile <- bc_x
+      grid_ord <- results.periods[[x]]$target$grid
+      cdff <- stats::ecdf(bc_x)
+      DiSCo_cdf <- cdff(grid_ord)
+      results.periods[[x]]$DiSCo$cdf <- DiSCo_cdf
+    } else { # if mixture
+      cdf_x <- cdf[[x]]
+      results.periods[[x]]$DiSCo$cdf <- cdf_x
+      grid_ord <- results.periods[[x]]$target$grid
+      bc_x <- sapply(evgrid, function(y) grid_ord[which(cdf_x >= (y-(1e-5)))[1]]) # tolerance accounts for inaccuracy (esp != 1)
+      results.periods[[x]]$DiSCo$quantile <- bc_x
+    }
+  }
+
+
+  if (mixture) { # choose weights for resampling and permutation test
+    weights <- Weights_mixture_avg
+  } else {
+    weights <- Weights_DiSCo_avg
   }
 
   # calculate confidence intervals for selected time periods
@@ -162,12 +183,15 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
   } else{
     CI_periods <- seq(1, T_max)
   }
+  if (!is.null(grid.cat)) grid <- grid.cat
   for (x in CI_periods) {
     if (CI) cat(paste0("Computing confidence intervals for period: ", x + t_min - 1, "\n"))
     controls <- results.periods[[x]]$controls$data
+    if (is.null(grid.cat)) grid <- results.periods[[x]]$target$grid
     if (CI) {
-      CI_temp <- DiSCo_CI(controls=controls, weights=Weights_DiSCo_avg,
-                          mc.cores=num.cores, cl=cl, num.redraws=boots, evgrid = evgrid, qmethod=qmethod)
+      CI_temp <- DiSCo_CI(controls=controls, weights=weights, grid=grid,
+                          mc.cores=num.cores, cl=cl, num.redraws=boots, evgrid = evgrid,
+                          qmethod=qmethod, mixture=mixture)
     } else {
       CI_temp <- NULL
     }
@@ -179,8 +203,9 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
 
     # run the permutation test
     perm_obj <- DiSCo_per(results.periods=results.periods, evgrid=evgrid, T0=T0,
-                          weights=Weights_DiSCo_avg, num.cores=num.cores,
-                          graph=graph, qmethod=qmethod, M=M, q_min=q_min, q_max=q_max)
+                          weights=weights, num.cores=num.cores,
+                          graph=graph, qmethod=qmethod, M=M, q_min=q_min, q_max=q_max,
+                          mixture=mixture, simplex=simplex)
 
 
   } else {

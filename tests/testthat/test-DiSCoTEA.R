@@ -1,4 +1,6 @@
 test_that("quantile works", {
+
+  # disco
   Ts <- 2
   t0 <- 2
   df <- ex_gmm(Ts=Ts,  num.con=4)
@@ -13,9 +15,28 @@ test_that("quantile works", {
   expect_true(!is.null(discot$ci_lower))
   expect_true(!is.null(discot$ci_upper))
 
+
+  # mixture
+  Ts <- 2
+  t0 <- 2
+  df <- ex_gmm(Ts=Ts,  num.con=4)
+  disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2, mixture=TRUE)
+
+
+  expect_no_error(discot <- DiSCoTEA(disco, agg="quantile"))
+  expect_true(typeof(discot$plot) == "list")
+  expect_no_error(summary(discot))
+  expect_true(!is.null(discot$treats))
+  expect_true(!is.null(discot$ses))
+  expect_true(!is.null(discot$ci_lower))
+  expect_true(!is.null(discot$ci_upper))
+
 })
 
+
 test_that("cdf works", {
+
+  # disco
   Ts <- 2
   t0 <- 2
   df <- ex_gmm(Ts=Ts,  num.con=4)
@@ -29,10 +50,27 @@ test_that("cdf works", {
   expect_true(!is.null(discot$ci_lower))
   expect_true(!is.null(discot$ci_upper))
 
+
+  # mixture
+  Ts <- 2
+  t0 <- 2
+  df <- ex_gmm(Ts=Ts,  num.con=4)
+  disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1,  CI=TRUE, boots=2, mixture=TRUE)
+
+  expect_no_error(discot <- DiSCoTEA(disco, agg="cdf"))
+  expect_true(typeof(discot$plot) == "list")
+  expect_no_error(summary(discot))
+  expect_true(!is.null(discot$treats))
+  expect_true(!is.null(discot$ses))
+  expect_true(!is.null(discot$ci_lower))
+  expect_true(!is.null(discot$ci_upper))
+
 })
 
 
 test_that("quantileDiff works", {
+
+  # disco
   Ts <- 2
   t0 <- 2
   df <- ex_gmm(Ts=Ts,  num.con=4)
@@ -46,14 +84,46 @@ test_that("quantileDiff works", {
   expect_true(!is.null(discot$ci_lower))
   expect_true(!is.null(discot$ci_upper))
 
+
+  # mixture
+  Ts <- 2
+  t0 <- 2
+  df <- ex_gmm(Ts=Ts,  num.con=4)
+  disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1,  CI=TRUE, boots=2, mixture=TRUE)
+
+  expect_no_error(discot <- DiSCoTEA(disco, agg="quantileDiff"))
+  expect_true(typeof(discot$plot) == "list")
+  expect_no_error(summary(discot))
+  expect_true(!is.null(discot$treats))
+  expect_true(!is.null(discot$ses))
+  expect_true(!is.null(discot$ci_lower))
+  expect_true(!is.null(discot$ci_upper))
+
 })
 
 
 test_that("cdfDiff works", {
+
+  # disco
   Ts <- 2
   t0 <- 2
   df <- ex_gmm(Ts=Ts,  num.con=4)
   disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2)
+
+  expect_no_error(discot <- DiSCoTEA(disco, agg="quantileDiff"))
+  expect_true(typeof(discot$plot) == "list")
+  expect_no_error(summary(discot))
+  expect_true(!is.null(discot$treats))
+  expect_true(!is.null(discot$ses))
+  expect_true(!is.null(discot$ci_lower))
+  expect_true(!is.null(discot$ci_upper))
+
+
+  # mixture
+  Ts <- 2
+  t0 <- 2
+  df <- ex_gmm(Ts=Ts,  num.con=4)
+  disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2, mixture=TRUE)
 
   expect_no_error(discot <- DiSCoTEA(disco, agg="quantileDiff"))
   expect_true(typeof(discot$plot) == "list")
@@ -90,7 +160,28 @@ test_that("nonsensical samples throws error", {
 
 })
 
+test_that("graph to FALSE works", {
+  Ts <- 2
+  t0 <- 2
+  df <- ex_gmm(Ts=Ts,  num.con=4)
+  disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=FALSE, boots=2)
 
+  expect_no_error(discot <- DiSCoTEA(disco, graph=FALSE))
+
+})
+
+
+
+test_that("t_plots works", {
+  Ts <- 4
+  t0 <- 2
+  df <- ex_gmm(Ts=Ts,  num.con=4)
+  disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=FALSE, boots=2)
+
+  expect_no_error(discot <- DiSCoTEA(disco, t_plot=c(4)))
+
+
+})
 
 
 
