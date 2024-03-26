@@ -47,7 +47,9 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
 
   lambda.opt=weights
 
-  bc_t <- sapply(results.periods, function(x) x$DiSCo$quantile) # grab quantiles
+  bc_t <- lapply(results.periods, function(x) x$DiSCo$quantile) # grab quantiles
+
+
   distt=c()
   for (t in 1:length(c_df)){
     distt[t]=mean((bc_t[[t]]-target.q[[t]])**2)
