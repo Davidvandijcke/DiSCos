@@ -82,7 +82,7 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
          CI, CI_placebo, boots, cl, graph,
          qmethod, seed)
 
-  if (!is.null(grid.cat)) {
+  if (!is.null(grid.cat)) { # TODO: allow restricted grid for mixture
     mixture <- TRUE
     grid.cat <- grid.cat[order(grid.cat)] # order the discrete grid
   }

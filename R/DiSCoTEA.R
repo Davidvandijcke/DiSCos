@@ -171,7 +171,7 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
     #---------------------------------------------------------------------------
     ### quantiles of treatment effects
     #---------------------------------------------------------------------------
-  } else if (agg == "quantileDiff") {
+  } else if (agg == "quantileDiff") { # TODO: adopt for discrete mixture
 
     treats <-  qtiles_centered
     if (CI) treats_boot <- qtiles_centered_boot

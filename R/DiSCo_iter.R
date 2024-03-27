@@ -59,7 +59,7 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_
   }
 
   # check whether problem undetermined
-  if (length(controls[[1]]) < length(controls)) {
+  if (length(target) < length(controls)) {
     stop("Problem undetermined: number of data points is smaller than number of weights")
   }
 
