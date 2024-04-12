@@ -49,6 +49,9 @@
     <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_mixture.html</loc>
   </url>
   <url>
+    <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_mixture_solve.html</loc>
+  </url>
+  <url>
     <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_per.html</loc>
   </url>
   <url>
@@ -59,6 +62,9 @@
   </url>
   <url>
     <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_weights_reg.html</loc>
+  </url>
+  <url>
+    <loc>http://www.davidvandijcke.com/DiSCo/reference/bootCounterfactuals.html</loc>
   </url>
   <url>
     <loc>http://www.davidvandijcke.com/DiSCo/reference/checks.html</loc>
@@ -86,6 +92,9 @@
   </url>
   <url>
     <loc>http://www.davidvandijcke.com/DiSCo/reference/myquant.html</loc>
+  </url>
+  <url>
+    <loc>http://www.davidvandijcke.com/DiSCo/reference/parseBoots.html</loc>
   </url>
   <url>
     <loc>http://www.davidvandijcke.com/DiSCo/reference/permut.html</loc>

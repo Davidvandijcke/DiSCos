@@ -10,7 +10,7 @@ as well as the alternative mixture of distributions approach."><meta property="o
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">DiSCos</a>
 
@@ -68,13 +68,15 @@ as well as the alternative mixture of distributions approach.</p>
 <span>  q_min <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  q_max <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  CI <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  CI_placebo <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  boots <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  replace <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cl <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  graph <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  qmethod <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  simplex <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  simplex <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  mixture <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  grid.cat <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -114,24 +116,27 @@ If you get an error in "all cores" or similar, try setting num.cores=1 to see th
 
 
 <dt>q_min</dt>
-<dd><p>Numeric, minimum quantile to use. Set this together with <code>q_max</code> to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).</p></dd>
+<dd><p>Numeric, minimum quantile to use. Set this together with <code>q_max</code> to restrict the range of quantiles used to construct the synthetic control.
+Default is 0 (all quantiles). Currently NOT implemented for the <code>mixture</code> approach.</p></dd>
 
 
 <dt>q_max</dt>
-<dd><p>Numeric, maximum quantile to use. Set this together with <code>q_min</code> to restrict the range of quantiles used to construct the synthetic control. Default is 1 (all quantiles).</p></dd>
+<dd><p>Numeric, maximum quantile to use. Set this together with <code>q_min</code> to restrict the range of quantiles used to construct the synthetic control.
+Default is 1 (all quantiles). Currently NOT implemented for the <code>mixture</code> approach.</p></dd>
 
 
 <dt>CI</dt>
-<dd><p>Logical, indicating whether to compute confidence intervals for the counterfactual quantiles. Default is FALSE.</p></dd>
-
-
-<dt>CI_placebo</dt>
-<dd><p>Logical, indicating whether to compute confidence intervals for the pre-treatment periods. Default is TRUE.
-If you have a lot of pre-treatment periods, setting this to FALSE can speed up the computation.</p></dd>
+<dd><p>Logical, indicating whether to compute confidence intervals for the counterfactual quantiles. Default is FALSE.
+The confidence intervals are computed using the bootstrap procedure described in Van Dijcke et al. (2024)
+.</p></dd>
 
 
 <dt>boots</dt>
 <dd><p>Integer, number of bootstrap samples to use for computing confidence intervals. Default is 500.</p></dd>
+
+
+<dt>replace</dt>
+<dd><p>Logical, indicating whether to sample with replacement when computing the bootstrap samples. Default is TRUE.</p></dd>
 
 
 <dt>cl</dt>
@@ -156,19 +161,51 @@ when using parallel processes. Default is NULL, which does not set a seed.</p></
 <dt>simplex</dt>
 <dd><p>Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.</p></dd>
 
+
+<dt>mixture</dt>
+<dd><p>Logical, indicating whether to use the mixture of distributions approach instead.
+See Section 4.3. in Gunsilius (2023)
+. This approach minimizes the distance between the CDFs
+instead of the quantile functions, and is preferred for categorical variables. When working with such variables, one should
+also provide a list of support points in the <code>grid.cat</code> parameter. When that is provided, this parameter is automatically set to TRUE. Default is FALSE.</p></dd>
+
+
+<dt>grid.cat</dt>
+<dd><p>List, containing the discrete support points for a discrete grid to be used with the mixture of distributions approach.
+This is useful for constructing synthetic distributions for categorical variables. Default is NULL, which uses a continuous grid based on the other parameters.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A list containing, for each time period, the elements described in the return argument of <code><a href="DiSCo_iter.html">DiSCo_iter</a></code>, as well as the following additional elements:</p><ul><li><p><code>DiSco</code></p><ul><li><p><code>CI </code> A list with the confidence intervals and standard errors for the counterfactual quantiles, if <code>CI</code> is TRUE and for the periods specified in <code>CI_periods</code>.
-See the output of <code><a href="DiSCo_CI.html">DiSCo_CI</a></code> for details.</p></li>
-<li><p><code>quantile </code> The counterfactual quantiles for the target unit.</p></li>
+<p>A list containing the following elements:</p><ul><li><p><code>results.periods</code> A list containing, for each time period, the elements described in the return argument of <code><a href="DiSCo_iter.html">DiSCo_iter</a></code>, as well as the following additional elements:</p><ul><li><p><code>DiSco</code></p><ul><li><p><code>quantile </code> The counterfactual quantiles for the target unit.</p></li>
 <li><p><code>weights </code> The optimal weights for the target unit.</p></li>
 <li><p><code>cdf </code> The counterfactual CDF for the target unit.</p></li>
 </ul></li>
+</ul></li>
+<li><p><code>weights</code> A numeric vector containing the synthetic control weights for the control units, averaged over time.
+When <code>mixture</code> is TRUE, these are the weights for the mixture of distributions, otherwise they are the weights for the quantile-based approach.</p></li>
+<li><p><code>CI</code> A list containing the confidence intervals for the counterfactual quantiles and CDFs, if <code>CI</code> is TRUE.
+Each element contains two named subelements called <code>upper</code>, <code>lower</code>, <code>se</code> which
+are the upper and lower confidence bands and the standard error of the estimate, respectively.
+They are G x T matrices where G is the specified number of grid points and T is the number of time periods.
+The elements are:</p><ul><li><p><code>cdf</code> The bootstrapped CDF</p></li>
+<li><p><code>quantile</code> The bootstrapped quantile</p></li>
+<li><p><code>quantile_diff</code> The bootstrapped quantile difference</p></li>
+<li><p><code>cdf_diff</code> The bootstrapped CDF difference</p></li>
+<li><p><code>bootmat</code> A list containing the raw bootstrapped samples for the counterfactual quantiles and CDFs, if <code>CI</code> is TRUE.
+These are not meant to be accessed directly, but are used by <code>DiSCoTEA</code> to compute aggregated standard errors. Advanced users
+may wish to access these directly for further analysis. The element names should be self-explanatory.
+#'</p></li>
+<li><p><code>control_ids</code> A list containing the control unit IDs used for each time period, which can be used to identify the weights
+associated with each control as the returned weights have the same order as the control IDs.</p></li>
 <li><p><code>perm </code> A <code><a href="permut.html">permut</a></code> object containing the results of the permutation method, if <code>permutation</code> is TRUE.
-Call <code>summary</code> on this object to print the overall results of the permutation test.</p></li>
+Call <code>summary</code> on this object to print the overall results of the permutation test.
+#'</p></li>
+<li><p><code>evgrid</code> A numeric vector containing the grid points on which the quantiles were evaluated.</p></li>
+<li><p><code>params</code> A list containing the parameters used in the function call.</p></li>
+</ul></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -180,7 +217,9 @@ calculated as a uniform mean, as well as the counterfactual target distribution 
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Gunsilius FF (2023).
 “Distributional synthetic controls.”
-<em>Econometrica</em>, <b>91</b>(3), 1105--1117.
+<em>Econometrica</em>, <b>91</b>(3), 1105--1117.<br><br> Van Dijcke D, Gunsilius FF, Wright A (2024).
+“Return to Office and the Tenure Distribution.”
+<em>Manuscript</em>.
 ()</p>
     </div>
 
@@ -193,7 +232,7 @@ calculated as a uniform mean, as well as the counterfactual target distribution 
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.8.</p>
 </div>
 
     </footer></div>
