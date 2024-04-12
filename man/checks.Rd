@@ -16,7 +16,6 @@ checks(
   q_min,
   q_max,
   CI,
-  CI_placebo,
   boots,
   cl,
   graph,
@@ -46,14 +45,14 @@ If you get an error in "all cores" or similar, try setting num.cores=1 to see th
 
 \item{permutation}{logical, whether to use permutation or not}
 
-\item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).}
+\item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control.
+Default is 0 (all quantiles). Currently NOT implemented for the \code{mixture} approach.}
 
-\item{q_max}{Numeric, maximum quantile to use. Set this together with \code{q_min} to restrict the range of quantiles used to construct the synthetic control. Default is 1 (all quantiles).}
+\item{q_max}{Numeric, maximum quantile to use. Set this together with \code{q_min} to restrict the range of quantiles used to construct the synthetic control.
+Default is 1 (all quantiles). Currently NOT implemented for the \code{mixture} approach.}
 
-\item{CI}{Logical, indicating whether to compute confidence intervals for the counterfactual quantiles. Default is FALSE.}
-
-\item{CI_placebo}{Logical, indicating whether to compute confidence intervals for the pre-treatment periods. Default is TRUE.
-If you have a lot of pre-treatment periods, setting this to FALSE can speed up the computation.}
+\item{CI}{Logical, indicating whether to compute confidence intervals for the counterfactual quantiles. Default is FALSE.
+The confidence intervals are computed using the bootstrap procedure described in \insertCite{vandijcke2024rto;textual}{DiSCos}.}
 
 \item{boots}{Integer, number of bootstrap samples to use for computing confidence intervals. Default is 500.}
 

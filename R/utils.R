@@ -69,7 +69,7 @@ getGrid <- function(target, controls, G) {
 #' @return NULL
 #' @keywords internal
 checks <- function(df, id_col.target, t0, M, G, num.cores, permutation, q_min, q_max,
-                   CI, CI_placebo, boots, cl, graph,
+                   CI,  boots, cl, graph,
                    qmethod, seed) {
       # checks on the input data
   if (!id_col.target %in% df$id_col) {
@@ -182,9 +182,7 @@ checks <- function(df, id_col.target, t0, M, G, num.cores, permutation, q_min, q
     stop("q_min must be less than or equal to q_max")
   }
 
-  if (!is.logical(CI_placebo)) {
-    stop("CI_placebo must be logical")
-  }
+
 
   if (!is.null(qmethod)) {
     if (!qmethod %in% c("qkden", "extreme")) {
@@ -374,5 +372,54 @@ ex_gmm <- function(Ts=2, num.con=30, numdraws=1000){
 }
 
 
+
+
+
+
+#' @title parseBoots
+#' @description Function for parsing the bootstrapped counterfactuals in the DiSCo method
+#' @param CI_temp A list containing the bootstrapped counterfactuals
+#' @param cl The confidence level
+#' @return A list containing the confidence intervals for the quantiles and cdfs
+#' @keywords internal
+parseBoots <- function(CI_temp, cl) {
+  ## CIs for quantiles and cdfs
+  # Extract and combine all data into a single call, and immediately convert to an array
+  extract_and_combine <- function(data, attribute) {
+    combined <- simplify2array(
+      lapply(data, function(x) sapply(x$disco_boot, function(y) y[[attribute]]))
+    )
+  }
+
+  q_boot <- extract_and_combine(CI_temp, "quantile")
+  cdf_boot <- extract_and_combine(CI_temp, "cdf")
+  q_diff <- extract_and_combine(CI_temp, "quantile_diff")
+  cdf_diff <- extract_and_combine(CI_temp, "cdf_diff")
+
+  # calculate confidence intervals
+  getCIs <- function(bootmat, cl) {
+    lower <- apply(bootmat, c(1,2), function(x) stats::quantile(x, probs=cl+(1-cl)/2)) # outputs a G X T_max matrix
+    upper <- apply(bootmat, c(1,2), function(x) stats::quantile(x, probs=(1-cl)/2)) # outputs a G X T_max matrix
+    se <- apply(bootmat, c(1,2), function(x) stats::sd(x)) # outputs a G X T_max matrix
+    return(list("lower"=lower, "upper"=upper, "se" = se))
+  }
+  q_CI <- getCIs(q_boot, cl)
+  cdf_CI <- getCIs(cdf_boot, cl)
+  q_diff_CI <- getCIs(q_diff, cl)
+  cdf_diff_CI <- getCIs(cdf_diff, cl)
+
+  ## CIs for weights
+  weights <- sapply(CI_temp, function(x) x$weights)
+  weights_CI <- list(
+    "upper" = apply(weights, c(1), function(x) stats::quantile(x, probs=cl+(1-cl)/2)),
+    "lower"=  apply(weights, c(1), function(x) stats::quantile(x, probs=cl+(1-cl)/2))
+  )
+
+  # create CI object
+  CI_out <- list("quantile" = q_CI, "cdf" = cdf_CI, "quantile_diff" =
+                   q_diff_CI, "cdf_diff" = cdf_diff_CI, "weights" = weights_CI,
+                 bootmat = list("quantile" = q_boot, "cdf" = cdf_boot, "quantile_diff" = q_diff, "cdf_diff" = cdf_diff))
+  return(CI_out)
+}
 
 

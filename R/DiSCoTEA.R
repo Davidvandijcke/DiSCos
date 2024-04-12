@@ -88,28 +88,22 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
   if (agg == "cdfDiff"){
 
     treats <- list()
-    if (CI) treats_boot <- list()
-    grid <- disco$results.periods[[1]]$target$grid ## TODO: in future probably wanna address this at root by always taking same grid in DiSco, and don't calculate CDFs
+    treats_boot <- list()
 
-    for (i in 1:length(disco$results.periods)) {
+    # get treatment effects
+    for (i in 1:length(disco$results.periods)) { # TODO: left off here
+      grid <- disco$results.periods[[i]]$target$grid
       c_cdf <- stats::ecdf(disco$results.periods[[i]]$DiSCo$quantile)(grid)
       t_cdf <- stats::ecdf(disco$results.periods[[i]]$target$quantile)(grid)
       treats[[i]] <- t_cdf - c_cdf
-      if (CI) {
-        boot_cdf <- apply(disco$results.periods[[i]]$DiSCo$CI$bootmat, 2, function(x) stats::ecdf(x)(grid))
-        treats_boot[[i]] <- - sweep(boot_cdf, 1, t_cdf, "-")
-      }
+      if (CI) treats_boot[[i]] <- disco$CI$bootmat$cdf_diff[,i,]  # need to grab from the bootmat
     }
 
     if (CI){
-      sds <- list()
-      ci_lower <- list()
-      ci_upper <- list()
-      for (i in 1:length(disco$results.periods)) {
-        sds[[i]] <- apply(treats_boot[[i]], 1, sd)
-        ci_lower[[i]] <- apply(treats_boot[[i]],1,stats::quantile, probs=(1-cl)/2)
-        ci_upper[[i]] <- apply(treats_boot[[i]],1,stats::quantile, probs=cl+(1-cl)/2)
-      }
+      agg_nam <- "cdf_diff"
+      sds <- lapply(1:T_max, function(t) disco$CI[[agg_nam]]$sd[,t])
+      ci_lower <- lapply(1:T_max, function(t) disco$CI[[agg_nam]]$lower[,t])
+      ci_upper <- lapply(1:T_max, function(t) disco$CI[[agg_nam]]$upper[,t])
     } else {
       sds <- NA
       ci_lower <- NA
@@ -137,32 +131,29 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
   } else if (agg == "cdf"){
 
     treats <- list()
+    treats_boot <- list()
     target_cdf <- list()
-    grid <- seq(min(unlist(qtiles)), max(unlist(qtiles)), length.out = disco$params$G)
-    # TODO: obsLine
 
-    for (i in 1:length(disco$results.periods)) {
-      treats[[i]] <- stats::ecdf(qtiles[[i]])(grid)
-      target_cdf[[i]] <- stats::ecdf(disco$results.periods[[i]]$target$quantiles)(grid)
+    # get treatment effects
+    for (i in 1:length(disco$results.periods)) { # TODO: left off here
+      grid <- disco$results.periods[[i]]$target$grid
+      treats[[i]]  <- stats::ecdf(disco$results.periods[[i]]$DiSCo$quantile)(grid)
+      target_cdf[[i]] <- stats::ecdf(disco$results.periods[[i]]$target$quantile)(grid)
+      if (CI) treats_boot[[i]] <- disco$CI$bootmat$cdf[,i,] # need to grab from the bootmat
     }
-    if (CI) {
-      treats_boot <- list()
-      sds <- list()
-      ci_lower <- list()
-      ci_upper <- list()
 
-      for (i in 1:length(qtiles_centered)) {
-        # apply ecdf to each column of qtiles_centered_boot[[i]]
-        treats_boot[[i]] <- apply(qtiles_boot[[i]], 2, function(x) stats::ecdf(x)(grid))
-        sds[[i]] <- apply(treats_boot[[i]], 1, sd)
-        ci_lower[[i]] <- apply(treats_boot[[i]],1,stats::quantile, probs=(1-cl)/2)
-        ci_upper[[i]] <- apply(treats_boot[[i]],1,stats::quantile, probs=cl+(1-cl)/2)
-      }
+    if (CI){
+      sds <- lapply(1:T_max, function(t) disco$CI[[agg]]$sd[,t])
+      ci_lower <- lapply(1:T_max, function(t) disco$CI[[agg]]$lower[,t])
+      ci_upper <- lapply(1:T_max, function(t) disco$CI[[agg]]$upper[,t])
     } else {
       sds <- NA
       ci_lower <- NA
       ci_upper <- NA
+
     }
+
+
     if (is.null(xlim)) xlim <- c(min(grid), max(grid))
     if (graph) {
       p <- plotDistOverTime(treats, grid, t_start, t_max, CI, ci_lower, ci_upper, savePlots=savePlots, plotName=agg,
@@ -173,24 +164,36 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
     #---------------------------------------------------------------------------
   } else if (agg == "quantileDiff") { # TODO: adopt for discrete mixture
 
-    treats <-  qtiles_centered
-    if (CI) treats_boot <- qtiles_centered_boot
+    treats <- list()
+
+    treats_boot <- list()
     grid <- evgrid
 
-    if (CI) {
-      sds <- lapply(treats_boot, function(x) apply(x, 1, sd))
-      ci_lower <- lapply(treats_boot, function(x) apply(x,1,stats::quantile, probs=(1-cl)/2))
-      ci_upper <- lapply(treats_boot, function(x) apply(x,1,stats::quantile, probs=cl+(1-cl)/2))
+
+    # get treatment effects
+    for (i in 1:length(disco$results.periods)) { # TODO: left off here
+      c_qtile <- disco$results.periods[[i]]$DiSCo$quantile
+      t_qtile <- disco$results.periods[[i]]$target$quantile
+      treats[[i]] <- t_qtile - c_qtile
+      if (CI) treats_boot[[i]] <- disco$CI$bootmat$quantile_diff[,i,] # need to grab from the bootmat
+    }
+
+    if (CI){
+      agg_nam <- "quantile_diff"
+      sds <- lapply(1:T_max, function(t) disco$CI[[agg_nam]]$sd[,t])
+      ci_lower <- lapply(1:T_max, function(t) disco$CI[[agg_nam]]$lower[,t])
+      ci_upper <- lapply(1:T_max, function(t) disco$CI[[agg_nam]]$upper[,t])
     } else {
       sds <- NA
       ci_lower <- NA
       ci_upper <- NA
+
     }
 
     if (graph) {
       if (is.null(ylim)) {
-        ymin <- quantile(unlist(qtiles_centered), 0.01)
-        ymax <- quantile(unlist(qtiles_centered), 0.99)
+        ymin <- quantile(unlist(treats), 0.01)
+        ymax <- quantile(unlist(treats), 0.99)
         ylim <- c(ymin, ymax)
       }
       if (is.null(xlim)) {
@@ -199,21 +202,33 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
         xlim <- c(xmin, xmax)
       }
       p <- plotDistOverTime(treats, grid, t_start, t_max, CI, ci_lower, ci_upper, ylim=ylim,
-                       xlab="Quantile", ylab="Treatment Effect", cdf=FALSE, savePlots=savePlots, plotName=agg, t_plot=t_plot)
+                       xlab="Quantile", ylab="Treatment Effect", cdf=FALSE, savePlots=savePlots,
+                       plotName=agg, t_plot=t_plot)
     }
     #---------------------------------------------------------------------------
     ### counterfactual and observed quantiles
     #---------------------------------------------------------------------------
   } else if (agg == "quantile") {
 
-    treats <-  qtiles
-    if (CI) treats_boot <- qtiles_boot
+    treats <- list()
+    treats_boot <- list()
+    target_qtiles <- list()
     grid <- evgrid
 
+
+    # get treatment effects
+    for (i in 1:length(disco$results.periods)) { # TODO: left off here
+      c_qtile <- disco$results.periods[[i]]$DiSCo$quantile
+      t_qtile <- disco$results.periods[[i]]$target$quantile
+      treats[[i]] <- c_qtile
+      target_qtiles[[i]] <- t_qtile
+      if (CI) treats_boot[[i]] <- disco$CI$bootmat$quantile[,i,]  # need to grab from the bootmat
+    }
+
     if (CI) {
-      sds <- lapply(treats_boot, function(x) apply(x, 1, sd))
-      ci_lower <- lapply(treats_boot, function(x) apply(x,1,stats::quantile, probs=(1-cl)/2))
-      ci_upper <- lapply(treats_boot, function(x) apply(x,1,stats::quantile, probs=cl+(1-cl)/2))
+      sds <- lapply(1:T_max, function(t) disco$CI[[agg]]$sd[,t])
+      ci_lower <- lapply(1:T_max, function(t) disco$CI[[agg]]$lower[,t])
+      ci_upper <- lapply(1:T_max, function(t) disco$CI[[agg]]$upper[,t])
     } else {
       sds <- NA
       ci_lower <- NA
@@ -222,8 +237,8 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
 
     if (graph) {
       if (is.null(ylim)) {
-        ymin <- quantile(unlist(qtiles), 0.01)
-        ymax <- quantile(unlist(qtiles), 0.99)
+        ymin <- quantile(unlist(treats), 0.01)
+        ymax <- quantile(unlist(treats), 0.99)
         ylim <- c(ymin, ymax)
       }
       if (is.null(xlim)) {

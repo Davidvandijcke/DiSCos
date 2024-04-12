@@ -1,9 +1,14 @@
-# DiSCos 0.0.2
+# DiSCos 0.1.0
 
-* Fixed a small issue where plot=FALSE option didn't work in DiSCoTEA
-* Added option to supply ordinal vector of discrete points for mixture of distributions
+Major updates:
+* Implemented the fully-fledged bootstrap approach for confidence interval estimation
 * Added mixture of distributions method CDFs, confidence intervals, and permutation test
 and made it optional
+
+Minor updates:
+* Fixed a small issue where plot=FALSE option didn't work in DiSCoTEA
+* Added option to supply ordinal vector of discrete points for mixture of distributions
+
 
 # DiSCos 0.0.1
 

@@ -14,9 +14,11 @@ test_that("mixture weights sum up to 1", {
   for (t in 1:(t0-1)) {
     expect_equal(sum(disco$results.periods[[t]]$mixture$weights), 1, tolerance=1e-5)
   }
-  expect_equal(sum(disco$Weights_mixture_avg), 1, tolerance=1e-5)
+  expect_equal(sum(disco$weights), 1, tolerance=1e-5)
 
 })
+
+
 
 
 #-----
@@ -35,7 +37,7 @@ test_that("disco weights sum up to 1", {
   }
 
   # overall weights
-  expect_equal(sum(disco$Weights_DiSCo_avg), 1)
+  expect_equal(sum(disco$weights), 1)
 
   ## test for only pre- and post-period
   Ts <- 2
@@ -49,7 +51,7 @@ test_that("disco weights sum up to 1", {
   }
 
   # overall weights
-  expect_equal(sum(disco$Weights_DiSCo_avg), 1)
+  expect_equal(sum(disco$weights), 1)
 
 })
 
@@ -79,7 +81,7 @@ test_that("simplex results in weakly positive weights", {
   # test simplex=TRUE
   expect_no_error(disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, num.cores=1, simplex=TRUE))
   # expect true up to some margin of error
-  expect_true(all(disco$Weights_DiSCo_avg > -1e-10))
+  expect_true(all(disco$weights > -1e-10))
 })
 
 
@@ -93,7 +95,7 @@ test_that("simplex results in weakly positive weights for mixture", {
   # test simplex=TRUE
   expect_no_error(disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, num.cores=1, simplex=TRUE, mixture=TRUE))
   # expect true up to some margin of error
-  expect_true(all(disco$Weights_mixture_avg > -1e-5))
+  expect_true(all(disco$weights > -1e-5))
 })
 
 
@@ -245,15 +247,11 @@ test_that("test that variations of other arguments work",  {
 
   # CI FALSE
   expect_no_error(disco <- DiSCo(df=df, id_col.target=1, t0=t0, CI=FALSE, seed=1))
-  expect_true(is.null(disco$results.periods[[1]]$DiSCo$CI))
+  expect_true(is.null(disco$CI$quantile))
 
-  # CI_placebo TRUE
-  expect_no_error(disco <- DiSCo(df=df, id_col.target=1, t0=t0, CI_placebo=TRUE, CI=TRUE, boot=2, seed=1, num.cores=1))
-  expect_true(!is.null(disco$results.periods[[1]]$DiSCo$CI))
-
-  # CI_placebo FALSE
-  expect_no_error(disco <- DiSCo(df=df, id_col.target=1, t0=t0, CI_placebo=FALSE, CI=TRUE, boot=2, seed=1, num.cores=1))
-  expect_true(is.null(disco$results.periods[[1]]$DiSCo$CI))
+  # CI without replacement
+  expect_no_error(disco <- DiSCo(df=df, id_col.target=1, t0=t0, CI=TRUE, replace=FALSE, boots=2, seed=1))
+  expect_true(!is.null(disco$CI$quantile))
 
   # boots 0
   expect_error(disco <- DiSCo(df=df, id_col.target=1, t0=t0, boots=0, seed=1, CI=TRUE, num.cores=1))
@@ -261,7 +259,7 @@ test_that("test that variations of other arguments work",  {
 
   # cl = 0
   expect_no_error(disco <- DiSCo(df=df, id_col.target=1, t0=t0, cl=0, seed=1, CI=TRUE, num.cores=1, boot=2))
-  expect_true(all(disco$results.periods[[1]]$DiSCo$CI$lower == disco$results.periods[[1]]$DiSCo$CI$upper))
+  expect_true(all(disco$CI$quantile$lower == disco$CI$quantile$upper))
 
   # cl < 0
   expect_error(disco <- DiSCo(df=df, id_col.target=1, t0=t0, cl=-1, seed=1, CI=TRUE, num.cores=1, boot=2))
@@ -273,7 +271,7 @@ test_that("test that variations of other arguments work",  {
   # test seed
   expect_no_error(disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, num.cores=1))
   expect_no_error(disco2 <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, num.cores=1))
-  expect_equal(disco$Weights_DiSCo_avg, disco2$Weights_DiSCo_avg)
+  expect_equal(disco$weights, disco2$weights)
 
 
 })

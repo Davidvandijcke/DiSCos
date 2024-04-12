@@ -2,44 +2,78 @@
 #' @title DiSCo_CI_iter
 #'
 #' @description Function for computing the confidence intervals in the DiSCo method in a single period
-#' @param redraw Integer indicating the number of times the function has been called
-#' @param controls List of control units
-#' @param weights Vector of optimal synthetic control weights, computed using the DiSCo_weights_reg function.
+#' @param t Time period
+#' @param controls_t List of control unit data for given period
+#' @param target_t List of target unit data for given period
 #' @inheritParams DiSCo_CI
 #' @inheritParams DiSCo
 #' @return The resampled counterfactual barycenter of the target unit
 #' @keywords internal
-DiSCo_CI_iter <- function(redraw, controls, weights, grid, cl=0.95,
+DiSCo_CI_iter <- function(t, controls_t, target_t, grid, T0, M=1000,
                           evgrid = seq(from=0, to=1, length.out=1001), qmethod=NULL,
-                          mixture=FALSE) {
-  # set.seed(redraw*1) # for reproducibility
-  # drawing m = 100% of samples from controls
+                          mixture=FALSE, simplex=FALSE, replace=TRUE) {
 
-  mycon <- list()
-  mycon.q <- matrix(0,nrow = length(evgrid), ncol=length(controls))
-  for (ii in 1:length(controls)){
-    sz <- length(controls[[ii]])
-    m.c <- floor(1*sz)
-    # sampling from controls
-    idx <- sample(1:sz, m.c, replace=TRUE)
-    mycon[[ii]] <- controls[[ii]][idx]
-    # mycon.q[,ii] <- mapply(myquant, evgrid, MoreArgs = list(X=mycon[[ii]]))
-    mycon.q[,ii] <- myQuant(mycon[[ii]], evgrid, qmethod)
+  # resample target
+  t_len <- length(target_t)
+  mytar <- target_t[sample(1:t_len, floor(1*t_len), replace=replace)]
+  mytar.q <- myQuant(mytar, evgrid, qmethod) # quantile
+  mytar.cdf <- stats::ecdf(mytar)(grid)
+
+  # resample controls
+  mycon.q <- matrix(0,nrow = length(evgrid), ncol=length(controls_t))
+  mycon.cdf <- matrix(0,nrow = length(grid), ncol=length(controls_t)+1)
+  mycon.cdf[,1] <- mytar.cdf
+
+
+  for (ii in 1:length(controls_t)){
+    controls_t_i <- controls_t[[ii]]
+    c_len <- length(controls_t_i)
+    mycon <- controls_t_i[sample(1:c_len, floor(1*c_len), replace=replace)] # resample
+    mycon.q[,ii] <- myQuant(mycon, evgrid, qmethod) # resampled quantile
+    mycon.cdf[,ii+1] <- stats::ecdf(mycon)(grid) # resampled cdf
   }
 
+  if (t <= T0) { # if pre-treatment, calculate bootstrapped weights
+    if (!mixture) {
+      lambda <- DiSCo_weights_reg(mycon.q, mytar, M=M, qmethod=qmethod, simplex=simplex)
+    } else {
+      mixt <- DiSCo_mixture_solve(length(controls_t), mycon.cdf, min(grid), max(grid),
+                                  grid, M, simplex)
+      lambda <- mixt$weights.opt
+    }
+  } else { # if post-treatment, no weights are calculated, but we still want to resample the data for bootstrap
+    lambda <- NULL
+  }
 
-  if (!mixture) {
-    out <- DiSCo_bc(mycon.q,weights,evgrid) # TODO: left off here
+  return(list("weights" = lambda, "target" = list("quantile" = mytar.q, "cdf" = mytar.cdf),
+         "controls" = list("quantile" = mycon.q, "cdf" = mycon.cdf[,-1])))
+
+}
+
+#' @title bootCounterfactuals
+#' @description Function for computing the bootstrapped counterfactuals in the DiSCo method
+#' @param result_t A list containing the results of the DiSCo_CI_iter function
+#' @param t The current time period
+#' @inheritParams DiSCo_CI
+#' @return A list containing the bootstrapped counterfactuals
+#' @keywords internal
+bootCounterfactuals <- function(result_t, t, mixture, weights, evgrid, grid) {
+  if (mixture) {
+    # calculate cdf and then back out quantile
+    cdf_t <- result_t$controls$cdf %*%  weights # cdf
+    q_t <- sapply(evgrid, function(y) grid[which(cdf_t >= (y-(1e-5)))[1]]) # tolerance accounts for inaccuracy (esp != 1)
+
   } else {
-    mycon.cdf <- apply(mycon.q, 2, function(x) stats::ecdf(x)(grid))
-    cdf <- mycon.cdf %*% weights
+    # calculate quantile then back out cdf
+    q_t <- DiSCo_bc(result_t$controls$quantile, weights, evgrid)
+    cdf_t <- stats::ecdf(q_t)(grid)
 
-    # this is slightly hacky cause we will have to recompute the cdf later but it allows me to keep the old DiSCoTEA function
-    # the tolerance serves to account for the imperfect optimization of CVXR (esp fact that CDF can be <1 everywhere bcs of it)
-    out <-  sapply(evgrid, function(y)
-      grid[which(cdf >= (y-(1e-5)))[1]])
   }
-  return(out)
+  # calculate bootstrapped counterfactual differences
+  cdf_diff <- as.vector(result_t$target$cdf - cdf_t)
+  q_diff <- as.vector(result_t$target$quantile - q_t)
+
+  return(list("cdf" = cdf_t, "quantile" = q_t, "quantile_diff" = q_diff, "cdf_diff" = cdf_diff))
 }
 
 
@@ -47,45 +81,47 @@ DiSCo_CI_iter <- function(redraw, controls, weights, grid, cl=0.95,
 #' @title DiSCo_CI
 #'
 #' @description Function for computing the confidence intervals in the DiSCo method
+#' using the bootstrap approach described in
+#' @param redraw Integer indicating the current bootstrap redraw
 #' @param controls A list containing the raw data for the control group
-#' @param weights A vector of optimal weights
+#' @param target A list containing the raw data for the target group
+#' @param T_max Index of last time period
+#' @param T0 Index of the last pre-treatment period
 #' @param mc.cores Number of cores to use for parallelization
-#' @param num.redraws The number of bootstrap samples to draw
 #' @param grid Grid to recompute the CDF on if `mixture` option is chosen
 #' @inheritParams DiSCo
-#' @return \code{DSC_CI} returns a list containing the following components:
+#' @return A list with the following components
 #' \itemize{
-#' \item \code{upper } A vector of the upper bound.
-#' \item \code{lower } A vector of the lower bound.
-#' \item \code{se } A vector of the standard errors of each counterfactual quantile estimate.
-#' \item \code{bootmat } A matrix of the counterfactual quantile estimates for each bootstrap sample.
+#' \item \code{weights} The bootstrapped weights
+#' \item \code{disco_boot} A list containing the bootstrapped counterfactuals,
+#' with the following elements, each of which contains named elements called `upper` and `lower`
+#' which are G x T matrices where G is the specified number of grid points and T is the number of time periods
 #' }
 #' @keywords internal
-DiSCo_CI <- function(controls, weights, grid, mc.cores=1, cl=0.95, num.redraws=500,
-                     evgrid = seq(from=0, to=1, length.out=1001), qmethod=NULL,
-                     mixture=FALSE){
+DiSCo_CI <- function(redraw, controls, target, T_max, T0, grid, mc.cores=1,
+                     evgrid = seq(from=0, to=1, length.out=1001), qmethod=NULL, M=1000,
+                     mixture=FALSE, simplex=FALSE, replace=TRUE) {
 
-  DSC_res2.CI <- mclapply.hack(1:num.redraws, DiSCo_CI_iter, controls=controls,
-                               weights=weights, grid=grid, cl=cl, evgrid=evgrid, mc.cores=mc.cores,
-                               mixture=mixture)
 
-  DSC_res2.CI <- sapply(DSC_res2.CI, function(x) x)
+  results.periods <- lapply(1:T_max, function(t) DiSCo_CI_iter(t, controls_t=controls[[t]],
+                                            target_t=target[[t]], grid=grid[[t]], T0=T0, M=M,
+                                             evgrid = evgrid, qmethod=qmethod,
+                                            mixture=mixture, simplex=simplex, replace=replace)
+         )
 
-  # DiSCo_CI_iter(1, controls=controls, bc=bc, weights=weights, cl=cl, evgrid = evgrid)
-  # obtain the cl% confidence intervals
-  if (!is.null(qmethod)){
-    if (qmethod=="qkden") {
-      # estimate bandwidth once
-      bw <- stats::bw.nrd0(DSC_res2.CI[,1])
-    }
+  # extract the weights
+  weights <- 0
+  for (t in 1:T0) {
+    weights <- weights + results.periods[[t]]$weights
   }
-  # we do the quantiles in parallel cause the qmethod=qkden is slow
-  CI.u <- unlist(mclapply.hack(1:dim(DSC_res2.CI)[1], function(x) myQuant(DSC_res2.CI[x,], q=cl+(1-cl)/2, qmethod=qmethod, bw=bw), mc.cores=mc.cores))
-  CI.l <- unlist(mclapply.hack(1:dim(DSC_res2.CI)[1], function(x) myQuant(DSC_res2.CI[x,], q=(1-cl)/2, qmethod=qmethod, bw=bw), mc.cores=mc.cores))
 
-  se <- apply(DSC_res2.CI,1,sd)
+  disco_boot <- list()
 
+  # compute resampled counterfactuals
+  disco_boot <- lapply(1:T_max, function(t)
+    bootCounterfactuals(results.periods[[t]], t, mixture, weights, evgrid, grid[[t]])
+  )
 
-  return(list(upper=CI.u, lower=CI.l, se=se, bootmat=DSC_res2.CI))
+  return(list("weights"=weights, "disco_boot"=disco_boot))
 
 }

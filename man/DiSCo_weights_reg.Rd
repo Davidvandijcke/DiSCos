@@ -27,9 +27,11 @@ Both are substantially slower than the default method but may be useful for fat-
 
 \item{simplex}{Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.}
 
-\item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).}
+\item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control.
+Default is 0 (all quantiles). Currently NOT implemented for the \code{mixture} approach.}
 
-\item{q_max}{Numeric, maximum quantile to use. Set this together with \code{q_min} to restrict the range of quantiles used to construct the synthetic control. Default is 1 (all quantiles).}
+\item{q_max}{Numeric, maximum quantile to use. Set this together with \code{q_min} to restrict the range of quantiles used to construct the synthetic control.
+Default is 1 (all quantiles). Currently NOT implemented for the \code{mixture} approach.}
 }
 \value{
 Vector of optimal synthetic control weights

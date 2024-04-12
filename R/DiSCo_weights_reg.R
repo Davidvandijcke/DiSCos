@@ -19,7 +19,7 @@
 #' @references
 #' \insertAllCited{}
 #' @keywords internal
-DiSCo_weights_reg <- function(controls,target, M = 500, qmethod=NULL, simplex=FALSE, q_min=0, q_max=1){
+DiSCo_weights_reg <- function(controls, target, M = 500, qmethod=NULL, simplex=FALSE, q_min=0, q_max=1){
 
 
   if (!is.null(qmethod)){

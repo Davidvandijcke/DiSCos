@@ -5,40 +5,62 @@
 \title{DiSCo_CI}
 \usage{
 DiSCo_CI(
+  redraw,
   controls,
-  weights,
+  target,
+  T_max,
+  T0,
+  grid,
   mc.cores = 1,
-  cl = 0.95,
-  num.redraws = 500,
   evgrid = seq(from = 0, to = 1, length.out = 1001),
-  qmethod = NULL
+  qmethod = NULL,
+  M = 1000,
+  mixture = FALSE,
+  simplex = FALSE,
+  replace = TRUE
 )
 }
 \arguments{
+\item{redraw}{Integer indicating the current bootstrap redraw}
+
 \item{controls}{A list containing the raw data for the control group}
 
-\item{weights}{A vector of optimal weights}
+\item{target}{A list containing the raw data for the target group}
+
+\item{T_max}{Index of last time period}
+
+\item{T0}{Index of the last pre-treatment period}
+
+\item{grid}{Grid to recompute the CDF on if \code{mixture} option is chosen}
 
 \item{mc.cores}{Number of cores to use for parallelization}
-
-\item{cl}{Numeric, confidence level for the (two-sided) confidence intervals.}
-
-\item{num.redraws}{The number of bootstrap samples to draw}
 
 \item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
 Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
 Both are substantially slower than the default method but may be useful for fat-tailed distributions with few data points at the upper quantiles. Alternatively, one could use the q_max option to restrict the range of quantiles used.}
+
+\item{M}{Integer indicating the number of control quantiles to use in the DiSCo method. Default is 1000.}
+
+\item{mixture}{Logical, indicating whether to use the mixture of distributions approach instead.
+See Section 4.3. in \insertCite{gunsilius2023distributional;textual}{DiSCos}. This approach minimizes the distance between the CDFs
+instead of the quantile functions, and is preferred for categorical variables. When working with such variables, one should
+also provide a list of support points in the \code{grid.cat} parameter. When that is provided, this parameter is automatically set to TRUE. Default is FALSE.}
+
+\item{simplex}{Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.}
+
+\item{replace}{Logical, indicating whether to sample with replacement when computing the bootstrap samples. Default is TRUE.}
 }
 \value{
-\code{DSC_CI} returns a list containing the following components:
+A list with the following components
 \itemize{
-\item \code{upper } A vector of the upper bound.
-\item \code{lower } A vector of the lower bound.
-\item \code{se } A vector of the standard errors of each counterfactual quantile estimate.
-\item \code{bootmat } A matrix of the counterfactual quantile estimates for each bootstrap sample.
+\item \code{weights} The bootstrapped weights
+\item \code{disco_boot} A list containing the bootstrapped counterfactuals,
+with the following elements, each of which contains named elements called \code{upper} and \code{lower}
+which are G x T matrices where G is the specified number of grid points and T is the number of time periods
 }
 }
 \description{
 Function for computing the confidence intervals in the DiSCo method
+using the bootstrap approach described in
 }
 \keyword{internal}

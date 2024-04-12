@@ -16,7 +16,9 @@ DiSCo_iter(
   q_min = 0,
   q_max = 1,
   simplex = FALSE,
-  controls.id
+  controls.id,
+  grid.cat,
+  mixture
 )
 }
 \arguments{
@@ -44,13 +46,23 @@ This variable can be any type, as long as it is the same type as the id_col colu
 Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
 Both are substantially slower than the default method but may be useful for fat-tailed distributions with few data points at the upper quantiles. Alternatively, one could use the q_max option to restrict the range of quantiles used.}
 
-\item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).}
+\item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control.
+Default is 0 (all quantiles). Currently NOT implemented for the \code{mixture} approach.}
 
-\item{q_max}{Numeric, maximum quantile to use. Set this together with \code{q_min} to restrict the range of quantiles used to construct the synthetic control. Default is 1 (all quantiles).}
+\item{q_max}{Numeric, maximum quantile to use. Set this together with \code{q_min} to restrict the range of quantiles used to construct the synthetic control.
+Default is 1 (all quantiles). Currently NOT implemented for the \code{mixture} approach.}
 
 \item{simplex}{Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.}
 
 \item{controls.id}{List of strings specifying the column names for the control units' identifiers.}
+
+\item{grid.cat}{List, containing the discrete support points for a discrete grid to be used with the mixture of distributions approach.
+This is useful for constructing synthetic distributions for categorical variables. Default is NULL, which uses a continuous grid based on the other parameters.}
+
+\item{mixture}{Logical, indicating whether to use the mixture of distributions approach instead.
+See Section 4.3. in \insertCite{gunsilius2023distributional;textual}{DiSCos}. This approach minimizes the distance between the CDFs
+instead of the quantile functions, and is preferred for categorical variables. When working with such variables, one should
+also provide a list of support points in the \code{grid.cat} parameter. When that is provided, this parameter is automatically set to TRUE. Default is FALSE.}
 }
 \value{
 A list with the following elements:
@@ -65,7 +77,7 @@ A list with the following elements:
 
 \item \code{target }
 \itemize{
-\item \code{cdf } Empirical CDF of the target.
+\item \code{cdf } Empirical CDF of the target. Only computed when \code{mixture=TRUE}.
 \item \code{grid } Grid on which the quantile and CDF functions were evaluated.
 \item \code{data } Original data for the target unit.
 \item \code{quantiles } Quantiles for the target unit, evaluated on the specified grid.
@@ -74,7 +86,7 @@ A list with the following elements:
 \item \code{controls }
 \itemize{
 \item \code{data } Original data for the control units.
-\item \code{cdf } Empirical CDFs of the control units.
+\item \code{cdf } Empirical CDFs of the control units. Only computed when \code{mixture=TRUE}.
 \item \code{quantiles } Quantiles for the control units, evaluated on the specified grid.
 .
 }

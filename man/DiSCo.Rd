@@ -15,13 +15,15 @@ DiSCo(
   q_min = 0,
   q_max = 1,
   CI = FALSE,
-  CI_placebo = TRUE,
   boots = 500,
+  replace = TRUE,
   cl = 0.95,
   graph = FALSE,
   qmethod = NULL,
   seed = NULL,
-  simplex = FALSE
+  simplex = FALSE,
+  mixture = FALSE,
+  grid.cat = NULL
 )
 }
 \arguments{
@@ -46,16 +48,18 @@ If you get an error in "all cores" or similar, try setting num.cores=1 to see th
 
 \item{permutation}{Logical, indicating whether to use the permutation method for computing the optimal weights. Default is FALSE.}
 
-\item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).}
+\item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control.
+Default is 0 (all quantiles). Currently NOT implemented for the \code{mixture} approach.}
 
-\item{q_max}{Numeric, maximum quantile to use. Set this together with \code{q_min} to restrict the range of quantiles used to construct the synthetic control. Default is 1 (all quantiles).}
+\item{q_max}{Numeric, maximum quantile to use. Set this together with \code{q_min} to restrict the range of quantiles used to construct the synthetic control.
+Default is 1 (all quantiles). Currently NOT implemented for the \code{mixture} approach.}
 
-\item{CI}{Logical, indicating whether to compute confidence intervals for the counterfactual quantiles. Default is FALSE.}
-
-\item{CI_placebo}{Logical, indicating whether to compute confidence intervals for the pre-treatment periods. Default is TRUE.
-If you have a lot of pre-treatment periods, setting this to FALSE can speed up the computation.}
+\item{CI}{Logical, indicating whether to compute confidence intervals for the counterfactual quantiles. Default is FALSE.
+The confidence intervals are computed using the bootstrap procedure described in \insertCite{vandijcke2024rto;textual}{DiSCos}.}
 
 \item{boots}{Integer, number of bootstrap samples to use for computing confidence intervals. Default is 500.}
+
+\item{replace}{Logical, indicating whether to sample with replacement when computing the bootstrap samples. Default is TRUE.}
 
 \item{cl}{Numeric, confidence level for the (two-sided) confidence intervals.}
 
@@ -69,21 +73,49 @@ Both are substantially slower than the default method but may be useful for fat-
 when using parallel processes. Default is NULL, which does not set a seed.}
 
 \item{simplex}{Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.}
+
+\item{mixture}{Logical, indicating whether to use the mixture of distributions approach instead.
+See Section 4.3. in \insertCite{gunsilius2023distributional;textual}{DiSCos}. This approach minimizes the distance between the CDFs
+instead of the quantile functions, and is preferred for categorical variables. When working with such variables, one should
+also provide a list of support points in the \code{grid.cat} parameter. When that is provided, this parameter is automatically set to TRUE. Default is FALSE.}
+
+\item{grid.cat}{List, containing the discrete support points for a discrete grid to be used with the mixture of distributions approach.
+This is useful for constructing synthetic distributions for categorical variables. Default is NULL, which uses a continuous grid based on the other parameters.}
 }
 \value{
-A list containing, for each time period, the elements described in the return argument of \code{\link{DiSCo_iter}}, as well as the following additional elements:
+A list containing the following elements:
+\itemize{
+\item \code{results.periods} A list containing, for each time period, the elements described in the return argument of \code{\link{DiSCo_iter}}, as well as the following additional elements:
 \itemize{
 \item \code{DiSco}
 \itemize{
-\item \code{CI } A list with the confidence intervals and standard errors for the counterfactual quantiles, if \code{CI} is TRUE and for the periods specified in \code{CI_periods}.
-See the output of \code{\link{DiSCo_CI}} for details.
 \item \code{quantile } The counterfactual quantiles for the target unit.
 \item \code{weights } The optimal weights for the target unit.
 \item \code{cdf } The counterfactual CDF for the target unit.
 }
-
+}
+\item \code{weights} A numeric vector containing the synthetic control weights for the control units, averaged over time.
+When \code{mixture} is TRUE, these are the weights for the mixture of distributions, otherwise they are the weights for the quantile-based approach.
+\item \code{CI} A list containing the confidence intervals for the counterfactual quantiles and CDFs, if \code{CI} is TRUE.
+Each element contains two named subelements called \code{upper}, \code{lower}, \code{se} which
+are the upper and lower confidence bands and the standard error of the estimate, respectively.
+They are G x T matrices where G is the specified number of grid points and T is the number of time periods.
+The elements are:
+\itemize{
+\item \code{cdf} The bootstrapped CDF
+\item \code{quantile} The bootstrapped quantile
+\item \code{quantile_diff} The bootstrapped quantile difference
+\item \code{cdf_diff} The bootstrapped CDF difference
+\item \code{bootmat} A list containing the raw bootstrapped samples for the counterfactual quantiles and CDFs, if \code{CI} is TRUE.
+These are not meant to be accessed directly, but are used by \code{DiSCoTEA} to compute aggregated standard errors. Advanced users
+may wish to access these directly for further analysis. The element names should be self-explanatory.
+#' \item \code{control_ids} A list containing the control unit IDs used for each time period, which can be used to identify the weights
+associated with each control as the returned weights have the same order as the control IDs.
 \item \code{perm } A \code{\link{permut}} object containing the results of the permutation method, if \code{permutation} is TRUE.
 Call \code{summary} on this object to print the overall results of the permutation test.
+#' \item \code{evgrid} A numeric vector containing the grid points on which the quantiles were evaluated.
+\item \code{params} A list containing the parameters used in the function call.
+}
 }
 }
 \description{

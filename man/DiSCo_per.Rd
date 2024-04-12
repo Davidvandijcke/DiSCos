@@ -12,13 +12,13 @@ DiSCo_per(
   evgrid = seq(from = 0, to = 1, length.out = 101),
   graph = TRUE,
   num.cores = 1,
-  redo_weights = FALSE,
   weights = NULL,
   qmethod = NULL,
   q_min = 0,
   q_max = 1,
   M = 1000,
-  simplex = FALSE
+  simplex = FALSE,
+  mixture = FALSE
 )
 }
 \arguments{
@@ -35,21 +35,26 @@ DiSCo_per(
 \item{num.cores}{Integer, number of cores to use for parallel computation. Default is 1. If the \code{permutation} or \code{CI} arguments are set to TRUE, this can be slow and it is recommended to set this to 4 or more, if possible.
 If you get an error in "all cores" or similar, try setting num.cores=1 to see the precise error value.}
 
-\item{redo_weights}{Boolean indicating whether to recompute the weights for the "true" treated unit. Set to FALSE by default.}
-
 \item{weights}{Optional vector of weights to use for the "true" treated unit. \code{redo_weights} has to be set to FALSE for these weights to be used.}
 
 \item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
 Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
 Both are substantially slower than the default method but may be useful for fat-tailed distributions with few data points at the upper quantiles. Alternatively, one could use the q_max option to restrict the range of quantiles used.}
 
-\item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control. Default is 0 (all quantiles).}
+\item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control.
+Default is 0 (all quantiles). Currently NOT implemented for the \code{mixture} approach.}
 
-\item{q_max}{Numeric, maximum quantile to use. Set this together with \code{q_min} to restrict the range of quantiles used to construct the synthetic control. Default is 1 (all quantiles).}
+\item{q_max}{Numeric, maximum quantile to use. Set this together with \code{q_min} to restrict the range of quantiles used to construct the synthetic control.
+Default is 1 (all quantiles). Currently NOT implemented for the \code{mixture} approach.}
 
 \item{M}{Integer indicating the number of control quantiles to use in the DiSCo method. Default is 1000.}
 
 \item{simplex}{Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.}
+
+\item{mixture}{Logical, indicating whether to use the mixture of distributions approach instead.
+See Section 4.3. in \insertCite{gunsilius2023distributional;textual}{DiSCos}. This approach minimizes the distance between the CDFs
+instead of the quantile functions, and is preferred for categorical variables. When working with such variables, one should
+also provide a list of support points in the \code{grid.cat} parameter. When that is provided, this parameter is automatically set to TRUE. Default is FALSE.}
 }
 \value{
 List of matrices containing synthetic time path of the outcome variable
