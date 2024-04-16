@@ -397,10 +397,10 @@ parseBoots <- function(CI_temp, cl) {
   cdf_diff <- extract_and_combine(CI_temp, "cdf_diff")
 
   # calculate confidence intervals
-  getCIs <- function(bootmat, cl) {
-    lower <- apply(bootmat, c(1,2), function(x) stats::quantile(x, probs=cl+(1-cl)/2)) # outputs a G X T_max matrix
-    upper <- apply(bootmat, c(1,2), function(x) stats::quantile(x, probs=(1-cl)/2)) # outputs a G X T_max matrix
-    se <- apply(bootmat, c(1,2), function(x) stats::sd(x)) # outputs a G X T_max matrix
+  getCIs <- function(btmat, cl) {
+    lower <- apply(btmat, c(1,2), function(x) stats::quantile(x, probs=cl+(1-cl)/2)) # outputs a G X T_max matrix
+    upper <- apply(btmat, c(1,2), function(x) stats::quantile(x, probs=(1-cl)/2)) # outputs a G X T_max matrix
+    se <- apply(btmat, c(1,2), function(x) stats::sd(x)) # outputs a G X T_max matrix
     return(list("lower"=lower, "upper"=upper, "se" = se))
   }
   q_CI <- getCIs(q_boot, cl)

@@ -135,7 +135,7 @@ DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlo
     target_cdf <- list()
 
     # get treatment effects
-    for (i in 1:length(disco$results.periods)) { # TODO: left off here
+    for (i in 1:length(disco$results.periods)) {
       grid <- disco$results.periods[[i]]$target$grid
       treats[[i]]  <- stats::ecdf(disco$results.periods[[i]]$DiSCo$quantile)(grid)
       target_cdf[[i]] <- stats::ecdf(disco$results.periods[[i]]$target$quantile)(grid)

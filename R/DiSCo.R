@@ -208,7 +208,7 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
     grid <- lapply(results.periods, function(x) x$target$grid)
 
     ## bootstrap the estimator
-    CI_bootmat <-  mclapply.hack(1:boots, DiSCo_CI, controls=controls,target=target,
+    CI_bootmat <-  mclapply.hack(1:boots, DiSCo_CI, controls=controls, target=target,
                               T_max=T_max, T0=T0, grid=grid, mc.cores=num.cores,
                               evgrid=evgrid, mixture=mixture, M=M, simplex=simplex,
                               qmethod=qmethod, replace=replace)

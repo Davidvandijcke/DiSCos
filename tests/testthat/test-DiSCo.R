@@ -5,6 +5,13 @@
 # uniformly distributed, ipw model is incorectly specified here
 #-----------------------------------------------------------------------------
 
+Ts <- 2
+t0 <- 2
+df <- ex_gmm(Ts=Ts,  num.con=4)
+disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=100, mixture=FALSE,
+               num.cores=5, simplex=TRUE)
+DiSCoTEA(disco, agg="quantileDiff")
+
 test_that("mixture weights sum up to 1", {
   Ts <- 2
   t0 <- 2

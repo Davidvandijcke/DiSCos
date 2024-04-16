@@ -1,3 +1,17 @@
+
+test_that("test with dube data", {
+  id_col.target <- 2
+  t0 <- 2003
+
+  # load datadf <- copy(dube)
+  df <- copy(dube)
+  disco <- DiSCo(df, id_col.target, t0, G = 1000, num.cores = 5,
+                 permutation = TRUE, CI = TRUE, boots = 100, graph = TRUE, simplex=TRUE, seed=1, q_max=0.9)
+
+  discot <- DiSCoTEA(disco,  agg="quantileDiff", graph=TRUE)
+  summary(discot)
+  })
+
 test_that("quantile works", {
 
   # disco

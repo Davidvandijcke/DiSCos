@@ -20,6 +20,7 @@ DiSCo_CI_iter <- function(t, controls_t, target_t, grid, T0, M=1000,
   mytar.cdf <- stats::ecdf(mytar)(grid)
 
   # resample controls
+  mycon_list <- list()
   mycon.q <- matrix(0,nrow = length(evgrid), ncol=length(controls_t))
   mycon.cdf <- matrix(0,nrow = length(grid), ncol=length(controls_t)+1)
   mycon.cdf[,1] <- mytar.cdf
@@ -29,13 +30,14 @@ DiSCo_CI_iter <- function(t, controls_t, target_t, grid, T0, M=1000,
     controls_t_i <- controls_t[[ii]]
     c_len <- length(controls_t_i)
     mycon <- controls_t_i[sample(1:c_len, floor(1*c_len), replace=replace)] # resample
+    mycon_list[[ii]] <- mycon
     mycon.q[,ii] <- myQuant(mycon, evgrid, qmethod) # resampled quantile
     mycon.cdf[,ii+1] <- stats::ecdf(mycon)(grid) # resampled cdf
   }
 
   if (t <= T0) { # if pre-treatment, calculate bootstrapped weights
     if (!mixture) {
-      lambda <- DiSCo_weights_reg(mycon.q, mytar, M=M, qmethod=qmethod, simplex=simplex)
+      lambda <- DiSCo_weights_reg(mycon_list, mytar, M=M, qmethod=qmethod, simplex=simplex)
     } else {
       mixt <- DiSCo_mixture_solve(length(controls_t), mycon.cdf, min(grid), max(grid),
                                   grid, M, simplex)
@@ -103,7 +105,7 @@ DiSCo_CI <- function(redraw, controls, target, T_max, T0, grid, mc.cores=1,
                      mixture=FALSE, simplex=FALSE, replace=TRUE) {
 
 
-  results.periods <- lapply(1:T_max, function(t) DiSCo_CI_iter(t, controls_t=controls[[t]],
+  boots.periods <- lapply(1:T_max, function(t) DiSCo_CI_iter(t, controls_t=controls[[t]],
                                             target_t=target[[t]], grid=grid[[t]], T0=T0, M=M,
                                              evgrid = evgrid, qmethod=qmethod,
                                             mixture=mixture, simplex=simplex, replace=replace)
@@ -112,14 +114,15 @@ DiSCo_CI <- function(redraw, controls, target, T_max, T0, grid, mc.cores=1,
   # extract the weights
   weights <- 0
   for (t in 1:T0) {
-    weights <- weights + results.periods[[t]]$weights
+    weights <- weights + boots.periods[[t]]$weights
   }
+  weights <- (1/T0)*weights
 
   disco_boot <- list()
 
   # compute resampled counterfactuals
   disco_boot <- lapply(1:T_max, function(t)
-    bootCounterfactuals(results.periods[[t]], t, mixture, weights, evgrid, grid[[t]])
+    bootCounterfactuals(boots.periods[[t]], t, mixture, weights, evgrid, grid[[t]])
   )
 
   return(list("weights"=weights, "disco_boot"=disco_boot))
