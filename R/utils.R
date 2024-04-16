@@ -412,7 +412,7 @@ parseBoots <- function(CI_temp, cl) {
   weights <- sapply(CI_temp, function(x) x$weights)
   weights_CI <- list(
     "upper" = apply(weights, c(1), function(x) stats::quantile(x, probs=cl+(1-cl)/2)),
-    "lower"=  apply(weights, c(1), function(x) stats::quantile(x, probs=cl+(1-cl)/2))
+    "lower"=  apply(weights, c(1), function(x) stats::quantile(x, probs=(1-cl)/2))
   )
 
   # create CI object
