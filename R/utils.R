@@ -398,8 +398,8 @@ parseBoots <- function(CI_temp, cl) {
 
   # calculate confidence intervals
   getCIs <- function(btmat, cl) {
-    lower <- apply(btmat, c(1,2), function(x) stats::quantile(x, probs=cl+(1-cl)/2)) # outputs a G X T_max matrix
-    upper <- apply(btmat, c(1,2), function(x) stats::quantile(x, probs=(1-cl)/2)) # outputs a G X T_max matrix
+    upper <- apply(btmat, c(1,2), function(x) stats::quantile(x, probs=cl+(1-cl)/2)) # outputs a G X T_max matrix
+    lower <- apply(btmat, c(1,2), function(x) stats::quantile(x, probs=(1-cl)/2)) # outputs a G X T_max matrix
     se <- apply(btmat, c(1,2), function(x) stats::sd(x)) # outputs a G X T_max matrix
     return(list("lower"=lower, "upper"=upper, "se" = se))
   }
