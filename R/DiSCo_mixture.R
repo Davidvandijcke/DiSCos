@@ -67,7 +67,7 @@ DiSCo_mixture_solve <- function(c_len, CDF.matrix, grid.min, grid.max, grid.rand
   # the variable we are after
   theweights <- CVXR::Variable(c_len)
   # the objective function
-  objective <- CVXR::cvxr_norm((CDF.matrix[,2:ncol(CDF.matrix)] %*% theweights - CDF.matrix[,1]))
+  objective <- CVXR::cvxr_norm((CDF.matrix[,2:ncol(CDF.matrix)] %*% theweights - CDF.matrix[,1]), 1)
 
   # the constraints for the unit simplex
   if (simplex) {
