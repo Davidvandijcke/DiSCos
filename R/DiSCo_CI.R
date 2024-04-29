@@ -11,12 +11,13 @@
 #' @keywords internal
 DiSCo_CI_iter <- function(t, controls_t, target_t, grid, T0, M=1000,
                           evgrid = seq(from=0, to=1, length.out=1001), qmethod=NULL,
+                          qtype=7,
                           mixture=FALSE, simplex=FALSE, replace=TRUE) {
 
   # resample target
   t_len <- length(target_t)
   mytar <- target_t[sample(1:t_len, floor(1*t_len), replace=replace)]
-  mytar.q <- myQuant(mytar, evgrid, qmethod) # quantile
+  mytar.q <- myQuant(mytar, evgrid, qmethod, qtype=qtype) # quantile
   mytar.cdf <- stats::ecdf(mytar)(grid)
 
   # resample controls
@@ -31,7 +32,7 @@ DiSCo_CI_iter <- function(t, controls_t, target_t, grid, T0, M=1000,
     c_len <- length(controls_t_i)
     mycon <- controls_t_i[sample(1:c_len, floor(1*c_len), replace=replace)] # resample
     mycon_list[[ii]] <- mycon
-    mycon.q[,ii] <- myQuant(mycon, evgrid, qmethod) # resampled quantile
+    mycon.q[,ii] <- myQuant(mycon, evgrid, qmethod, qtype=qtype) # resampled quantile
     mycon.cdf[,ii+1] <- stats::ecdf(mycon)(grid) # resampled cdf
   }
 
@@ -101,13 +102,13 @@ bootCounterfactuals <- function(result_t, t, mixture, weights, evgrid, grid) {
 #' }
 #' @keywords internal
 DiSCo_CI <- function(redraw, controls, target, T_max, T0, grid, mc.cores=1,
-                     evgrid = seq(from=0, to=1, length.out=1001), qmethod=NULL, M=1000,
-                     mixture=FALSE, simplex=FALSE, replace=TRUE) {
+                     evgrid = seq(from=0, to=1, length.out=1001), qmethod=NULL, qtype=7,
+                     M=1000,mixture=FALSE, simplex=FALSE, replace=TRUE) {
 
 
   boots.periods <- lapply(1:T_max, function(t) DiSCo_CI_iter(t, controls_t=controls[[t]],
                                             target_t=target[[t]], grid=grid[[t]], T0=T0, M=M,
-                                             evgrid = evgrid, qmethod=qmethod,
+                                             evgrid = evgrid, qmethod=qmethod, qtype=qtype,
                                             mixture=mixture, simplex=simplex, replace=replace)
          )
 

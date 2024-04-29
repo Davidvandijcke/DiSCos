@@ -19,7 +19,7 @@
 #' @references
 #' \insertAllCited{}
 #' @keywords internal
-DiSCo_weights_reg <- function(controls, target, M = 500, qmethod=NULL, simplex=FALSE, q_min=0, q_max=1){
+DiSCo_weights_reg <- function(controls, target, M = 500, qmethod=NULL, qtype=7, simplex=FALSE, q_min=0, q_max=1){
 
 
   if (!is.null(qmethod)){
@@ -48,12 +48,11 @@ DiSCo_weights_reg <- function(controls, target, M = 500, qmethod=NULL, simplex=F
   Mvec <- stats::runif(M, min = q_min, max = q_max)
   controls.s <- matrix(0,nrow = M, ncol = length(controls))
   for (jj in 1:length(controls)){
-    controls.s[,jj] <- myQuant(controls[[jj]], Mvec, qmethod)
-    #controls.s[,jj] <- mapply(myquant, Mvec, MoreArgs = list(X=controls[[jj]]))
+    controls.s[,jj] <- myQuant(controls[[jj]], Mvec, qmethod, qtype=qtype)
   }
 
   target.s <- matrix(0, nrow = M, ncol=1)
-  target.s[,1] <- myQuant(target, Mvec, qmethod)
+  target.s[,1] <- myQuant(target, Mvec, qmethod, qtype=qtype)
 
   ## Solving the optimization using constrained linear regression
 

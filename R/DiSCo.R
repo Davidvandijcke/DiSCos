@@ -36,6 +36,8 @@ utils::globalVariables(c("y_col", "id_col", "time_col", "t_col", "group", "x", "
 #' @param qmethod Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
 #' Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
 #' Both are substantially slower than the default method but may be useful for fat-tailed distributions with few data points at the upper quantiles. Alternatively, one could use the q_max option to restrict the range of quantiles used.
+#' @param qtype Integer, indicating the type of quantile to compute when using  \code{\link[stats]{quantile}} in the `qmethod` argument.
+#' The default 7. See the documentation for the \code{\link[stats]{quantile}} function for more information.
 #' @param seed Integer, seed for the random number generator. This needs to be set explicitly in the function call, since it will invoke \code{\link[base]{RNGkind}} which will set the seed for each core
 #' when using parallel processes. Default is NULL, which does not set a seed.
 #' @param simplex Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.
@@ -88,11 +90,12 @@ utils::globalVariables(c("y_col", "id_col", "time_col", "t_col", "group", "x", "
 #'
 DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, permutation = FALSE, q_min = 0, q_max = 1,
                   CI = FALSE, boots = 500, replace=TRUE, cl = 0.95, graph = FALSE,
-                  qmethod=NULL, seed=NULL, simplex=FALSE, mixture=FALSE, grid.cat=NULL) {
+                  qmethod=NULL, qtype=7, seed=NULL, simplex=FALSE, mixture=FALSE, grid.cat=NULL) {
 
   #---------------------------------------------------------------------------
   ### process inputs
   #---------------------------------------------------------------------------
+  # TODO: need to fix discontinuous quantile method for mixture, I think
   # make sure we have a data table
   df <- data.table::as.data.table(df)
 
@@ -142,7 +145,7 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
                                     # TODO: currently we are actually calculating them, but it's not a huge cost
   controls.id <- unique(df[id_col != id_col.target]$id_col) # list of control ids
   results.periods <- mclapply.hack(periods, DiSCo_iter, df, evgrid, id_col.target = id_col.target, M = M,
-                                   G = G, T0 = T0, mc.cores = num.cores, qmethod=qmethod, q_min=0, q_max=1,
+                                   G = G, T0 = T0, mc.cores = num.cores, qmethod=qmethod, qtype=qtype, q_min=0, q_max=1,
                                    controls.id=controls.id, simplex=simplex, grid.cat, mixture)
 
   # turn results.periods into a named list where the name is the period
@@ -211,7 +214,7 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
     CI_bootmat <-  mclapply.hack(1:boots, DiSCo_CI, controls=controls, target=target,
                               T_max=T_max, T0=T0, grid=grid, mc.cores=num.cores,
                               evgrid=evgrid, mixture=mixture, M=M, simplex=simplex,
-                              qmethod=qmethod, replace=replace)
+                              qmethod=qmethod, qtype=qtype, replace=replace)
     CI_out <- parseBoots(CI_bootmat, cl)
 
   } else {
@@ -227,7 +230,7 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
     # run the permutation test
     perm_obj <- DiSCo_per(results.periods=results.periods, evgrid=evgrid, T0=T0,
                           weights=weights, num.cores=num.cores,
-                          graph=graph, qmethod=qmethod, M=M, q_min=q_min, q_max=q_max,
+                          graph=graph, qmethod=qmethod, qtype=qtype, M=M, q_min=q_min, q_max=q_max,
                           mixture=mixture, simplex=simplex)
 
 

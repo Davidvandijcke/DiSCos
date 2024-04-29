@@ -45,7 +45,7 @@
 #'   \item \code{controls.q } Quantiles for the control units, evaluated on the specified grid.
 #' }
 #' @export
-DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_min=0, q_max=1, simplex=FALSE, controls.id, grid.cat, mixture) {
+DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, qtype=7, q_min=0, q_max=1, simplex=FALSE, controls.id, grid.cat, mixture) {
 
   # target
   target <- df[(id_col == id_col.target) & (t_col == yy)]$y_col
@@ -66,8 +66,7 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_
   # evaluating the quantile functions on the grid "evgrid":
   controls.q <- matrix(0,nrow = length(evgrid), ncol=length(controls))
   for (jj in 1:length(controls)){
-    # controls.q[,jj] <- mapply(myquant, evgrid, MoreArgs = list(X=controls[[jj]]))
-    controls.q[,jj] <- myQuant(controls[[jj]], evgrid, qmethod)
+    controls.q[,jj] <- myQuant(controls[[jj]], evgrid, qmethod, qtype=qtype)
   }
 
   # sample grid
@@ -80,7 +79,7 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_
 
   if (!mixture) {
   # obtaining the optimal weights for the DiSCo method
-    DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M=M, qmethod=qmethod, simplex=simplex, q_min=q_min, q_max=q_max)
+    DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M=M, qmethod=qmethod, qtype=qtype, simplex=simplex, q_min=q_min, q_max=q_max)
     mixture <- NULL
   } else {
   # obtaining the optimal weights for the mixture of distributions method, note that this one is not restricted to q_min, q_max
@@ -88,7 +87,7 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, q_
     DiSCo_res_weights <- NULL
   }
   #computing the target quantile function
-  target.q <- myQuant(target, evgrid, qmethod)
+  target.q <- myQuant(target, evgrid, qmethod, qtype=qtype)
 
 
   results <- list()

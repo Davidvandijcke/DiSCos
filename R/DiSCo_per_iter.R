@@ -9,7 +9,7 @@
 #' @return List of squared Wasserstein distances between the target unit and the control units
 #' @keywords internal
 DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, grid_df, M=1000,
-                           ww=0, qmethod=NULL, q_min=0, q_max=1, simplex=FALSE,
+                           ww=0, qmethod=NULL, qtype=7, q_min=0, q_max=1, simplex=FALSE,
                            mixture=FALSE){
     # One iteration of the permutation test
 
@@ -77,8 +77,7 @@ DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, grid_df,
       }
       # computing the target quantile function
       for (t in 1:length(pert)){
-        # target_q[[t]] <- mapply(myquant, evgrid, MoreArgs = list(X=pert[[t]]))
-        target_q[[t]] <- myQuant(pert[[t]], evgrid, qmethod)
+        target_q[[t]] <- myQuant(pert[[t]], evgrid, qmethod, qtype=qtype)
       }
     } else { ## mixture
       #calculate the cdfs for each period
@@ -87,7 +86,6 @@ DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, grid_df,
       }
       # computing the target quantile function
       for (t in 1:length(pert)){
-        # target_q[[t]] <- mapply(myquant, evgrid, MoreArgs = list(X=pert[[t]]))
         target_q[[t]] <- perc.cdf[[t]][,1]
       }
     }

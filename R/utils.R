@@ -4,7 +4,7 @@
 #' @param q A vector containing the quantiles
 #' @return A vector containing the empirical quantile function
 #' @keywords internal
-myQuant <- function(X,q, qmethod=NULL,...){
+myQuant <- function(X,q, qtype=7, qmethod=NULL,...){
   # sort if unsorted
   # if (is.unsorted(X)) X <- sort(X)
 
@@ -14,8 +14,7 @@ myQuant <- function(X,q, qmethod=NULL,...){
   }
   if (is.null(qmethod)) { # use old-fashioned quantiles
     # obtain the corresponding empirical quantile
-    # return(mapply(myquant, q, MoreArgs = list(X=X)))
-    return(stats::quantile(X, probs=q))
+    return(stats::quantile(X, probs=q, names=FALSE, qtype=qtype))
   } else if (qmethod=="qkden") {
     temp <- evmix::qkden(p=q, kerncentres=X,...)
     temp[1] <- min(c(temp[2]), min(X))

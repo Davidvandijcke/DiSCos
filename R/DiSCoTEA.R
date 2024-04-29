@@ -411,6 +411,10 @@ plotDistOverTime <- function(cdf_centered, grid_cdf, t_start, t_max, CI, ci_lowe
 
   if (!is.null(t_plot)) df <- df[df$time %in% t_plot,]
 
+  # df <- df %>% # filter for points where it changes only
+  #   mutate(Change = c(FALSE, diff(y) != 0)) %>%
+  #   filter(Change) # TODO: implement to avoid jagged plots
+
   # Create a ggplot
   p <- ggplot(df, aes(x = x)) +
     geom_line(aes(y = y), colour = "black", linetype = lty)

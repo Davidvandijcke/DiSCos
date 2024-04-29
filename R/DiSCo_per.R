@@ -20,7 +20,7 @@
 #' @keywords internal
 #' # TODO add option to select the post-treatment time periods
 DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, length.out=101),
-                 graph=TRUE, num.cores = 1, weights=NULL, qmethod=NULL, q_min=0, q_max=1, M=1000, simplex=FALSE, mixture=FALSE){
+                 graph=TRUE, num.cores = 1, weights=NULL, qmethod=NULL, qtype=qtype, q_min=0, q_max=1, M=1000, simplex=FALSE, mixture=FALSE){
 
   # slightly hacky way to fix reporting of q_min and q_max
   q_min_report <- q_min
@@ -76,7 +76,8 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
 
 
   distp <- mclapply.hack(seq_len(length(peridx)), function(idx) {
-    DiSCo_per_iter(c_df=c_df, c_df.q=controls.q, t_df=t_df, T0=T0, ww=ww, peridx=peridx, evgrid=evgrid, idx=idx, grid_df=grid_df, qmethod=qmethod, M=M,
+    DiSCo_per_iter(c_df=c_df, c_df.q=controls.q, t_df=t_df, T0=T0, ww=ww, peridx=peridx,
+                   evgrid=evgrid, idx=idx, grid_df=grid_df, qmethod=qmethod, M=M, qtype=qtype,
                    q_min=q_min, q_max=q_max, simplex=simplex, mixture=mixture)
   }, mc.cores = num.cores)
 
