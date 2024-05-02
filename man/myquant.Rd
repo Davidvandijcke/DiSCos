@@ -4,7 +4,7 @@
 \alias{myQuant}
 \title{Compute the empirical quantile function}
 \usage{
-myQuant(X, q, qmethod = NULL, ...)
+myQuant(X, q, qtype = 7, qmethod = NULL, ...)
 }
 \arguments{
 \item{X}{A vector containing the data}

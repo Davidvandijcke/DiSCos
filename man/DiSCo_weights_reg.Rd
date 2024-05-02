@@ -9,6 +9,7 @@ DiSCo_weights_reg(
   target,
   M = 500,
   qmethod = NULL,
+  qtype = 7,
   simplex = FALSE,
   q_min = 0,
   q_max = 1
@@ -24,6 +25,9 @@ DiSCo_weights_reg(
 \item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
 Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
 Both are substantially slower than the default method but may be useful for fat-tailed distributions with few data points at the upper quantiles. Alternatively, one could use the q_max option to restrict the range of quantiles used.}
+
+\item{qtype}{Integer, indicating the type of quantile to compute when using  \code{\link[stats]{quantile}} in the \code{qmethod} argument.
+The default 7. See the documentation for the \code{\link[stats]{quantile}} function for more information.}
 
 \item{simplex}{Logical, indicating whether to use to constrain the optimal weights to the unit simplex. Default is FALSE, which only constrains the weights to sum up to 1 but allows them to be negative.}
 

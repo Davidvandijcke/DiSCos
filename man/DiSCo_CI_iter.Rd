@@ -13,6 +13,7 @@ DiSCo_CI_iter(
   M = 1000,
   evgrid = seq(from = 0, to = 1, length.out = 1001),
   qmethod = NULL,
+  qtype = 7,
   mixture = FALSE,
   simplex = FALSE,
   replace = TRUE
@@ -34,6 +35,9 @@ DiSCo_CI_iter(
 \item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
 Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
 Both are substantially slower than the default method but may be useful for fat-tailed distributions with few data points at the upper quantiles. Alternatively, one could use the q_max option to restrict the range of quantiles used.}
+
+\item{qtype}{Integer, indicating the type of quantile to compute when using  \code{\link[stats]{quantile}} in the \code{qmethod} argument.
+The default 7. See the documentation for the \code{\link[stats]{quantile}} function for more information.}
 
 \item{mixture}{Logical, indicating whether to use the mixture of distributions approach instead.
 See Section 4.3. in \insertCite{gunsilius2023distributional;textual}{DiSCos}. This approach minimizes the distance between the CDFs

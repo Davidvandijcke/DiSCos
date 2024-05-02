@@ -14,6 +14,7 @@ DiSCo_per(
   num.cores = 1,
   weights = NULL,
   qmethod = NULL,
+  qtype = qtype,
   q_min = 0,
   q_max = 1,
   M = 1000,
@@ -40,6 +41,9 @@ If you get an error in "all cores" or similar, try setting num.cores=1 to see th
 \item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
 Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
 Both are substantially slower than the default method but may be useful for fat-tailed distributions with few data points at the upper quantiles. Alternatively, one could use the q_max option to restrict the range of quantiles used.}
+
+\item{qtype}{Integer, indicating the type of quantile to compute when using  \code{\link[stats]{quantile}} in the \code{qmethod} argument.
+The default 7. See the documentation for the \code{\link[stats]{quantile}} function for more information.}
 
 \item{q_min}{Numeric, minimum quantile to use. Set this together with \code{q_max} to restrict the range of quantiles used to construct the synthetic control.
 Default is 0 (all quantiles). Currently NOT implemented for the \code{mixture} approach.}

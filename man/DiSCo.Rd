@@ -17,9 +17,11 @@ DiSCo(
   CI = FALSE,
   boots = 500,
   replace = TRUE,
+  uniform = TRUE,
   cl = 0.95,
   graph = FALSE,
   qmethod = NULL,
+  qtype = 7,
   seed = NULL,
   simplex = FALSE,
   mixture = FALSE,
@@ -61,6 +63,9 @@ The confidence intervals are computed using the bootstrap procedure described in
 
 \item{replace}{Logical, indicating whether to sample with replacement when computing the bootstrap samples. Default is TRUE.}
 
+\item{uniform}{Logical, indicating whether to construct uniform bootstrap confidence intervals. Default is TRUE.
+If FALSE, the confidence intervals are pointwise.}
+
 \item{cl}{Numeric, confidence level for the (two-sided) confidence intervals.}
 
 \item{graph}{Logical, indicating whether to plot the permutation graph as in Figure 3 of the paper. Default is FALSE.}
@@ -68,6 +73,9 @@ The confidence intervals are computed using the bootstrap procedure described in
 \item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
 Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).
 Both are substantially slower than the default method but may be useful for fat-tailed distributions with few data points at the upper quantiles. Alternatively, one could use the q_max option to restrict the range of quantiles used.}
+
+\item{qtype}{Integer, indicating the type of quantile to compute when using  \code{\link[stats]{quantile}} in the \code{qmethod} argument.
+The default 7. See the documentation for the \code{\link[stats]{quantile}} function for more information.}
 
 \item{seed}{Integer, seed for the random number generator. This needs to be set explicitly in the function call, since it will invoke \code{\link[base]{RNGkind}} which will set the seed for each core
 when using parallel processes. Default is NULL, which does not set a seed.}
