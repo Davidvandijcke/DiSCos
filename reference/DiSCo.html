@@ -70,9 +70,11 @@ as well as the alternative mixture of distributions approach.</p>
 <span>  CI <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  boots <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>  replace <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  uniform <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cl <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  graph <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  qmethod <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  qtype <span class="op">=</span> <span class="fl">7</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  simplex <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  mixture <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -139,6 +141,11 @@ The confidence intervals are computed using the bootstrap procedure described in
 <dd><p>Logical, indicating whether to sample with replacement when computing the bootstrap samples. Default is TRUE.</p></dd>
 
 
+<dt>uniform</dt>
+<dd><p>Logical, indicating whether to construct uniform bootstrap confidence intervals. Default is TRUE.
+If FALSE, the confidence intervals are pointwise.</p></dd>
+
+
 <dt>cl</dt>
 <dd><p>Numeric, confidence level for the (two-sided) confidence intervals.</p></dd>
 
@@ -151,6 +158,11 @@ The confidence intervals are computed using the bootstrap procedure described in
 <dd><p>Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the <code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></code> function from the stats package.
 Other options are "<code><a href="https://rdrr.io/pkg/evmix/man/kden.html" class="external-link">qkden</a></code>" (based on smoothed kernel density function) and "<code><a href="https://rdrr.io/pkg/extremeStat/man/distLquantile.html" class="external-link">extreme</a></code>" (based on parametric extreme value distributions).
 Both are substantially slower than the default method but may be useful for fat-tailed distributions with few data points at the upper quantiles. Alternatively, one could use the q_max option to restrict the range of quantiles used.</p></dd>
+
+
+<dt>qtype</dt>
+<dd><p>Integer, indicating the type of quantile to compute when using  <code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></code> in the <code>qmethod</code> argument.
+The default 7. See the documentation for the <code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></code> function for more information.</p></dd>
 
 
 <dt>seed</dt>

@@ -41,7 +41,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>parseBoots</h1>
-      <small class="dont-index">Source: <a href="NA/NA/NA/blob/HEAD/R/utils.R"><code>R/utils.R</code></a></small>
+      <small class="dont-index">Source: <a href="NA/NA/NA/blob/HEAD/R/DiSCo_CI.R"><code>R/DiSCo_CI.R</code></a></small>
       <div class="d-none name"><code>parseBoots.Rd</code></div>
     </div>
 
@@ -51,7 +51,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">parseBoots</span><span class="op">(</span><span class="va">CI_temp</span>, <span class="va">cl</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">parseBoots</span><span class="op">(</span><span class="va">CI_temp</span>, <span class="va">cl</span>, <span class="va">q_disco</span>, <span class="va">cdf_disco</span>, <span class="va">q_obs</span>, <span class="va">cdf_obs</span>, uniform <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -62,6 +62,26 @@
 
 <dt>cl</dt>
 <dd><p>The confidence level</p></dd>
+
+
+<dt>q_disco</dt>
+<dd><p>The estimated quantiles around which to center</p></dd>
+
+
+<dt>cdf_disco</dt>
+<dd><p>The estimated cdfs around which to center</p></dd>
+
+
+<dt>q_obs</dt>
+<dd><p>The observed quantiles</p></dd>
+
+
+<dt>cdf_obs</dt>
+<dd><p>The observed cdfs</p></dd>
+
+
+<dt>uniform</dt>
+<dd><p>Whether to use uniform or pointwise confidence intervals</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -63,6 +63,7 @@ Its return values contain valuable period-specific estimation outputs.</p>
 <span>  <span class="va">G</span>,</span>
 <span>  <span class="va">T0</span>,</span>
 <span>  qmethod <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  qtype <span class="op">=</span> <span class="fl">7</span>,</span>
 <span>  q_min <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  q_max <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  simplex <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -110,6 +111,11 @@ This variable can be any type, as long as it is the same type as the id_col colu
 <dd><p>Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the <code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></code> function from the stats package.
 Other options are "<code><a href="https://rdrr.io/pkg/evmix/man/kden.html" class="external-link">qkden</a></code>" (based on smoothed kernel density function) and "<code><a href="https://rdrr.io/pkg/extremeStat/man/distLquantile.html" class="external-link">extreme</a></code>" (based on parametric extreme value distributions).
 Both are substantially slower than the default method but may be useful for fat-tailed distributions with few data points at the upper quantiles. Alternatively, one could use the q_max option to restrict the range of quantiles used.</p></dd>
+
+
+<dt>qtype</dt>
+<dd><p>Integer, indicating the type of quantile to compute when using  <code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></code> in the <code>qmethod</code> argument.
+The default 7. See the documentation for the <code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></code> function for more information.</p></dd>
 
 
 <dt>q_min</dt>
