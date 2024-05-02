@@ -121,7 +121,7 @@ parseBoots <- function(CI_temp, cl, q_disco, cdf_disco, q_obs, cdf_obs, uniform=
 
     if (uniform) {
       bt_diff <- apply(abs(bt_diff), c(2,3), max) # outputs a G X T_max matrix
-      t_all <- apply(bt_diff, c(1), function(x) stats::quantile(x, probs=cl+(1-cl)/2))
+      t_all <- apply(bt_diff, c(1), function(x) stats::quantile(x, probs=cl))
       t_all <- t(replicate(nrow(og), t_all))
       upper <- og + t_all
       lower <- og - t_all
