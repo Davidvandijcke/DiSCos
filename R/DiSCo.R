@@ -31,6 +31,8 @@ utils::globalVariables(c("y_col", "id_col", "time_col", "t_col", "group", "x", "
 #' The confidence intervals are computed using the bootstrap procedure described in \insertCite{vandijcke2024rto;textual}{DiSCos}.
 #' @param boots Integer, number of bootstrap samples to use for computing confidence intervals. Default is 500.
 #' @param replace Logical, indicating whether to sample with replacement when computing the bootstrap samples. Default is TRUE.
+#' @param uniform Logical, indicating whether to construct uniform bootstrap confidence intervals. Default is TRUE.
+#' If FALSE, the confidence intervals are pointwise.
 #' @param cl Numeric, confidence level for the (two-sided) confidence intervals.
 #' @param graph Logical, indicating whether to plot the permutation graph as in Figure 3 of the paper. Default is FALSE.
 #' @param qmethod Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
@@ -89,7 +91,7 @@ utils::globalVariables(c("y_col", "id_col", "time_col", "t_col", "group", "x", "
 #' @export
 #'
 DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, permutation = FALSE, q_min = 0, q_max = 1,
-                  CI = FALSE, boots = 500, replace=TRUE, cl = 0.95, graph = FALSE,
+                  CI = FALSE, boots = 500, replace=TRUE, uniform=TRUE, cl = 0.95, graph = FALSE,
                   qmethod=NULL, qtype=7, seed=NULL, simplex=FALSE, mixture=FALSE, grid.cat=NULL) {
 
   #---------------------------------------------------------------------------
@@ -206,16 +208,21 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
 
   if (!is.null(grid.cat)) grid <- grid.cat
   if (CI) {
+    # extract time-specific data
     controls <- lapply(results.periods, function(x) x$controls$data)
     target <- lapply(results.periods, function(x) x$target$data)
     grid <- lapply(results.periods, function(x) x$target$grid)
+    q_disco <- lapply(results.periods, function(x) x$DiSCo$quantile)
+    cdf_disco <- lapply(results.periods, function(x) x$DiSCo$cdf)
+    q_obs <- lapply(results.periods, function(x) x$target$quantiles)
+    cdf_obs <- lapply(results.periods, function(x) x$target$cdf)
 
     ## bootstrap the estimator
     CI_bootmat <-  mclapply.hack(1:boots, DiSCo_CI, controls=controls, target=target,
                               T_max=T_max, T0=T0, grid=grid, mc.cores=num.cores,
                               evgrid=evgrid, mixture=mixture, M=M, simplex=simplex,
                               qmethod=qmethod, qtype=qtype, replace=replace)
-    CI_out <- parseBoots(CI_bootmat, cl)
+    CI_out <- parseBoots(CI_bootmat, cl, q_disco, cdf_disco, q_obs, cdf_obs, uniform)
 
   } else {
     CI_out <- NULL
