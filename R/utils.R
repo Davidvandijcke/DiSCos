@@ -14,7 +14,7 @@ myQuant <- function(X,q, qtype=7, qmethod=NULL,...){
   }
   if (is.null(qmethod)) { # use old-fashioned quantiles
     # obtain the corresponding empirical quantile
-    return(stats::quantile(X, probs=q, names=FALSE, qtype=qtype))
+    return(stats::quantile(X, probs=q, names=FALSE, type=qtype))
   } else if (qmethod=="qkden") {
     temp <- evmix::qkden(p=q, kerncentres=X,...)
     temp[1] <- min(c(temp[2]), min(X))
