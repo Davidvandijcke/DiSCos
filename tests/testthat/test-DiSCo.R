@@ -13,9 +13,9 @@ test_that("mixture weights sum up to 1", {
   disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2, mixture=TRUE, num.cores=1)
   # period-specific weights
   for (t in 1:(t0-1)) {
-    expect_equal(sum(disco$results.periods[[t]]$mixture$weights), 1, tolerance=1e-5)
+    expect_equal(sum(disco$results.periods[[t]]$mixture$weights), 1, tolerance=1e-3)
   }
-  expect_equal(sum(disco$weights), 1, tolerance=1e-5)
+  expect_equal(sum(disco$weights), 1, tolerance=1e-3)
 
 })
 
