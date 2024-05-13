@@ -1,6 +1,6 @@
 Package: DiSCos
 Title: Distributional Synthetic Controls Estimation
-Version: 0.0.1
+Version: 0.1.0
 Authors@R: 
     c(person("David", "Van Dijcke", , "dvdijcke@umich.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-5825-3447")),

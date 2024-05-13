@@ -31,7 +31,7 @@ utils::globalVariables(c("y_col", "id_col", "time_col", "t_col", "group", "x", "
 #' The confidence intervals are computed using the bootstrap procedure described in \insertCite{vandijcke2024rto;textual}{DiSCos}.
 #' @param boots Integer, number of bootstrap samples to use for computing confidence intervals. Default is 500.
 #' @param replace Logical, indicating whether to sample with replacement when computing the bootstrap samples. Default is TRUE.
-#' @param uniform Logical, indicating whether to construct uniform bootstrap confidence intervals. Default is TRUE.
+#' @param uniform Logical, indicating whether to construct uniform bootstrap confidence intervals. Default is FALSE
 #' If FALSE, the confidence intervals are pointwise.
 #' @param cl Numeric, confidence level for the (two-sided) confidence intervals.
 #' @param graph Logical, indicating whether to plot the permutation graph as in Figure 3 of the paper. Default is FALSE.
@@ -91,7 +91,7 @@ utils::globalVariables(c("y_col", "id_col", "time_col", "t_col", "group", "x", "
 #' @export
 #'
 DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, permutation = FALSE, q_min = 0, q_max = 1,
-                  CI = FALSE, boots = 500, replace=TRUE, uniform=TRUE, cl = 0.95, graph = FALSE,
+                  CI = FALSE, boots = 500, replace=TRUE, uniform=FALSE, cl = 0.95, graph = FALSE,
                   qmethod=NULL, qtype=7, seed=NULL, simplex=FALSE, mixture=FALSE, grid.cat=NULL) {
 
   #---------------------------------------------------------------------------

@@ -17,7 +17,7 @@ DiSCo(
   CI = FALSE,
   boots = 500,
   replace = TRUE,
-  uniform = TRUE,
+  uniform = FALSE,
   cl = 0.95,
   graph = FALSE,
   qmethod = NULL,
@@ -63,7 +63,7 @@ The confidence intervals are computed using the bootstrap procedure described in
 
 \item{replace}{Logical, indicating whether to sample with replacement when computing the bootstrap samples. Default is TRUE.}
 
-\item{uniform}{Logical, indicating whether to construct uniform bootstrap confidence intervals. Default is TRUE.
+\item{uniform}{Logical, indicating whether to construct uniform bootstrap confidence intervals. Default is FALSE
 If FALSE, the confidence intervals are pointwise.}
 
 \item{cl}{Numeric, confidence level for the (two-sided) confidence intervals.}

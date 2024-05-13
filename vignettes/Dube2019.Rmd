@@ -122,7 +122,7 @@ will just have a look at the top 10 estimated weights,
 
 ```{r}
 # retrieve the weights
-weights <- disco$Weights_DiSCo_avg
+weights <- disco$weights
 
 # retrieve the control unit IDs 
 controls <- disco$control_ids
@@ -198,7 +198,7 @@ Setting `graph` to `TRUE` also prints a plot of the distribution
 differences over time You can focus on specific years using the `t_plot`
 parameter. You can use the other parameters of the `DiSCOTEA` function
 to adjust the basic appearance of the plots, or directly alter the
-returned ggplot object that is stored in the returned `DiSCoT` object.
+ggplot object that is stored in the returned `DiSCoT` object.
 
 Looking at the plot of the quantile and CDF differences, we can see two
 things: 1) the pre-treatment fit for the years 1998-2002 is decent but
@@ -224,7 +224,7 @@ earn 3.5 times the poverty income threshold. This corresponds to around
 the 0.65th quantile in our data:
 
 ```{r}
-ecdf(disco$results.periods$`2000`$target$quantiles)(3.5)
+stats::ecdf(disco$results.periods$`2000`$target$quantiles)(3.5)
 ```
 
 We can simply run the following code,

@@ -1,9 +1,8 @@
 # DiSCos 0.1.0
 
 Major updates:
-* Implemented the fully-fledged bootstrap approach for confidence interval estimation
-* Added mixture of distributions method CDFs, confidence intervals, and permutation test
-and made it optional
+* Implemented the fully-fledged bootstrap approach for confidence interval estimation. See Van Dijcke, Gunsilius, and Wright (2024)
+* Added mixture of distributions method CDFs, confidence intervals, and permutation test 
 
 Minor updates:
 * Fixed a small issue where plot=FALSE option didn't work in DiSCoTEA
