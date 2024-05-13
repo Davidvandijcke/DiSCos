@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">DiSCos</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,7 +75,7 @@
                         <h4 data-toc-skip class="author">David Van
 Dijcke</h4>
             
-            <h4 data-toc-skip class="date">2024-05-03</h4>
+            <h4 data-toc-skip class="date">2024-05-13</h4>
       
       <small class="dont-index">Source: <a href="NA/NA/NA/blob/HEAD/vignettes/Dube2019.Rmd"><code>vignettes/Dube2019.Rmd</code></a></small>
       <div class="d-none name"><code>Dube2019.Rmd</code></div>
@@ -166,7 +166,7 @@ returned object. For now, we will just have a look at the top 10
 estimated weights,</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># retrieve the weights</span></span>
-<span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="va">disco</span><span class="op">$</span><span class="va">Weights_DiSCo_avg</span></span>
+<span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="va">disco</span><span class="op">$</span><span class="va">weights</span></span>
 <span></span>
 <span><span class="co"># retrieve the control unit IDs </span></span>
 <span><span class="va">controls</span> <span class="op">&lt;-</span> <span class="va">disco</span><span class="op">$</span><span class="va">control_ids</span></span>
@@ -235,8 +235,8 @@ reported as well.</p>
 the distribution differences over time You can focus on specific years
 using the <code>t_plot</code> parameter. You can use the other
 parameters of the <code>DiSCOTEA</code> function to adjust the basic
-appearance of the plots, or directly alter the returned ggplot object
-that is stored in the returned <code>DiSCoT</code> object.</p>
+appearance of the plots, or directly alter the ggplot object that is
+stored in the returned <code>DiSCoT</code> object.</p>
 <p>Looking at the plot of the quantile and CDF differences, we can see
 two things: 1) the pre-treatment fit for the years 1998-2002 is decent
 but not perfect; 2) there do not appear to be any notable effects of the
@@ -263,7 +263,7 @@ interested in. For example, following <span class="citation">Dube
 until observations that earn 3.5 times the poverty income threshold.
 This corresponds to around the 0.65th quantile in our data:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/ecdf.html" class="external-link">ecdf</a></span><span class="op">(</span><span class="va">disco</span><span class="op">$</span><span class="va">results.periods</span><span class="op">$</span><span class="va">`2000`</span><span class="op">$</span><span class="va">target</span><span class="op">$</span><span class="va">quantiles</span><span class="op">)</span><span class="op">(</span><span class="fl">3.5</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/ecdf.html" class="external-link">ecdf</a></span><span class="op">(</span><span class="va">disco</span><span class="op">$</span><span class="va">results.periods</span><span class="op">$</span><span class="va">`2000`</span><span class="op">$</span><span class="va">target</span><span class="op">$</span><span class="va">quantiles</span><span class="op">)</span><span class="op">(</span><span class="fl">3.5</span><span class="op">)</span></span></code></pre></div>
 <p>We can simply run the following code,</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">disco</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DiSCo.html">DiSCo</a></span><span class="op">(</span><span class="va">dube</span>, id_col.target<span class="op">=</span><span class="va">id_col.target</span>, t0<span class="op">=</span><span class="va">t0</span>, G <span class="op">=</span> <span class="fl">1000</span>, num.cores <span class="op">=</span> <span class="fl">1</span>, permutation <span class="op">=</span> <span class="cn">TRUE</span>, CI <span class="op">=</span> <span class="cn">TRUE</span>, boots <span class="op">=</span> <span class="fl">1000</span>, graph <span class="op">=</span> <span class="cn">FALSE</span>, q_min <span class="op">=</span> <span class="fl">0</span>, q_max<span class="op">=</span><span class="fl">0.65</span>, seed<span class="op">=</span><span class="fl">1</span>, simplex<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
