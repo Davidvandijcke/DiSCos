@@ -1,10 +1,9 @@
 pandoc: 3.1.11
-pkgdown: 2.0.9
+pkgdown: 2.1.0
 pkgdown_sha: ~
 articles:
   Dube2019: Dube2019.html
-last_built: 2024-07-03T15:47Z
+last_built: 2024-07-22T18:35Z
 urls:
   reference: http://www.davidvandijcke.com/DiSCo/reference
   article: http://www.davidvandijcke.com/DiSCo/articles
-

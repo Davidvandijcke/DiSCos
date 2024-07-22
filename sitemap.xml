@@ -1,114 +1,40 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/404.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/articles/Dube2019.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/authors.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/index.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/news/index.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCoT.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCoTEA.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_CI.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_CI_iter.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_bc.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_iter.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_mixture.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_mixture_solve.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_per.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_per_iter.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_per_rank.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_weights_reg.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/bootCounterfactuals.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/checks.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/citation.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/dube.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/ex_gmm.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/getGrid.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/is.integer.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/mclapply.hack.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/myquant.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/parseBoots.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/permut.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/plotDistOverTime.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/print.permut.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/summary.DiSCoT.html</loc>
-  </url>
-  <url>
-    <loc>http://www.davidvandijcke.com/DiSCo/reference/summary.permut.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>http://www.davidvandijcke.com/DiSCo/404.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/LICENSE-text.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/LICENSE.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/articles/Dube2019.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/articles/index.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/authors.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/index.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/news/index.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCoT.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCoTEA.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_CI.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_CI_iter.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_bc.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_iter.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_mixture.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_mixture_solve.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_per.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_per_iter.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_per_rank.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/DiSCo_weights_reg.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/bootCounterfactuals.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/checks.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/citation.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/dube.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/ex_gmm.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/getGrid.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/index.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/is.integer.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/mclapply.hack.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/myquant.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/parseBoots.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/permut.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/plotDistOverTime.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/print.permut.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/summary.DiSCoT.html</loc></url>
+<url><loc>http://www.davidvandijcke.com/DiSCo/reference/summary.permut.html</loc></url>
 </urlset>
+
