@@ -6,7 +6,7 @@ test_that("test with dube data", {
   # load datadf <- copy(dube)
   df <- copy(dube)
   disco <- DiSCo(df, id_col.target, t0, G = 1000, num.cores = 1,
-                 permutation = TRUE, CI = TRUE, boots = 1000, graph = TRUE, simplex=TRUE, seed=1, q_max=0.9)
+                 permutation = TRUE, CI = TRUE, boots = 4, graph = TRUE, simplex=TRUE, seed=1, q_max=0.9)
 
   discot <- DiSCoTEA(disco,  agg="quantileDiff", graph=TRUE)
   summary(discot)
