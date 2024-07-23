@@ -89,7 +89,11 @@ utils::globalVariables(c("y_col", "id_col", "time_col", "t_col", "group", "x", "
 #' @references
 #'  \insertAllCited()
 #' @export
-#'
+#' @examples
+#'   Ts <- 2
+#'   t0 <- 2
+#'   df <- ex_gmm(Ts=Ts,  num.con=4)
+#'   disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2, mixture=TRUE, num.cores=1)
 DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, permutation = FALSE, q_min = 0, q_max = 1,
                   CI = FALSE, boots = 500, replace=TRUE, uniform=FALSE, cl = 0.95, graph = FALSE,
                   qmethod=NULL, qtype=7, seed=NULL, simplex=FALSE, mixture=FALSE, grid.cat=NULL) {

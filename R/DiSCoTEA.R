@@ -36,6 +36,12 @@
 #'
 #' @importFrom stats sd
 #' @export
+#' @examples
+#' Ts <- 2
+#' t0 <- 2
+#' df <- ex_gmm(Ts=Ts,  num.con=4)
+#' disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2)
+#' discot <- DiSCoTEA(disco, agg="quantile")
 DiSCoTEA <- function(disco, agg="quantileDiff", graph=TRUE, t_plot=NULL, savePlots=FALSE,
                      xlim=NULL, ylim=NULL, samples=c(0.25, 0.5, 0.75)) {
 
