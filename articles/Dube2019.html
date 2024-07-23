@@ -65,7 +65,7 @@
                         <h4 data-toc-skip class="author">David Van
 Dijcke</h4>
             
-            <h4 data-toc-skip class="date">2024-07-22</h4>
+            <h4 data-toc-skip class="date">2024-07-23</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Davidvandijcke/DiSCos/blob/main/vignettes/Dube2019.Rmd" class="external-link"><code>vignettes/Dube2019.Rmd</code></a></small>
       <div class="d-none name"><code>Dube2019.Rmd</code></div>
@@ -132,22 +132,13 @@ we take the average of the optimal weights across all periods.</p>
 </h2>
 <p>To get coding, we load the data from <span class="citation">Dube
 (2019)</span>, which is available in the package.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"dube"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dube</span><span class="op">)</span></span></code></pre></div>
 <p>To learn more about the data, just type <code><a href="../reference/dube.html">?dube</a></code> in the
 console. We have already renamed the outcome, id, and time variables to
 <code>y_col</code>, <code>id_col</code>, and <code>time_col</code>,
 respectively, which is required before passing the dataframe to the
 DiSCo command. We also need to set the two following parameters:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">id_col.target</span> <span class="op">&lt;-</span> <span class="fl">2</span></span>
-<span><span class="va">t0</span> <span class="op">&lt;-</span> <span class="fl">2003</span></span></code></pre></div>
 <p>which indicate the id of the treated unit and the time period of the
 intervention, respectively. We can now run the DiSCo command:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">copy</span><span class="op">(</span><span class="va">dube</span><span class="op">)</span></span>
-<span><span class="va">disco</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DiSCo.html">DiSCo</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">id_col.target</span>, <span class="va">t0</span>, G <span class="op">=</span> <span class="fl">1000</span>, num.cores <span class="op">=</span> <span class="fl">1</span>, permutation <span class="op">=</span> <span class="cn">TRUE</span>, CI <span class="op">=</span> <span class="cn">TRUE</span>, boots <span class="op">=</span> <span class="fl">1000</span>, graph <span class="op">=</span> <span class="cn">TRUE</span>, simplex<span class="op">=</span><span class="cn">TRUE</span>, seed<span class="op">=</span><span class="fl">1</span>, q_max<span class="op">=</span><span class="fl">0.9</span><span class="op">)</span></span></code></pre></div>
 <p>where we have chosen a grid (<code>G</code>) of 1000 quantiles and
 opted for parallel computation with 5 cores to speed up the permutation
 test and confidence intervals (<code>CI</code> is set to
@@ -164,24 +155,6 @@ produced by the command. Typing <code><a href="../reference/DiSCoT.html">?DiSCoT
 pulls up the help files which lay out the precise structure of the
 returned object. For now, we will just have a look at the top 10
 estimated weights,</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># retrieve the weights</span></span>
-<span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="va">disco</span><span class="op">$</span><span class="va">weights</span></span>
-<span></span>
-<span><span class="co"># retrieve the control unit IDs </span></span>
-<span><span class="va">controls</span> <span class="op">&lt;-</span> <span class="va">disco</span><span class="op">$</span><span class="va">control_ids</span></span>
-<span></span>
-<span><span class="co"># store in a dataframe</span></span>
-<span><span class="va">weights_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>weights <span class="op">=</span> <span class="va">weights</span>, fips <span class="op">=</span> <span class="va">controls</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># merge with state fips codes (built into the maps package)</span></span>
-<span><span class="va">state.fips</span> <span class="op">&lt;-</span> <span class="fu">as.data.table</span><span class="op">(</span><span class="fu">maps</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/maps/man/state.fips.html" class="external-link">state.fips</a></span><span class="op">)</span></span>
-<span><span class="va">state.fips</span> <span class="op">&lt;-</span> <span class="va">state.fips</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="va">state.fips</span><span class="op">$</span><span class="va">abb</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fips"</span>, <span class="st">"abb"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="va">weights_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">weights_df</span>, <span class="va">state.fips</span>, by <span class="op">=</span> <span class="st">"fips"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">setorder</span><span class="op">(</span><span class="va">weights_df</span>, <span class="op">-</span><span class="va">weights</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">weights_df</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,<span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <p>When we ran the <code>DiSCo</code> command, we set
 <code>permutation</code> to <code>TRUE</code>, which runs the
 permutation test described in the paper (see <code><a href="../reference/DiSCo_per.html">?DiSCo_per</a></code> for
@@ -212,8 +185,6 @@ is the Heaviside function which is 1 if
 and 0 otherwise. This p-value gives the probability of observing a
 placebo test with a larger ratio than the true treatment effect. It can
 be retrieved by calling</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">disco</span><span class="op">$</span><span class="va">perm</span><span class="op">)</span></span></code></pre></div>
 <p>The p-value is larger than 0.05, which confirms the visual result
 from the plot above, while accounting for potential differences in
 pre-treatment fit across placebo units.</p>
@@ -223,12 +194,6 @@ counterfactual quantile functions into various treatment effect
 measures. For example, we can calculate the difference between the
 counterfactual and observed quantile functions and cumulative
 distribution functions (CDF) as follows.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">discot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DiSCoTEA.html">DiSCoTEA</a></span><span class="op">(</span><span class="va">disco</span>,  agg<span class="op">=</span><span class="st">"quantileDiff"</span>, graph<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">discot</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">discot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DiSCoTEA.html">DiSCoTEA</a></span><span class="op">(</span><span class="va">disco</span>,  agg<span class="op">=</span><span class="st">"cdfDiff"</span>, graph<span class="op">=</span><span class="cn">TRUE</span>, ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.05</span>, <span class="fl">0.05</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">discot</span><span class="op">)</span></span></code></pre></div>
 <p>Calling <code>summary</code> on the returned object prints a table
 summarizing the effects across the distribution. You can choose the
 intervals of quantiles over which it aggregates using the
@@ -264,23 +229,13 @@ following <span class="citation">Dube (2019)</span>, we can focus on the
 lower end of the distribution, up until observations that earn 3.5 times
 the poverty income threshold. This corresponds to around the 0.65th
 quantile in our data:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/ecdf.html" class="external-link">ecdf</a></span><span class="op">(</span><span class="va">disco</span><span class="op">$</span><span class="va">results.periods</span><span class="op">$</span><span class="va">`2000`</span><span class="op">$</span><span class="va">target</span><span class="op">$</span><span class="va">quantiles</span><span class="op">)</span><span class="op">(</span><span class="fl">3.5</span><span class="op">)</span></span></code></pre></div>
 <p>We can simply run the following code,</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">disco</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DiSCo.html">DiSCo</a></span><span class="op">(</span><span class="va">dube</span>, id_col.target<span class="op">=</span><span class="va">id_col.target</span>, t0<span class="op">=</span><span class="va">t0</span>, G <span class="op">=</span> <span class="fl">1000</span>, num.cores <span class="op">=</span> <span class="fl">1</span>, permutation <span class="op">=</span> <span class="cn">TRUE</span>, CI <span class="op">=</span> <span class="cn">TRUE</span>, boots <span class="op">=</span> <span class="fl">1000</span>, graph <span class="op">=</span> <span class="cn">FALSE</span>, q_min <span class="op">=</span> <span class="fl">0</span>, q_max<span class="op">=</span><span class="fl">0.65</span>, seed<span class="op">=</span><span class="fl">1</span>, simplex<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>One could also try to deal with irregularity in the estimated
 quantile functions is by using the <code>qmethod</code> option in the
 <code>DiSCo</code> command, which allows for the use of alternative
 quantile estimation methods that can account for non-smoothness and
 extreme values. As above, we plot the results using the
 <code>DiScoTEA</code> function:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">discot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DiSCoTEA.html">DiSCoTEA</a></span><span class="op">(</span><span class="va">disco</span>, agg<span class="op">=</span><span class="st">"quantileDiff"</span>, graph<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">discot</span><span class="op">)</span> </span></code></pre></div>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">discot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DiSCoTEA.html">DiSCoTEA</a></span><span class="op">(</span><span class="va">disco</span>, agg<span class="op">=</span><span class="st">"cdfDiff"</span>, graph<span class="op">=</span><span class="cn">TRUE</span>, ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.05</span>,<span class="fl">0.05</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">discot</span><span class="op">)</span> </span></code></pre></div>
 <p>Again, we do not observe any subtantial changes in the quantile
 functions or CDFs. Also, the p-value of the permutation test is now
 larger, losing the marginal significance it had before. Overall, we
