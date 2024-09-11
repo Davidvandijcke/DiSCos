@@ -41,8 +41,12 @@ If you find any bugs or have any questions, please email dvdijcke@umich.edu.
 
 <div id="ref-gunsilius2023distributional" class="csl-entry">
 
+If you are using this package in your research, please cite: 
+
 Gunsilius, Florian F. 2023. “Distributional Synthetic Controls.”
 *Econometrica* 91 (3): 1105–17.
+
+Van Dijcke, David, Florian Gunsilius, and Austin Wright. "Return to Office and the Tenure Distribution." arXiv preprint arXiv:2405.04352 (2024).
 
 </div>
 
