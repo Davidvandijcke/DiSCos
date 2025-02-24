@@ -66,9 +66,7 @@ Van Dijcke, David, Florian Gunsilius, and Austin Wright. "Return to Office and t
 
 `Q`: How can I reduce the runtime while developing or debugging?
 
-`A`:
-
-Use fewer quantile points by setting M = 100 in DiSCo.
+`A`: Use fewer quantile points by setting M = 100 in DiSCo.
 Set a smaller grid, e.g. G = 100, to reduce the evaluation points.
 Start with only two time periods (Ts = 2) so there are fewer distributions to match.
 Disable time-consuming features, such as confidence intervals (CI=FALSE) and permutation tests (permutation=FALSE).
