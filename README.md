@@ -85,4 +85,4 @@ Van Dijcke, David, Florian Gunsilius, and Austin Wright. "Return to Office and t
 ---
 
 **Q:** **Can I get a progress bar?**  
-**A:** When the package was first implemented, there were no functional solutions for progress bars with parallel computation in R. This may have changed—if you’d like to contribute, feel free to become that hero and either enhance this repo or create your own parallel progress bar package!
+**A:** When the package was first implemented, there were no functional solutions for progress bars with parallel computation in R. This may have changed—if you’d like to contribute, feel free to become that hero 🦸 and either enhance this repo or create your own parallel progress bar package!
