@@ -93,12 +93,21 @@ Van Dijcke, David, Florian Gunsilius, and Austin Wright. “Return to Office and
 <div class="section level2">
 <h2 id="faq">FAQ<a class="anchor" aria-label="anchor" href="#faq"></a>
 </h2>
-<p><code>Q</code>: Why does the code sometimes run slower than expected? <code>A</code>: The approach in DiSCo is non-parametric and requires integrating over entire distributions, which naturally increases computational complexity. The solution uses iterative methods (like in DiSCo_mixture) and can be costly for large datasets or large values of M and G.</p>
-<p><code>Q</code>: Is there a faster backend? <code>A</code>: The optimization relies on libraries (e.g., “quadprog” or “CVXR”) that ultimately call C++ or FORTRAN under the hood. Even though these libraries are optimized, fully non-parametric distance-matching remains computationally heavy.</p>
-<p><code>Q</code>: How can I reduce the runtime while developing or debugging? <code>A</code>:</p>
-<p>Use fewer quantile points by setting M = 100 in DiSCo. Set a smaller grid, e.g. G = 100, to reduce the evaluation points. Start with only two time periods (Ts = 2) so there are fewer distributions to match. Disable time-consuming features, such as confidence intervals (CI=FALSE) and permutation tests (permutation=FALSE). Increase parallel execution with num.cores in DiSCo; for example, use a cluster or multiple cores to split bootstrap/permutation tasks (see mclapply.hack in R/utils.R).</p>
-<p><code>Q</code>: Are there other suggestions for handling large real-world data? <code>A</code>: • Verify correctness with a minimal working example, then gradually increase M, G, and the number of periods. • Use discrete or categorical grid options (grid.cat) if suitable for your data to reduce the dimension of the problem. • Ensure memory and CPU availability align with the size of the task.</p>
-<p><code>Q</code>: Can I get a progress bar? <code>A</code>: When the package was implemented, there were no functional solutions for progress bars that work with parallel computation in R. This might have changed, or maybe you want to change it! If you are indeed that hero 🦸, feel free to contribute to this GitHub repo, or even to write your own parallel progress bar package!</p>
+<p><strong>Q:</strong> <strong>Why does the code sometimes run slower than expected?</strong><br><strong>A:</strong> The approach in <em>DiSCo</em> is non-parametric and requires integrating over entire distributions, which naturally increases computational complexity. The solution uses iterative methods (like in <em>DiSCo_mixture</em>) and can be costly for large datasets or large values of <em>M</em> and <em>G</em>.</p>
+<hr>
+<p><strong>Q:</strong> <strong>Is there a faster backend?</strong><br><strong>A:</strong> The optimization relies on libraries (e.g., “quadprog” or “CVXR”) that ultimately call C++ or FORTRAN under the hood. Even though these libraries are optimized, fully non-parametric distance-matching remains computationally heavy.</p>
+<hr>
+<p><strong>Q:</strong> <strong>How can I reduce the runtime while developing or debugging?</strong><br><strong>A:</strong> - Use fewer quantile points by setting <code>M = 100</code> in <em>DiSCo</em>.<br>
+- Set a smaller grid, e.g., <code>G = 100</code>, to reduce evaluation points.<br>
+- Start with only two time periods (<code>Ts = 2</code>).<br>
+- Disable time-consuming features, such as confidence intervals (<code>CI=FALSE</code>) and permutation tests (<code>permutation=FALSE</code>).<br>
+- Increase parallel execution with <code>num.cores</code> in <em>DiSCo</em>, for example, by using a cluster or multiple cores to split bootstrap/permutation tasks.</p>
+<hr>
+<p><strong>Q:</strong> <strong>Are there other suggestions for handling large real-world data?</strong><br><strong>A:</strong> - Verify correctness with a minimal working example, then gradually increase <code>M</code>, <code>G</code>, and the number of periods.<br>
+- Use discrete or categorical grid options (<code>grid.cat</code>) if suitable for your data to reduce the dimension of the problem.<br>
+- Ensure memory and CPU availability align with the size of the task.</p>
+<hr>
+<p><strong>Q:</strong> <strong>Can I get a progress bar?</strong><br><strong>A:</strong> When the package was first implemented, there were no functional solutions for progress bars with parallel computation in R. This may have changed—if you’d like to contribute, feel free to become that hero 🦸 and either enhance this repo or create your own parallel progress bar package!</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
