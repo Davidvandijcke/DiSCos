@@ -93,7 +93,7 @@ Van Dijcke, David, Florian Gunsilius, and Austin Wright. “Return to Office and
 <div class="section level2">
 <h2 id="faq">FAQ<a class="anchor" aria-label="anchor" href="#faq"></a>
 </h2>
-<p><strong>Q:</strong> <strong>Why does the code sometimes run slower than expected?</strong><br><strong>A:</strong> The approach in <em>DiSCo</em> is non-parametric and requires integrating over entire distributions, which naturally increases computational complexity. The solution uses iterative methods (like in <em>DiSCo_mixture</em>) and can be costly for large datasets or large values of <em>M</em> and <em>G</em>.</p>
+<p><strong>Q:</strong> <strong>Why does the code sometimes run slower than expected?</strong><br><strong>A:</strong> The approach in <em>DiSCo</em> is non-parametric and requires integrating over entire distributions, which naturally increases computational complexity. In particular, it can be costly for large datasets or large values of <em>M</em> and <em>G</em>.</p>
 <hr>
 <p><strong>Q:</strong> <strong>Is there a faster backend?</strong><br><strong>A:</strong> The optimization relies on libraries (e.g., “quadprog” or “CVXR”) that ultimately call C++ or FORTRAN under the hood. Even though these libraries are optimized, fully non-parametric distance-matching remains computationally heavy.</p>
 <hr>
