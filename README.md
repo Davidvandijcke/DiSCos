@@ -57,7 +57,7 @@ Van Dijcke, David, Florian Gunsilius, and Austin Wright. "Return to Office and t
 ## FAQ
 
 **Q:** **Why does the code sometimes run slower than expected?**  
-**A:** The approach in *DiSCo* is non-parametric and requires integrating over entire distributions, which naturally increases computational complexity. The solution uses iterative methods (like in *DiSCo_mixture*) and can be costly for large datasets or large values of *M* and *G*.
+**A:** The approach in *DiSCo* is non-parametric and requires integrating over entire distributions, which naturally increases computational complexity. In particular, it can be costly for large datasets or large values of *M* and *G*.
 
 ---
 
