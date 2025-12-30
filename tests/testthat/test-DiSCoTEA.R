@@ -10,7 +10,7 @@ test_that("quantile works", {
   disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2)
 
   expect_no_error(discot <- DiSCoTEA(disco, agg="quantile"))
-  expect_true(ggplot2::is.ggplot(discot$plot))
+  expect_true(ggplot2::is_ggplot(discot$plot))
   expect_no_error(summary(discot))
   expect_true(!is.null(discot$treats))
   expect_true(!is.null(discot$ses))
@@ -26,7 +26,7 @@ test_that("quantile works", {
 
 
   expect_no_error(discot <- DiSCoTEA(disco, agg="quantile"))
-  expect_true(is.ggplot(discot$plot))
+  expect_true(ggplot2::is_ggplot(discot$plot))
   expect_no_error(summary(discot))
   expect_true(!is.null(discot$treats))
   expect_true(!is.null(discot$ses))
@@ -45,7 +45,7 @@ test_that("cdf works", {
   disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1,  CI=TRUE, boots=2)
 
   expect_no_error(discot <- DiSCoTEA(disco, agg="cdf"))
-  expect_true(is.ggplot(discot$plot))
+  expect_true(ggplot2::is_ggplot(discot$plot))
   expect_no_error(summary(discot))
   expect_true(!is.null(discot$treats))
   expect_true(!is.null(discot$ses))
@@ -60,7 +60,7 @@ test_that("cdf works", {
   disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1,  CI=TRUE, boots=2, mixture=TRUE)
 
   expect_no_error(discot <- DiSCoTEA(disco, agg="cdf"))
-  expect_true(is.ggplot(discot$plot))
+  expect_true(ggplot2::is_ggplot(discot$plot))
   expect_no_error(summary(discot))
   expect_true(!is.null(discot$treats))
   expect_true(!is.null(discot$ses))
@@ -79,7 +79,7 @@ test_that("quantileDiff works", {
   disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1,  CI=TRUE, boots=2)
 
   expect_no_error(discot <- DiSCoTEA(disco, agg="quantileDiff"))
-  expect_true(is.ggplot(discot$plot))
+  expect_true(ggplot2::is_ggplot(discot$plot))
   expect_no_error(summary(discot))
   expect_true(!is.null(discot$treats))
   expect_true(!is.null(discot$ses))
@@ -94,7 +94,7 @@ test_that("quantileDiff works", {
   disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1,  CI=TRUE, boots=2, mixture=TRUE)
 
   expect_no_error(discot <- DiSCoTEA(disco, agg="quantileDiff"))
-  expect_true(is.ggplot(discot$plot))
+  expect_true(ggplot2::is_ggplot(discot$plot))
   expect_no_error(summary(discot))
   expect_true(!is.null(discot$treats))
   expect_true(!is.null(discot$ses))
@@ -113,7 +113,7 @@ test_that("cdfDiff works", {
   disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2)
 
   expect_no_error(discot <- DiSCoTEA(disco, agg="quantileDiff"))
-  expect_true(is.ggplot(discot$plot))
+  expect_true(ggplot2::is_ggplot(discot$plot))
   expect_no_error(summary(discot))
   expect_true(!is.null(discot$treats))
   expect_true(!is.null(discot$ses))
@@ -128,7 +128,7 @@ test_that("cdfDiff works", {
   disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2, mixture=TRUE)
 
   expect_no_error(discot <- DiSCoTEA(disco, agg="quantileDiff"))
-  expect_true(is.ggplot(discot$plot))
+  expect_true(ggplot2::is_ggplot(discot$plot))
   expect_no_error(summary(discot))
   expect_true(!is.null(discot$treats))
   expect_true(!is.null(discot$ses))
