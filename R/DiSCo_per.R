@@ -95,8 +95,8 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
 
     # Create the base plot
     p <- ggplot() +
-      geom_line(data = df_distp, aes(x = x, y = y, group = group), color = "grey", size = 0.5) +
-      geom_line(data = df_distt, aes(x = x, y = y), size = 1) +
+      geom_line(data = df_distp, aes(x = x, y = y, group = group), color = "grey", linewidth = 0.5) +
+      geom_line(data = df_distt, aes(x = x, y = y), linewidth = 1) +
       geom_vline(xintercept = T0, linetype = "dashed") +
       labs(x = "Time periods", y = "Squared Wasserstein distance") +
       scale_x_continuous(breaks = seq(1, length(distt), 1)) + # single tick for each time period
