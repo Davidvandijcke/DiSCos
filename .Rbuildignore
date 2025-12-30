@@ -10,3 +10,6 @@
 ^LICENSE\.md$
 ^README.Rmd
 ^DiSCos.Rproj
+^CRAN-SUBMISSION$
+^\.claude$
+^CLAUDE\.md$

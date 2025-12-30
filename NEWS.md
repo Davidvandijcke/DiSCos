@@ -1,3 +1,11 @@
+# DiSCos 0.1.2
+
+* Compatibility with ggplot 4.0.0
+
+# DiSCos 0.1.1
+
+* Corrected ORCIDs of authors
+
 # DiSCos 0.1.0
 
 Major updates:
@@ -11,6 +19,6 @@ Minor updates:
 
 # DiSCos 0.0.1
 
-  * First version of package, basic DiSco function for estimating counterfactual quantile function, resampling-based CIs, permutation test; DiSCo_TEA function for various aggregation schemes. 
+* First version of package, basic DiSco function for estimating counterfactual quantile function, resampling-based CIs, permutation test; DiSCo_TEA function for various aggregation schemes. 
 
 
