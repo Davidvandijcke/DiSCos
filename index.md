@@ -1,6 +1,7 @@
 # DiSCos
 
 [![](https://cranlogs.r-pkg.org/badges/grand-total/DiSCos?color=blue)](https://cran.r-project.org/package=DiSCos)
+\#
 [![](https://cranlogs.r-pkg.org/badges/last-month/DiSCos?color=blue)](https://cran.r-project.org/package=DiSCos)
 [![](https://www.r-pkg.org/badges/version/DiSCos?color=blue)](https://cran.r-project.org/package=DiSCos)
 [![](https://img.shields.io/badge/devel%20version-0.0.0.9000-blue.svg)](https://github.com/Davidvandijcke/DiSCos)
