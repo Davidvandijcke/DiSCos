@@ -2,6 +2,8 @@
 
 ## DiSCos 0.1.2
 
+CRAN release: 2026-02-04
+
 - Compatibility with ggplot 4.0.0
 
 ## DiSCos 0.1.1
