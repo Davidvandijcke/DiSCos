@@ -10,8 +10,12 @@
 #' @keywords internal
 DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, grid_df, M=1000,
                            ww=0, qmethod=NULL, qtype=7, q_min=0, q_max=1, simplex=FALSE,
-                           mixture=FALSE){
+                           mixture=FALSE, perm_q_range=NULL, perm_seed=NULL){
     # One iteration of the permutation test
+
+    # deterministic per-placebo seeding: makes the permutation p-value reproducible and
+    # independent of num.cores (the parallel RNG stream otherwise depends on fork layout)
+    if (!is.null(perm_seed)) set.seed(perm_seed + idx)
 
     #create new control and target
     pert=list()
@@ -94,7 +98,12 @@ DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, grid_df,
     #squared Wasserstein distance between the target and the corresponding barycenter
     dist=c()
     for (t in 1:length(perc)){
-      dist[t]=mean((bc_t[[t]] -target_q[[t]])**2)
+      d2 <- (bc_t[[t]] - target_q[[t]])**2
+      if (!is.null(perm_q_range)) {  # restrict test statistic to a quantile sub-range (fit unchanged)
+        gg <- seq(0, 1, length.out = length(d2))
+        d2 <- d2[gg >= perm_q_range[1] & gg <= perm_q_range[2]]
+      }
+      dist[t]=mean(d2)
     }
     #setTxtProgressBar(pb, i)
 

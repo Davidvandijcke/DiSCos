@@ -25,7 +25,9 @@ DiSCo(
   seed = NULL,
   simplex = FALSE,
   mixture = FALSE,
-  grid.cat = NULL
+  grid.cat = NULL,
+  perm_q_range = NULL,
+  perm_seed = NULL
 )
 }
 \arguments{
@@ -89,6 +91,10 @@ also provide a list of support points in the \code{grid.cat} parameter. When tha
 
 \item{grid.cat}{List, containing the discrete support points for a discrete grid to be used with the mixture of distributions approach.
 This is useful for constructing synthetic distributions for categorical variables. Default is NULL, which uses a continuous grid based on the other parameters.}
+
+\item{perm_q_range}{Optional numeric vector \code{c(a, b)}. If supplied, the permutation test statistic (the post/pre ratio of squared Wasserstein/CDF distances) is averaged only over the quantile sub-range \code{[a, b]}, while the synthetic control is still fit over the full distribution. Useful for testing for an effect in a specific region of the distribution (e.g. the upper tail). Default \code{NULL} uses the full distribution.}
+
+\item{perm_seed}{Optional integer. If supplied, each permutation iteration (placebo) is seeded deterministically by its index via \code{set.seed(perm_seed + idx)}, making the permutation p-value reproducible and independent of \code{num.cores}. Default \code{NULL} leaves the seeding behaviour unchanged.}
 }
 \value{
 A list containing the following elements:

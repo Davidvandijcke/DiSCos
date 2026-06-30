@@ -20,7 +20,7 @@
 #' @keywords internal
 #' # TODO add option to select the post-treatment time periods
 DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to=1, length.out=101),
-                 graph=TRUE, num.cores = 1, weights=NULL, qmethod=NULL, qtype=qtype, q_min=0, q_max=1, M=1000, simplex=FALSE, mixture=FALSE){
+                 graph=TRUE, num.cores = 1, weights=NULL, qmethod=NULL, qtype=qtype, q_min=0, q_max=1, M=1000, simplex=FALSE, mixture=FALSE, perm_q_range=NULL, perm_seed=NULL){
 
   # slightly hacky way to fix reporting of q_min and q_max
   q_min_report <- q_min
@@ -54,13 +54,19 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
 
   distt=c()
 
+  # optionally restrict the test statistic to a quantile sub-range (does not affect the fit)
+  .sub_range <- function(v) {
+    if (is.null(perm_q_range)) return(v)
+    gg <- seq(0, 1, length.out = length(v))
+    v[gg >= perm_q_range[1] & gg <= perm_q_range[2]]
+  }
   if (!mixture) {
     for (t in 1:length(c_df)){
-      distt[t]=mean((bc_t[[t]]-target.q[[t]])**2)
+      distt[t]=mean(.sub_range((bc_t[[t]]-target.q[[t]])**2))
     }
   } else {
     for (t in 1:length(c_df)){
-      distt[t]=mean((cdf_t[[t]]-target.cdf[[t]])**2)
+      distt[t]=mean(.sub_range((cdf_t[[t]]-target.cdf[[t]])**2))
     }
   }
 
@@ -78,7 +84,7 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
   distp <- mclapply.hack(seq_len(length(peridx)), function(idx) {
     DiSCo_per_iter(c_df=c_df, c_df.q=controls.q, t_df=t_df, T0=T0, ww=ww, peridx=peridx,
                    evgrid=evgrid, idx=idx, grid_df=grid_df, qmethod=qmethod, M=M, qtype=qtype,
-                   q_min=q_min, q_max=q_max, simplex=simplex, mixture=mixture)
+                   q_min=q_min, q_max=q_max, simplex=simplex, mixture=mixture, perm_q_range=perm_q_range, perm_seed=perm_seed)
   }, mc.cores = num.cores)
 
 
@@ -144,7 +150,6 @@ DiSCo_per_rank <- function(distt, distp, T0) {
 
   R <- apply(distall, 1, function(x) sqrt(mean(x[(T0+1):length(x)])) / sqrt(mean(x[1:T0]))  )
   p_val <- (rank(-R)[length(R)]) / (J_1) # minus cause we want to count the number of tests it is smaller than
-
 
   return(p_val)
 }
