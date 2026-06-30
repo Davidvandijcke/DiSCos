@@ -48,6 +48,8 @@ utils::globalVariables(c("y_col", "id_col", "time_col", "t_col", "group", "x", "
 #' instead of the quantile functions, and is preferred for categorical variables. When working with such variables, one should
 #' also provide a list of support points in the `grid.cat` parameter. When that is provided, this parameter is automatically set to TRUE. Default is FALSE.
 #' @param grid.cat List, containing the discrete support points for a discrete grid to be used with the mixture of distributions approach.
+#' @param perm_q_range Optional numeric vector `c(a, b)`. If supplied, the permutation test statistic (the post/pre ratio of squared Wasserstein/CDF distances) is averaged only over the quantile sub-range `[a, b]`, while the synthetic control is still fit over the full distribution. Useful for testing for an effect in a specific region of the distribution (e.g. the upper tail). Default `NULL` uses the full distribution.
+#' @param perm_seed Optional integer. If supplied, each permutation iteration (placebo) is seeded deterministically by its index via `set.seed(perm_seed + idx)`, making the permutation p-value reproducible and independent of `num.cores`. Default `NULL` leaves the seeding behaviour unchanged.
 #' This is useful for constructing synthetic distributions for categorical variables. Default is NULL, which uses a continuous grid based on the other parameters.
 #' @return A list containing the following elements:
 #' \itemize{
@@ -96,7 +98,16 @@ utils::globalVariables(c("y_col", "id_col", "time_col", "t_col", "group", "x", "
 #'   disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2, mixture=TRUE, num.cores=1)
 DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, permutation = FALSE, q_min = 0, q_max = 1,
                   CI = FALSE, boots = 500, replace=TRUE, uniform=FALSE, cl = 0.95, graph = FALSE,
-                  qmethod=NULL, qtype=7, seed=NULL, simplex=FALSE, mixture=FALSE, grid.cat=NULL) {
+                  qmethod=NULL, qtype=7, seed=NULL, simplex=FALSE, mixture=FALSE, grid.cat=NULL,
+                  perm_q_range=NULL, perm_seed=NULL) {
+  # perm_q_range: optional c(a,b). If set, the permutation test statistic (the squared
+  # Wasserstein/CDF distance entering the post/pre ratio) is averaged ONLY over the
+  # quantile sub-range [a,b], WITHOUT changing the synthetic-control fit (weights are
+  # still estimated over the full distribution). Lets one test significance in a
+  # specific region (e.g. the upper tail). NULL (default) = full distribution, unchanged.
+  # perm_seed: optional integer. If set, each permutation iteration (placebo) is seeded
+  # deterministically by its index (set.seed(perm_seed + idx)), so the permutation p-value
+  # is reproducible and INDEPENDENT of num.cores. NULL (default) = unchanged behaviour.
 
   #---------------------------------------------------------------------------
   ### process inputs
@@ -242,7 +253,7 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
     perm_obj <- DiSCo_per(results.periods=results.periods, evgrid=evgrid, T0=T0,
                           weights=weights, num.cores=num.cores,
                           graph=graph, qmethod=qmethod, qtype=qtype, M=M, q_min=q_min, q_max=q_max,
-                          mixture=mixture, simplex=simplex)
+                          mixture=mixture, simplex=simplex, perm_q_range=perm_q_range, perm_seed=perm_seed)
 
 
   } else {
