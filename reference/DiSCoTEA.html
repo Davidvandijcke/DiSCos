@@ -11,7 +11,7 @@ and report summary tables."><meta property="og:image" content="http://www.davidv
 
     <a class="navbar-brand me-2" href="../index.html">DiSCos</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -120,6 +120,18 @@ If the original <code>DiSCo</code> call was restricted to a range of quantiles s
 and only the aggregated differences for the quantile range specified in the original call are returned.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">Ts</span> <span class="op">&lt;-</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="va">t0</span> <span class="op">&lt;-</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="ex_gmm.html">ex_gmm</a></span><span class="op">(</span>Ts<span class="op">=</span><span class="va">Ts</span>,  num.con<span class="op">=</span><span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">disco</span> <span class="op">&lt;-</span> <span class="fu"><a href="DiSCo.html">DiSCo</a></span><span class="op">(</span>df<span class="op">=</span><span class="va">df</span>, id_col.target<span class="op">=</span><span class="fl">1</span>, t0<span class="op">=</span><span class="va">t0</span>, seed<span class="op">=</span><span class="fl">1</span>, CI<span class="op">=</span><span class="cn">TRUE</span>, boots<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">discot</span> <span class="op">&lt;-</span> <span class="fu">DiSCoTEA</span><span class="op">(</span><span class="va">disco</span>, agg<span class="op">=</span><span class="st">"quantile"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="DiSCoTEA-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

@@ -109,3 +109,16 @@ range of quantiles smaller than `[0,1]` (i.e. `q_min` \> 0 or `q_max` \<
 1), the `samples` parameter is ignored and only the aggregated
 differences for the quantile range specified in the original call are
 returned.
+
+## Examples
+
+``` r
+# \donttest{
+Ts <- 2
+t0 <- 2
+df <- ex_gmm(Ts=Ts,  num.con=4)
+disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2)
+discot <- DiSCoTEA(disco, agg="quantile")
+
+# }
+```

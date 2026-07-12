@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">DiSCos</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,7 +50,8 @@
 <span>  qtype <span class="op">=</span> <span class="fl">7</span>,</span>
 <span>  simplex <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  q_min <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  q_max <span class="op">=</span> <span class="fl">1</span></span>
+<span>  q_max <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  presorted <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -93,6 +94,13 @@ Default is 0 (all quantiles). Currently NOT implemented for the <code>mixture</c
 <dt id="arg-q-max">q_max<a class="anchor" aria-label="anchor" href="#arg-q-max"></a></dt>
 <dd><p>Numeric, maximum quantile to use. Set this together with <code>q_min</code> to restrict the range of quantiles used to construct the synthetic control.
 Default is 1 (all quantiles). Currently NOT implemented for the <code>mixture</code> approach.</p></dd>
+
+
+<dt id="arg-presorted">presorted<a class="anchor" aria-label="anchor" href="#arg-presorted"></a></dt>
+<dd><p>Logical, indicating whether the target vector and each
+control vector are already sorted in ascending order, in which case the
+internal re-sorting in the quantile evaluations is skipped. Only used with
+the default quantile settings (<code>qmethod=NULL</code>, <code>qtype=7</code>). Default is FALSE.</p></dd>
 
 </dl></div>
     <div class="section level2">
