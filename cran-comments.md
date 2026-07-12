@@ -4,10 +4,11 @@
 
 ## Resubmission
 
-This is a resubmission to fix compatibility issues with ggplot2 3.5+:
+This is a resubmission to fix compatibility with CVXR 1.8.x:
 
-* Fixed deprecated `size` parameter in `geom_line()` - now uses `linewidth`
-* Fixed deprecated `is.ggplot()` - now uses `is_ggplot()`
+* Added backwards-compatible support for both CVXR < 1.8.1 (`solve`) and >= 1.8.1 (`psolve`)
+* Replaced `CVXR::norm()` with `base::norm()` for non-CVXR matrix operations
+* Wrapped slow examples in `\donttest{}` to address elapsed time NOTE on Windows
 
 ## Test environments
 

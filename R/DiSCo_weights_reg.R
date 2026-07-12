@@ -61,7 +61,7 @@ DiSCo_weights_reg <- function(controls, target, M = 500, qmethod=NULL, qtype=7, 
     # if the values in controls.s and target.s are too large it can happen that we run into
     # overflow errors. For this reason we scale both the vector and the matrix by the Frobenius
     # norm of the matrix
-    sc <- CVXR::norm(controls.s,"2")
+    sc <- base::norm(controls.s, type = "2")
 
   if (simplex) { lb <- 0 } else { lb <- NULL }
   # mirror the behavior of the lsqlincon, which explicitly requires

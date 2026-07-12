@@ -1,3 +1,7 @@
+# DiSCos 0.1.3
+
+* Compatibility with CVXR 1.8.x (`solve` -> `psolve`, `getValue` -> `value`)
+
 # DiSCos 0.1.2
 
 * Compatibility with ggplot 4.0.0

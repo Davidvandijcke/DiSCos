@@ -135,6 +135,14 @@ This function is called for every time period in the DiSCo function. It implemen
 The corresponding results for each time period can be accessed in the \code{results.periods} list of the output of the DiSCo function. The DiSCo function returns the average weight for each unit across all periods,
 calculated as a uniform mean, as well as the counterfactual target distribution produced as the weighted average of the control distributions for each period, using these averaged weights.
 }
+\examples{
+\donttest{
+  Ts <- 2
+  t0 <- 2
+  df <- ex_gmm(Ts=Ts,  num.con=4)
+  disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2, mixture=TRUE, num.cores=1)
+}
+}
 \references{
 \insertAllCited()
 }

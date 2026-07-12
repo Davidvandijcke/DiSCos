@@ -41,7 +41,8 @@ This variable can be any type, as long as it is the same type as the id_col colu
 
 \item{G}{Integer indicating the number of grid points for the grid on which the estimated functions are evaluated. Default is 1000.}
 
-\item{T0}{Integer indicating the last pre-treatment period starting from 1.}
+\item{T0}{Integer indicating the last pre-treatment period starting from 1.
+TODO: add other parameters...}
 
 \item{qmethod}{Character, indicating the method to use for computing the quantiles of the target distribution. The default is NULL, which uses the \code{\link[stats]{quantile}} function from the stats package.
 Other options are "\code{\link[evmix]{qkden}}" (based on smoothed kernel density function) and "\code{\link[extremeStat:distLquantile]{extreme}}" (based on parametric extreme value distributions).

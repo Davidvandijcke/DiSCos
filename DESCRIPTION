@@ -1,6 +1,6 @@
 Package: DiSCos
 Title: Distributional Synthetic Controls Estimation
-Version: 0.1.2
+Version: 0.1.3
 Authors@R: 
     c(person("David", "Van Dijcke", , "dvdijcke@umich.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-5825-3447")),
@@ -30,6 +30,6 @@ Suggests:
     quadprog
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.2
+RoxygenNote: 7.3.3
 VignetteBuilder: knitr
 Config/testthat/edition: 3

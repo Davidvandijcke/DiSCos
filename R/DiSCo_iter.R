@@ -16,6 +16,7 @@
 #' @param controls.id List of strings specifying the column names for the control units' identifiers.
 #' @param evgrid A vector of grid points on which to evaluate the quantile functions.
 #' @param T0 Integer indicating the last pre-treatment period starting from 1.
+#' TODO: add other parameters...
 #'
 #' @return A list with the following elements:
 #' \itemize{
