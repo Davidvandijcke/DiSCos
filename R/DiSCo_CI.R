@@ -14,11 +14,22 @@ DiSCo_CI_iter <- function(t, controls_t, target_t, grid, T0, M=1000,
                           qtype=7,
                           mixture=FALSE, simplex=FALSE, replace=TRUE) {
 
+  # fast path: with the default quantile settings we sort each resample once
+  # and evaluate quantiles/CDFs on the sorted sample, which is exactly
+  # equivalent but avoids the repeated internal sorts in quantile() and ecdf()
+  use_fast <- is.null(qmethod) && qtype == 7
+
   # resample target
   t_len <- length(target_t)
   mytar <- target_t[sample(1:t_len, floor(1*t_len), replace=replace)]
-  mytar.q <- myQuant(mytar, evgrid, qmethod, qtype=qtype) # quantile
-  mytar.cdf <- stats::ecdf(mytar)(grid)
+  if (use_fast) {
+    mytar <- sort(mytar)
+    mytar.q <- quant7_sorted(mytar, evgrid) # quantile
+    mytar.cdf <- ecdf_sorted(mytar, grid)
+  } else {
+    mytar.q <- myQuant(mytar, evgrid, qmethod, qtype=qtype) # quantile
+    mytar.cdf <- stats::ecdf(mytar)(grid)
+  }
 
   # resample controls
   mycon_list <- list()
@@ -31,14 +42,21 @@ DiSCo_CI_iter <- function(t, controls_t, target_t, grid, T0, M=1000,
     controls_t_i <- controls_t[[ii]]
     c_len <- length(controls_t_i)
     mycon <- controls_t_i[sample(1:c_len, floor(1*c_len), replace=replace)] # resample
-    mycon_list[[ii]] <- mycon
-    mycon.q[,ii] <- myQuant(mycon, evgrid, qmethod, qtype=qtype) # resampled quantile
-    mycon.cdf[,ii+1] <- stats::ecdf(mycon)(grid) # resampled cdf
+    if (use_fast) {
+      mycon <- sort(mycon)
+      mycon_list[[ii]] <- mycon
+      mycon.q[,ii] <- quant7_sorted(mycon, evgrid) # resampled quantile
+      mycon.cdf[,ii+1] <- ecdf_sorted(mycon, grid) # resampled cdf
+    } else {
+      mycon_list[[ii]] <- mycon
+      mycon.q[,ii] <- myQuant(mycon, evgrid, qmethod, qtype=qtype) # resampled quantile
+      mycon.cdf[,ii+1] <- stats::ecdf(mycon)(grid) # resampled cdf
+    }
   }
 
   if (t <= T0) { # if pre-treatment, calculate bootstrapped weights
     if (!mixture) {
-      lambda <- DiSCo_weights_reg(mycon_list, mytar, M=M, qmethod=qmethod, simplex=simplex)
+      lambda <- DiSCo_weights_reg(mycon_list, mytar, M=M, qmethod=qmethod, simplex=simplex, presorted=use_fast)
     } else {
       mixt <- DiSCo_mixture_solve(length(controls_t), mycon.cdf, min(grid), max(grid),
                                   grid, M, simplex)
@@ -64,12 +82,17 @@ bootCounterfactuals <- function(result_t, t, mixture, weights, evgrid, grid) {
   if (mixture) {
     # calculate cdf and then back out quantile
     cdf_t <- result_t$controls$cdf %*%  weights # cdf
-    q_t <- sapply(evgrid, function(y) grid[which(cdf_t >= (y-(1e-5)))[1]]) # tolerance accounts for inaccuracy (esp != 1)
+    cdf_v <- as.vector(cdf_t)
+    if (!is.unsorted(cdf_v)) { # vectorized inversion (identical result)
+      q_t <- grid[first_geq(cdf_v, evgrid - (1e-5))]
+    } else { # non-monotone cdf possible without simplex constraint
+      q_t <- sapply(evgrid, function(y) grid[which(cdf_t >= (y-(1e-5)))[1]]) # tolerance accounts for inaccuracy (esp != 1)
+    }
 
   } else {
     # calculate quantile then back out cdf
     q_t <- DiSCo_bc(result_t$controls$quantile, weights, evgrid)
-    cdf_t <- stats::ecdf(q_t)(grid)
+    cdf_t <- ecdf_sorted(sort(as.vector(q_t)), grid)
 
   }
   # calculate bootstrapped counterfactual differences
@@ -115,9 +138,27 @@ parseBoots <- function(CI_temp, cl, q_disco, cdf_disco, q_obs, cdf_obs, uniform=
   q_diff <- extract_and_combine(CI_temp, "quantile_diff")
   cdf_diff <- extract_and_combine(CI_temp, "cdf_diff")
 
+  # type-7 quantile of each ROW of a row-sorted matrix S at a single prob p;
+  # replicates stats::quantile(x, probs=p, type=7) cell by cell
+  rowQuant7 <- function(S, p) {
+    B <- ncol(S)
+    index <- 1 + (B - 1) * p
+    lo <- floor(index)
+    hi <- ceiling(index)
+    qs <- S[, lo]
+    if (index > lo) {
+      h <- index - lo
+      alt <- S[, hi]
+      sel <- alt != qs
+      qs[sel] <- (1 - h) * qs[sel] + h * alt[sel]
+    }
+    qs
+  }
+
   # calculate confidence intervals
   getCIs <- function(btmat, cl, og, uniform) {
     bt_diff <- sweep(btmat, c(1,2), og, "-")
+    d <- dim(bt_diff)
 
     if (uniform) {
       bt_diff <- apply(abs(bt_diff), c(2,3), max) # outputs a G X T_max matrix
@@ -126,13 +167,20 @@ parseBoots <- function(CI_temp, cl, q_disco, cdf_disco, q_obs, cdf_obs, uniform=
       upper <- og + t_all
       lower <- og - t_all
     } else {
-      t_upper <- apply(bt_diff, c(1,2), function(x) stats::quantile(x, probs=(1-cl)/2)) # outputs a G X T_max matrix
-      t_lower <- apply(bt_diff, c(1,2), function(x) stats::quantile(x, probs= cl+(1-cl)/2)) # outputs a G X T_max matrix
+      # vectorized pointwise quantiles: one sort per (grid, period) cell,
+      # numerically identical to the previous per-cell stats::quantile calls
+      m <- matrix(bt_diff, nrow = d[1]*d[2])
+      ms <- t(apply(m, 1L, sort.int))
+      t_upper <- matrix(rowQuant7(ms, (1-cl)/2),    d[1], d[2]) # outputs a G X T_max matrix
+      t_lower <- matrix(rowQuant7(ms, cl+(1-cl)/2), d[1], d[2]) # outputs a G X T_max matrix
       upper <- og - t_upper
       lower <- og - t_lower
     }
 
-    se <- apply(btmat, c(1,2), function(x) stats::sd(x)) # outputs a G X T_max matrix
+    # vectorized two-pass standard errors (same algorithm as stats::sd)
+    mb <- matrix(btmat, nrow = d[1]*d[2])
+    mu <- rowMeans(mb)
+    se <- matrix(sqrt(rowSums((mb - mu)^2) / (d[3] - 1L)), d[1], d[2]) # outputs a G X T_max matrix
     return(list("lower"=lower, "upper"=upper, "se" = se))
   }
   q_CI <- getCIs(q_boot, cl, q_d, uniform)

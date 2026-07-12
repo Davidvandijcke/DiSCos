@@ -1,3 +1,11 @@
+# DiSCos 0.1.4
+
+* Performance release: the bootstrap confidence intervals are about 3x faster
+  and the permutation test and point estimation meaningfully faster, from
+  sorting each sample once and evaluating quantiles/CDFs on the sorted data,
+  and from vectorizing the confidence-interval assembly. Results are
+  numerically identical to 0.1.3 for the same seed.
+
 # DiSCos 0.1.3
 
 * Compatibility with CVXR 1.8.x (`solve` -> `psolve`, `getValue` -> `value`)

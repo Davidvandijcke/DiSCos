@@ -45,7 +45,9 @@ DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, grid_df,
 
     if (!mixture) { # disco
       for (t in 1:T0){
-        lambda_tp[[t]] <- DiSCo_weights_reg(perc[[t]], as.vector(pert[[t]]),  M=M, qmethod=qmethod, simplex=simplex, q_min=q_min, q_max=q_max)
+        # cells arrive pre-sorted from DiSCo_per, so the quantile evaluations
+        # inside the weight solver can skip re-sorting
+        lambda_tp[[t]] <- DiSCo_weights_reg(perc[[t]], as.vector(pert[[t]]),  M=M, qmethod=qmethod, simplex=simplex, q_min=q_min, q_max=q_max, presorted=TRUE)
       }
     } else {
       perc.cdf <- list()
@@ -75,9 +77,13 @@ DiSCo_per_iter <- function(c_df, c_df.q, t_df, T0, peridx, evgrid, idx, grid_df,
       for (t in 1:length(perc)){
         bc_t[[t]] <- DiSCo_bc(perc.q[[t]], lambda.opt,evgrid)
       }
-      # computing the target quantile function
+      # computing the target quantile function (pert cells are pre-sorted)
       for (t in 1:length(pert)){
-        target_q[[t]] <- myQuant(pert[[t]], evgrid, qmethod, qtype=qtype)
+        if (is.null(qmethod) && qtype == 7) {
+          target_q[[t]] <- quant7_sorted(pert[[t]], evgrid)
+        } else {
+          target_q[[t]] <- myQuant(pert[[t]], evgrid, qmethod, qtype=qtype)
+        }
       }
     } else { ## mixture
       #calculate the cdfs for each period

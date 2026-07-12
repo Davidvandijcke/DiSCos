@@ -64,10 +64,23 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, qt
     stop("Problem undetermined: number of data points is smaller than number of weights")
   }
 
+  # fast path: with the default quantile settings, sort each unit's data once
+  # and evaluate quantiles/CDFs on the sorted samples (identical results,
+  # without the repeated internal sorts in quantile() and ecdf())
+  use_fast <- is.null(qmethod) && qtype == 7
+  if (use_fast) {
+    target_s <- sort(target)
+    controls_s <- lapply(controls, sort)
+  }
+
   # evaluating the quantile functions on the grid "evgrid":
   controls.q <- matrix(0,nrow = length(evgrid), ncol=length(controls))
   for (jj in 1:length(controls)){
-    controls.q[,jj] <- myQuant(controls[[jj]], evgrid, qmethod, qtype=qtype)
+    if (use_fast) {
+      controls.q[,jj] <- quant7_sorted(controls_s[[jj]], evgrid)
+    } else {
+      controls.q[,jj] <- myQuant(controls[[jj]], evgrid, qmethod, qtype=qtype)
+    }
   }
 
   # sample grid
@@ -80,9 +93,14 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, qt
 
   if (!mixture) {
   # obtaining the optimal weights for the DiSCo method
-    DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M=M, qmethod=qmethod, qtype=qtype, simplex=simplex, q_min=q_min, q_max=q_max)
+    if (use_fast) {
+      DiSCo_res_weights <- DiSCo_weights_reg(controls_s, as.vector(target_s), M=M, qmethod=qmethod, qtype=qtype, simplex=simplex, q_min=q_min, q_max=q_max, presorted=TRUE)
+      cdf_t <- ecdf_sorted(target_s, grid$grid.ord)
+    } else {
+      DiSCo_res_weights <- DiSCo_weights_reg(controls, as.vector(target), M=M, qmethod=qmethod, qtype=qtype, simplex=simplex, q_min=q_min, q_max=q_max)
+      cdf_t <- stats::ecdf(target)(grid$grid.ord)
+    }
     mixture <- NULL
-    cdf_t <- stats::ecdf(target)(grid$grid.ord)
   } else {
   # obtaining the optimal weights for the mixture of distributions method, note that this one is not restricted to q_min, q_max
     mixture <- DiSCo_mixture(controls, target, grid$grid.min, grid$grid.max, grid$grid.ord, M, simplex=simplex)
@@ -90,7 +108,11 @@ DiSCo_iter <- function(yy, df, evgrid, id_col.target, M, G, T0, qmethod=NULL, qt
     cdf_t <- mixture$target.order
   }
   #computing the target quantile function
-  target.q <- myQuant(target, evgrid, qmethod, qtype=qtype)
+  if (use_fast) {
+    target.q <- quant7_sorted(target_s, evgrid)
+  } else {
+    target.q <- myQuant(target, evgrid, qmethod, qtype=qtype)
+  }
 
 
   results <- list()

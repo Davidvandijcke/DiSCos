@@ -12,7 +12,8 @@ DiSCo_weights_reg(
   qtype = 7,
   simplex = FALSE,
   q_min = 0,
-  q_max = 1
+  q_max = 1,
+  presorted = FALSE
 )
 }
 \arguments{
@@ -36,6 +37,11 @@ Default is 0 (all quantiles). Currently NOT implemented for the \code{mixture} a
 
 \item{q_max}{Numeric, maximum quantile to use. Set this together with \code{q_min} to restrict the range of quantiles used to construct the synthetic control.
 Default is 1 (all quantiles). Currently NOT implemented for the \code{mixture} approach.}
+
+\item{presorted}{Logical, indicating whether the target vector and each
+control vector are already sorted in ascending order, in which case the
+internal re-sorting in the quantile evaluations is skipped. Only used with
+the default quantile settings (\code{qmethod=NULL}, \code{qtype=7}). Default is FALSE.}
 }
 \value{
 Vector of optimal synthetic control weights

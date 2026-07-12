@@ -13,13 +13,17 @@
 #'
 #' @param controls List with matrices of control distributions
 #' @param target Matrix containing the target distribution
+#' @param presorted Logical, indicating whether the target vector and each
+#' control vector are already sorted in ascending order, in which case the
+#' internal re-sorting in the quantile evaluations is skipped. Only used with
+#' the default quantile settings (`qmethod=NULL`, `qtype=7`). Default is FALSE.
 #' @inheritParams DiSCo
 #'
 #' @return Vector of optimal synthetic control weights
 #' @references
 #' \insertAllCited{}
 #' @keywords internal
-DiSCo_weights_reg <- function(controls, target, M = 500, qmethod=NULL, qtype=7, simplex=FALSE, q_min=0, q_max=1){
+DiSCo_weights_reg <- function(controls, target, M = 500, qmethod=NULL, qtype=7, simplex=FALSE, q_min=0, q_max=1, presorted=FALSE){
 
 
   if (!is.null(qmethod)){
@@ -47,12 +51,21 @@ DiSCo_weights_reg <- function(controls, target, M = 500, qmethod=NULL, qtype=7, 
   ## Sampling from this quantile function M times
   Mvec <- stats::runif(M, min = q_min, max = q_max)
   controls.s <- matrix(0,nrow = M, ncol = length(controls))
+  use_fast <- is.null(qmethod) && qtype == 7 # sort once, then interpolate (identical result)
   for (jj in 1:length(controls)){
-    controls.s[,jj] <- myQuant(controls[[jj]], Mvec, qmethod, qtype=qtype)
+    if (use_fast) {
+      controls.s[,jj] <- quant7_sorted(if (presorted) controls[[jj]] else sort(controls[[jj]]), Mvec)
+    } else {
+      controls.s[,jj] <- myQuant(controls[[jj]], Mvec, qmethod, qtype=qtype)
+    }
   }
 
   target.s <- matrix(0, nrow = M, ncol=1)
-  target.s[,1] <- myQuant(target, Mvec, qmethod, qtype=qtype)
+  if (use_fast) {
+    target.s[,1] <- quant7_sorted(if (presorted) target else sort(target), Mvec)
+  } else {
+    target.s[,1] <- myQuant(target, Mvec, qmethod, qtype=qtype)
+  }
 
   ## Solving the optimization using constrained linear regression
 

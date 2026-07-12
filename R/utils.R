@@ -373,3 +373,42 @@ ex_gmm <- function(Ts=2, num.con=30, numdraws=1000){
 
 
 
+
+
+# ------------------------------------------------------------------------------
+# Internal performance kernels. These replicate base R functions exactly but
+# skip redundant sorting, so hot loops can sort each sample once and reuse it.
+# ------------------------------------------------------------------------------
+
+# Type-7 quantiles of PRE-SORTED data. Replicates stats::quantile(x, probs,
+# names = FALSE, type = 7) line by line (including the tie/no-interpolation
+# rule), without the internal re-sort. Not exported.
+quant7_sorted <- function(xs, probs) {
+  xs <- as.double(xs)
+  n <- length(xs)
+  if (n == 0L) return(rep(NA_real_, length(probs)))
+  if (n == 1L) return(rep(xs[1L], length(probs)))
+  index <- 1 + (n - 1) * probs
+  lo <- floor(index)
+  hi <- ceiling(index)
+  qs <- xs[lo]
+  i <- which(index > lo & xs[hi] != qs)
+  h <- (index - lo)[i]
+  qs[i] <- (1 - h) * qs[i] + h * xs[hi][i]
+  qs
+}
+
+# Empirical CDF of PRE-SORTED data evaluated at v; identical to
+# stats::ecdf(x)(v) (ties counted by the rightmost index). Not exported.
+ecdf_sorted <- function(xs, v) {
+  findInterval(v, xs) / length(xs)
+}
+
+# First index i with cdf[i] >= w, NA if none; identical to
+# which(cdf >= w)[1] for each w, vectorized over w. Requires a
+# non-decreasing cdf (callers check with is.unsorted). Not exported.
+first_geq <- function(cdf, w) {
+  idx <- findInterval(w, cdf, left.open = TRUE) + 1L
+  idx[idx > length(cdf)] <- NA_integer_
+  idx
+}

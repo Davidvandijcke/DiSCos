@@ -30,9 +30,11 @@ DiSCo_per <- function(results.periods, T0, ww=0, peridx=0, evgrid=seq(from=0, to
   q_max <- 1
 
   ## prep
-  # grab the raw control and target data
-  c_df <- lapply(seq(1:length(results.periods)), function(x) results.periods[[x]]$controls$data)
-  t_df <- lapply(seq(1:length(results.periods)), function(x) results.periods[[x]]$target$data)
+  # grab the raw control and target data; pre-sort each cell once so the
+  # placebo iterations can reuse the sorted samples (quantiles and CDFs are
+  # invariant to the data order, and no resampling happens in this path)
+  c_df <- lapply(seq(1:length(results.periods)), function(x) lapply(results.periods[[x]]$controls$data, sort))
+  t_df <- lapply(seq(1:length(results.periods)), function(x) sort(results.periods[[x]]$target$data))
 
 
   # grab the quantiles for the control and target data, for the desired range

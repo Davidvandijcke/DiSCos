@@ -195,7 +195,12 @@ DiSCo <- function(df, id_col.target, t0, M = 1000, G = 1000, num.cores = 1, perm
       cdf_x <- cdf[[x]]
       results.periods[[x]]$DiSCo$cdf <- cdf_x
       grid_ord <- results.periods[[x]]$target$grid
-      bc_x <- sapply(evgrid, function(y) grid_ord[which(cdf_x >= (y-(1e-5)))[1]]) # tolerance accounts for inaccuracy (esp != 1)
+      cdf_v <- as.vector(cdf_x)
+      if (!is.unsorted(cdf_v)) { # vectorized inversion (identical result)
+        bc_x <- grid_ord[first_geq(cdf_v, evgrid - (1e-5))]
+      } else { # non-monotone cdf possible without simplex constraint
+        bc_x <- sapply(evgrid, function(y) grid_ord[which(cdf_x >= (y-(1e-5)))[1]]) # tolerance accounts for inaccuracy (esp != 1)
+      }
       results.periods[[x]]$DiSCo$quantile <- bc_x
     }
   }
