@@ -13,7 +13,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/Davidvandijcke/DiSCos/blob/v0.1.4/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/Davidvandijcke/DiSCos/blob/main/DESCRIPTION)
 
 Van Dijcke D, Gunsilius F, He S (2026). *DiSCos: Distributional
 Synthetic Controls Estimation*. R package version 0.1.4,
