@@ -73,6 +73,7 @@ DiSCo_iter(
 - T0:
 
   Integer indicating the last pre-treatment period starting from 1.
+  TODO: add other parameters...
 
 - qmethod:
 

@@ -266,3 +266,22 @@ Gunsilius FF (2023). “Distributional synthetic controls.”
 Van Dijcke D, Gunsilius F, Wright AL (2024). “Return to Office and the
 Tenure Distribution.” Working Paper 2024-56, University of Chicago,
 Becker Friedman Institute for Economics. ()
+
+## Examples
+
+``` r
+# \donttest{
+  Ts <- 2
+  t0 <- 2
+  df <- ex_gmm(Ts=Ts,  num.con=4)
+  disco <- DiSCo(df=df, id_col.target=1, t0=t0, seed=1, CI=TRUE, boots=2, mixture=TRUE, num.cores=1)
+#> Warning: Solution may be inaccurate. Try another solver, adjusting the solver settings,
+#> or solve with `verbose = TRUE` for more information.
+#> Warning: Solution may be inaccurate. Try another solver, adjusting the solver settings,
+#> or solve with `verbose = TRUE` for more information.
+#> Warning: Solution may be inaccurate. Try another solver, adjusting the solver settings,
+#> or solve with `verbose = TRUE` for more information.
+#> Warning: Solution may be inaccurate. Try another solver, adjusting the solver settings,
+#> or solve with `verbose = TRUE` for more information.
+# }
+```
