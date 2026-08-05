@@ -1,6 +1,6 @@
 # Changelog
 
-## DiSCos 0.1.4.9000 (development)
+## DiSCos 0.1.5
 
 - Added `perm_q_range` argument to
   [`DiSCo()`](http://www.davidvandijcke.com/DiSCo/reference/DiSCo.md):
