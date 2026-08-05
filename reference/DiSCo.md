@@ -28,7 +28,9 @@ DiSCo(
   seed = NULL,
   simplex = FALSE,
   mixture = FALSE,
-  grid.cat = NULL
+  grid.cat = NULL,
+  perm_q_range = NULL,
+  perm_seed = NULL
 )
 ```
 
@@ -185,6 +187,27 @@ DiSCo(
   constructing synthetic distributions for categorical variables.
   Default is NULL, which uses a continuous grid based on the other
   parameters.
+
+- perm_q_range:
+
+  Numeric vector of length 2, e.g. `c(0.5, 1)`. Only used when
+  `permutation` is TRUE. If supplied, the permutation test statistic
+  (the squared Wasserstein/CDF distance entering the pre/post ratio) is
+  averaged only over the quantile sub-range
+  `[perm_q_range[1], perm_q_range[2]]`, *without* changing the
+  synthetic-control fit (the weights are still estimated over the full
+  distribution). This allows testing for significance in a specific
+  region of the distribution, such as the upper tail. Default is NULL,
+  which uses the full distribution.
+
+- perm_seed:
+
+  Integer. Only used when `permutation` is TRUE. If supplied, each
+  permutation iteration (placebo) is seeded deterministically as
+  `set.seed(perm_seed + i)` for iteration `i`, so that the permutation
+  p-value is reproducible and independent of `num.cores` (the parallel
+  RNG stream otherwise depends on the fork layout). Default is NULL,
+  which preserves the previous behaviour.
 
 ## Value
 

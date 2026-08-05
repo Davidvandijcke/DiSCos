@@ -11,7 +11,7 @@ as well as the alternative mixture of distributions approach."><meta property="o
 
     <a class="navbar-brand me-2" href="../index.html">DiSCos</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,7 +69,9 @@ as well as the alternative mixture of distributions approach.</p>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  simplex <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  mixture <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  grid.cat <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  grid.cat <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  perm_q_range <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  perm_seed <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -178,6 +180,22 @@ also provide a list of support points in the <code>grid.cat</code> parameter. Wh
 <dt id="arg-grid-cat">grid.cat<a class="anchor" aria-label="anchor" href="#arg-grid-cat"></a></dt>
 <dd><p>List, containing the discrete support points for a discrete grid to be used with the mixture of distributions approach.
 This is useful for constructing synthetic distributions for categorical variables. Default is NULL, which uses a continuous grid based on the other parameters.</p></dd>
+
+
+<dt id="arg-perm-q-range">perm_q_range<a class="anchor" aria-label="anchor" href="#arg-perm-q-range"></a></dt>
+<dd><p>Numeric vector of length 2, e.g. <code>c(0.5, 1)</code>. Only used when <code>permutation</code> is TRUE.
+If supplied, the permutation test statistic (the squared Wasserstein/CDF distance entering the pre/post ratio)
+is averaged only over the quantile sub-range <code>[perm_q_range[1], perm_q_range[2]]</code>, <em>without</em> changing the
+synthetic-control fit (the weights are still estimated over the full distribution). This allows testing for
+significance in a specific region of the distribution, such as the upper tail. Default is NULL, which uses the
+full distribution.</p></dd>
+
+
+<dt id="arg-perm-seed">perm_seed<a class="anchor" aria-label="anchor" href="#arg-perm-seed"></a></dt>
+<dd><p>Integer. Only used when <code>permutation</code> is TRUE. If supplied, each permutation iteration (placebo)
+is seeded deterministically as <code>set.seed(perm_seed + i)</code> for iteration <code>i</code>, so that the permutation
+p-value is reproducible and independent of <code>num.cores</code> (the parallel RNG stream otherwise depends on the fork
+layout). Default is NULL, which preserves the previous behaviour.</p></dd>
 
 </dl></div>
     <div class="section level2">

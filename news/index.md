@@ -1,5 +1,17 @@
 # Changelog
 
+## DiSCos 0.1.4.9000 (development)
+
+- Added `perm_q_range` argument to
+  [`DiSCo()`](http://www.davidvandijcke.com/DiSCo/reference/DiSCo.md):
+  restrict the permutation test statistic to a quantile sub-range
+  (e.g. the upper tail) without changing the synthetic-control fit, so
+  one can test for an effect in a specific region of the distribution.
+- Added `perm_seed` argument to
+  [`DiSCo()`](http://www.davidvandijcke.com/DiSCo/reference/DiSCo.md):
+  seed each permutation iteration deterministically by its index, making
+  the permutation p-value reproducible and independent of `num.cores`.
+
 ## DiSCos 0.1.4
 
 CRAN release: 2026-07-12

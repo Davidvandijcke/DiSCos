@@ -16,13 +16,13 @@ Source:
 [`DESCRIPTION`](https://github.com/Davidvandijcke/DiSCos/blob/main/DESCRIPTION)
 
 Van Dijcke D, Gunsilius F, He S (2026). *DiSCos: Distributional
-Synthetic Controls Estimation*. R package version 0.1.4,
+Synthetic Controls Estimation*. R package version 0.1.4.9000,
 <http://www.davidvandijcke.com/DiSCos/>.
 
     @Manual{,
       title = {DiSCos: Distributional Synthetic Controls Estimation},
       author = {David {Van Dijcke} and Florian Gunsilius and Siyun He},
       year = {2026},
-      note = {R package version 0.1.4},
+      note = {R package version 0.1.4.9000},
       url = {http://www.davidvandijcke.com/DiSCos/},
     }
