@@ -95,7 +95,8 @@ utils::globalVariables(c("y_col", "id_col", "time_col", "t_col", "group", "x", "
 #' }
 #' @importFrom Rdpack reprompt
 #' @importFrom stats sd quantile rnorm
-#' @import data.table ggplot2
+#' @importFrom data.table := .N as.data.table copy frank
+#' @import ggplot2
 #' @references
 #'  \insertAllCited()
 #' @export

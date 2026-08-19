@@ -35,6 +35,7 @@
 #'
 #'
 #' @importFrom stats sd
+#' @importFrom data.table uniqueN
 #' @export
 #' @examples
 #' \donttest{

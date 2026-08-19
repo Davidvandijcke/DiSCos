@@ -323,6 +323,7 @@ citation <- function() {
 #' \item{\code{control}}{a matrix.}
 #' @importFrom MASS mvrnorm
 #' @importFrom stats runif
+#' @importFrom data.table data.table melt setnames :=
 #' @export
 ex_gmm <- function(Ts=2, num.con=30, numdraws=1000){
 
