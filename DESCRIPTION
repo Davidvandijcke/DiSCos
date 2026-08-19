@@ -14,9 +14,8 @@ License: MIT + file LICENSE
 BugReports: https://github.com/Davidvandijcke/DiSCos/issues
 URL: http://www.davidvandijcke.com/DiSCos/, https://github.com/Davidvandijcke/DiSCos
 LazyData: TRUE
-Imports: CVXR, pracma, Rdpack, parallel, evmix, utils, extremeStat, MASS
+Imports: CVXR, pracma, Rdpack, parallel, evmix, utils, extremeStat, MASS, data.table
 Depends: 
-    data.table,
     R (>= 2.10),
     ggplot2
 RdMacros: Rdpack
@@ -30,6 +29,6 @@ Suggests:
     quadprog
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 VignetteBuilder: knitr
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0
